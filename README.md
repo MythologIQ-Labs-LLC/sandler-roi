@@ -4,6 +4,8 @@ A lightweight, **rep-led sales conversation tool** for a Sandler consultant to d
 
 **Status:** Early working prototype. Independent illustrative financial modeling tool, **not** an official Sandler publication, assurance, performance claim, or guaranteed return.
 
+**Architecture and contributor guidance:** [Architecture and model contracts](docs/ARCHITECTURE.md) · [Agent instructions](AGENTS.md). This is a rep-led illustrative demo, not an automated ROI attestation.
+
 ## Run it
 
 Requires Node.js **20+**. No packages need to be installed.
