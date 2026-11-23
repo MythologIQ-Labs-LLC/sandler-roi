@@ -27,7 +27,7 @@ Opening `index.html` with a `file://` URL is not supported because browser secur
 1. **Discover**: enter the prospect, training investment, team size, and confirmed commercial performance baselines.
 2. **Model**: include or exclude four relevant value drivers, then adjust the conservative, expected and upside scenarios in the meeting.
 3. **Explain**: compare cost versus modeled benefit, review source and assumption notes, and show contribution by each driver.
-4. **Present**: use **Present / Print** for a clean meeting summary; export an editable JSON model or CSV snapshot for follow-up.
+4. **Present**: use **Present** to hide the worksheet during the discussion; use **Print** for a clean meeting summary. Export an editable JSON model or CSV snapshot for follow-up.
 
 Every starting number is *fictional example data*, not an asserted COIT or Sandler benchmark. Blank an unverified field to see the missing-input warning. The calculator refuses to present a complete ROI when an enabled driver lacks required inputs.
 
