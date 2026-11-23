@@ -8,19 +8,19 @@ A lightweight, **rep-led sales conversation tool** for a Sandler consultant to d
 
 Requires Node.js **20+**. No packages need to be installed.
 
-\`\`\`bash
+```bash
 npm start
-\`\`\`
+```
 
-Open **http://127.0.0.1:4173**. This starts a local-only server bound to \`127.0.0.1\`; the application has no cloud services, authentication, cookies, analytics, or external network dependencies.
+Open **http://127.0.0.1:4173**. This starts a local-only server bound to `127.0.0.1`; the application has no cloud services, authentication, cookies, analytics, or external network dependencies.
 
 Run tests with:
 
-\`\`\`bash
+```bash
 npm test
-\`\`\`
+```
 
-Opening \`index.html\` with a \`file://\` URL is not supported because browser security restricts JavaScript module loading from local files; use the local server above.
+Opening `index.html` with a `file://` URL is not supported because browser security restricts JavaScript module loading from local files; use the local server above.
 
 ## How a Sandler rep uses it
 
