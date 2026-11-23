@@ -175,6 +175,11 @@ $("export-csv").addEventListener("click",()=>{
   for(const [name,value] of Object.entries(scenarios[selected]))rows.push(["Assumption "+name,value]);
   download("sandler-roi-"+safeSlug(inputs.prospect)+".csv",rows.map(r=>r.map(csvCell).join(",")).join("\r\n"),"text/csv");
 });
+$("present").addEventListener("click",()=>{
+  const showing=document.body.classList.toggle("present-mode");
+  $("present").textContent=showing?"Exit presentation":"Present";
+  $("present").setAttribute("aria-pressed",String(showing));
+});
 $("print").addEventListener("click",()=>window.print());
 $("reset").addEventListener("click",()=>{
   if(!window.confirm("Replace all current inputs and assumptions with the illustrative example?"))return;
