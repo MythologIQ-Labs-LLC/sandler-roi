@@ -99,6 +99,10 @@
     @media (max-width:1100px){.results{grid-template-columns:repeat(2,1fr)} .shell{grid-template-columns:340px 1fr}}
     @media (max-width:850px){.shell{grid-template-columns:1fr;padding:16px}.results{grid-template-columns:repeat(2,1fr)} .top{padding:16px;align-items:start;flex-direction:column}}
     @media (max-width:520px){.two,.grid-footer{grid-template-columns:1fr}.results{grid-template-columns:1fr 1fr}.stat .v{font-size:21px}.bar-row{grid-template-columns:75px 1fr 72px;gap:6px;font-size:11px}.bar-row strong{font-size:11px}}
+    body.present-mode .shell {grid-template-columns:minmax(0,1fr)}
+    body.present-mode .side {display:none}
+    body.present-mode .main {max-width:1200px;width:100%;margin:0 auto}
+    body.present-mode .stat .v {font-size:clamp(24px,3vw,36px)}
     @media print {
       body{background:white;color:#111}
       .top{padding:13px 0;background:white;color:#111;border-bottom:2px solid #222}
@@ -122,7 +126,8 @@
       <input type="file" id="import-file" accept=".json,application/json" hidden>
       <button type="button" id="export-json" class="btn btn-dark">Save model</button>
       <button type="button" id="export-csv" class="btn btn-dark">CSV</button>
-      <button type="button" id="print" class="btn btn-primary">Present / Print</button>
+      <button type="button" id="present" class="btn btn-primary" aria-pressed="false">Present</button>
+      <button type="button" id="print" class="btn btn-dark">Print</button>
     </div>
   </header>
   <div class="shell">
