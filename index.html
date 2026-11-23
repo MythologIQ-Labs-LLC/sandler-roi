@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e1b35">
+  <title>Sandler ROI Workbench | Illustrative Business Case</title>
+  <meta name="description" content="Configurable ROI modeling workbench for consultative sales training discussions.">
+  <style>
+    :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; color: #172440; background:#f4f6fa; font-size:14px; }
+    * { box-sizing:border-box }
+    body { margin:0; line-height:1.42 }
+    button,input,select,textarea {font:inherit}
+    button {cursor:pointer}
+    a {color:#244a83}
+    :focus-visible {outline:3px solid #df893c;outline-offset:2px}
+    .top {background:#0f203d;color:#fff;padding:21px max(24px,calc((100% - 1510px)/2));display:flex;align-items:center;justify-content:space-between;gap:15px}
+    .brand {display:flex;align-items:center;gap:15px}
+    .brand-symbol {width:40px;height:40px;display:grid;place-items:center;border:1px solid #f9b773;color:#f9b773;border-radius:12px;font-weight:800;font-size:20px}
+    .brand-title {font-weight:750;font-size:20px;letter-spacing:-.5px}
+    .brand-sub {font-size:12px;color:#adbcd1}
+    .top-actions {display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+    .btn {border:1px solid #d1d9e4;border-radius:9px;padding:10px 14px;background:#fff;color:#1b3152;font-weight:650;font-size:12px}
+    .btn:hover {background:#f7f0e8}
+    .btn-primary {background:#c37538;border-color:#c37538;color:#fff}
+    .btn-primary:hover {background:#aa602c}
+    .btn-dark {background:#192e51;color:#fff;border-color:#49607e}
+    .btn-dark:hover {background:#273b5b}
+    .shell {max-width:1510px;margin:auto;padding:24px;display:grid;grid-template-columns:minmax(340px,410px) minmax(0,1fr);gap:20px;align-items:start}
+    .card {background:#fff;border:1px solid #e0e5ee;border-radius:16px;box-shadow:0 5px 18px rgba(10,27,52,.035)}
+    .panel {padding:20px}
+    .side {display:grid;gap:16px}
+    h1,h2,h3,p {margin-top:0}
+    h1 {font-size:25px;line-height:1.15;letter-spacing:-.6px;margin:0 0 7px}
+    h2 {font-size:16px;letter-spacing:-.25px;margin:0}
+    h3 {font-size:14px;margin:0}
+    .small,.muted {color:#62718a}
+    .small {font-size:12px}
+    .eyebrow {color:#9a582c;letter-spacing:1.5px;font-size:10px;font-weight:900;text-transform:uppercase;margin-bottom:8px}
+    .headline {display:flex;justify-content:space-between;gap:12px;align-items:start}
+    .pill {border-radius:30px;border:1px solid #e0d6ba;background:#fff8e8;color:#925f1b;padding:5px 9px;font-size:11px;white-space:nowrap;font-weight:700}
+    .layout-description {max-width:75ch;color:#68758b;margin:0}
+    .stack {display:grid;gap:12px}
+    label {font-size:12px;font-weight:700;color:#2c3a50;display:block}
+    .field {display:grid;gap:5px;min-width:0}
+    .field input,.field textarea {width:100%;border:1px solid #cfd6e2;border-radius:9px;padding:10px;color:#1c2e4d;background:#fff;min-width:0}
+    .field input:focus,.field textarea:focus {border-color:#b57a46}
+    .field .hint {font-size:10px;color:#7d899b}
+    .field textarea {min-height:72px;resize:vertical}
+    .two {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+    details {border-bottom:1px solid #e8ecf3;padding:13px 0}
+    details:last-child {border:0}
+    summary {cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:space-between;font-weight:750;color:#172440}
+    summary::-webkit-details-marker{display:none}
+    summary::after {content:"+";font-size:19px;color:#7b879a}
+    details[open] summary::after{content:"−"}
+    details .inside {padding-top:14px;display:grid;gap:12px}
+    .section-note {font-size:11px;color:#718098}
+    .main {display:grid;gap:18px;min-width:0}
+    .selects {display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}
+    .scenario {border:1px solid #d8dfe9;background:#fff;color:#394d6e;border-radius:9px;padding:9px 13px;font-weight:700}
+    .scenario[aria-pressed=true]{background:#132846;color:#fff;border-color:#132846}
+    .results {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+    .stat {padding:17px;border:1px solid #e3e8f0;border-radius:12px;background:#fbfcfe}
+    .stat.feature {background:#13294a;color:#fff;border-color:#13294a}
+    .stat .k {font-size:12px;color:#637289;font-weight:650}
+    .stat.feature .k {color:#bac7d7}
+    .stat .v {font-size:25px;letter-spacing:-1px;font-weight:800;margin:8px 0 5px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+    .stat .note {font-size:11px;color:#77839a}
+    .stat.feature .note {color:#acb9ca}
+    .flex-heading {display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+    .divider {border-top:1px solid #e8ecf2;margin:18px 0}
+    .lever {display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;border-bottom:1px solid #edf0f5;padding:13px 0}
+    .lever:last-child {border:0}
+    .lever-title {font-weight:750}
+    .lever-sub {color:#718098;font-size:11px;margin-top:2px}
+    .money {font-weight:800;font-variant-numeric:tabular-nums;font-size:16px;white-space:nowrap}
+    .toggle {display:flex;align-items:center}
+    .toggle input {width:17px;height:17px;accent-color:#bf793e;cursor:pointer}
+    .status {font-size:10px;color:#966525}
+    .metric-mini {display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+    .tag {font-size:10px;padding:4px 6px;border-radius:5px;background:#f1f5f9;color:#526985}
+    .bar-row {display:grid;grid-template-columns:100px 1fr 100px;align-items:center;gap:12px;margin:15px 0}
+    .bar-track {height:15px;background:#e9eef4;border-radius:7px;overflow:hidden}
+    .bar-fill {height:100%;width:0;background:#3e7892;border-radius:7px;transition:width .2s ease}
+    .bar-row.active .bar-fill {background:#c78347}
+    .bar-row.active strong {color:#9b5a2e}
+    .bar-row strong {text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+    .warnings {padding:12px 15px;border-radius:9px;background:#fff7e8;border:1px solid #ead9b7;color:#754e18;font-size:12px;display:none}
+    .warnings.visible {display:block}
+    .grid-footer {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+    .mini {background:#f4f7fa;border-radius:9px;padding:12px}
+    .mini .val {font-weight:850;font-variant-numeric:tabular-nums;font-size:18px;margin-top:5px}
+    .pitch {padding:20px 22px;background:#f4f7fc;border:1px solid #d8e3f1;border-left:4px solid #c78347;border-radius:10px}
+    .pitch p:last-child {margin:0}
+    .footer {padding:0 24px 28px;max-width:1510px;margin:auto;color:#748099;font-size:11px}
+    .hidden {display:none!important}
+    .print-only {display:none}
+    @media (max-width:1100px){.results{grid-template-columns:repeat(2,1fr)} .shell{grid-template-columns:340px 1fr}}
+    @media (max-width:850px){.shell{grid-template-columns:1fr;padding:16px}.results{grid-template-columns:repeat(2,1fr)} .top{padding:16px;align-items:start;flex-direction:column}}
+    @media (max-width:520px){.two,.grid-footer{grid-template-columns:1fr}.results{grid-template-columns:1fr 1fr}.stat .v{font-size:21px}.bar-row{grid-template-columns:75px 1fr 72px;gap:6px;font-size:11px}.bar-row strong{font-size:11px}}
+    @media print {
+      body{background:white;color:#111}
+      .top{padding:13px 0;background:white;color:#111;border-bottom:2px solid #222}
+      .top-actions,.side,.selects,.no-print,.footer{display:none!important}
+      .shell{display:block;padding:14px 0}
+      .main{display:block}
+      .card{box-shadow:none;border-color:#b9c4d2;break-inside:avoid;margin-bottom:14px}
+      .stat.feature{background:white;color:#111}
+      .stat.feature .k,.stat.feature .note{color:#555}
+      .print-only{display:block}
+      .top .brand-sub{color:#555}
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><div class="brand-symbol" aria-hidden="true">S</div><div><div class="brand-title">Sandler ROI Workbench</div><div class="brand-sub">A consultative value conversation, supported by transparent math</div></div></div>
+    <div class="top-actions no-print">
+      <button type="button" id="reset" class="btn btn-dark">Reset example</button>
+      <button type="button" id="import" class="btn btn-dark">Import JSON</button>
+      <input type="file" id="import-file" accept=".json,application/json" hidden>
+      <button type="button" id="export-json" class="btn btn-dark">Save model</button>
+      <button type="button" id="export-csv" class="btn btn-dark">CSV</button>
+      <button type="button" id="print" class="btn btn-primary">Present / Print</button>
+    </div>
+  </header>
+  <div class="shell">
+    <aside class="side no-print">
+      <section class="card panel">
+        <div class="eyebrow">1 · Discover</div>
+        <h2>Prospect & investment</h2>
+        <p class="small" style="margin:8px 0 14px">Adjust the inputs live with your prospect. All starting numbers are fictional examples.</p>
+        <div class="stack" id="identity-fields"></div>
+        <div class="divider"></div>
+        <div class="two" id="cost-fields"></div>
+      </section>
+      <section class="card panel">
+        <div class="eyebrow">2 · Define baseline</div>
+        <h2>Current commercial performance</h2>
+        <p class="small" style="margin:8px 0 2px">Use the categories relevant to the prospect. Disable a value driver in the results to exclude it.</p>
+        <div id="baseline-fields"></div>
+      </section>
+      <section class="card panel">
+        <div class="eyebrow">3 · Validate</div>
+        <div class="field"><label for="evidence-notes">Source notes and assumptions</label><textarea id="evidence-notes" placeholder="Where did baseline data come from? What has not been validated?"></textarea></div>
+        <p class="section-note" style="margin:12px 0 0">Private by design: no data sent anywhere. Use Save model to preserve your work as a local JSON file.</p>
+      </section>
+    </aside>
+    <main class="main">
+      <section class="card panel">
+        <div class="headline">
+          <div>
+            <div class="eyebrow">4 · Explore scenarios</div>
+            <h1 id="prospect-title">Illustrative value opportunity</h1>
+            <p class="layout-description">What would modest improvements in sales execution be worth? Change the assumptions and test the answer together.</p>
+          </div>
+          <span class="pill">Projection, not a promise</span>
+        </div>
+        <div class="selects no-print" role="group" aria-label="Select scenario">
+          <button class="scenario" type="button" data-scenario="conservative" aria-pressed="false">Conservative</button>
+          <button class="scenario" type="button" data-scenario="expected" aria-pressed="true">Expected</button>
+          <button class="scenario" type="button" data-scenario="upside" aria-pressed="false">Upside</button>
+        </div>
+        <p class="print-only"><strong id="print-scenario">Expected</strong> scenario</p>
+        <div class="results">
+          <div class="stat feature"><div class="k">Modeled ROI</div><div class="v" id="roi">—</div><div class="note">Net modeled benefit ÷ program cost</div></div>
+          <div class="stat"><div class="k">Net value</div><div class="v" id="net">—</div><div class="note">After training investment</div></div>
+          <div class="stat"><div class="k">Gross benefit</div><div class="v" id="benefit">—</div><div class="note">After attribution adjustments</div></div>
+          <div class="stat"><div class="k">Total program cost</div><div class="v" id="cost">—</div><div class="note">Training fees for selected period</div></div>
+        </div>
+        <div id="warnings" class="warnings" role="status" aria-live="polite"></div>
+      </section>
+      <section class="card panel">
+        <div class="flex-heading">
+          <div><div class="eyebrow">5 · Test value drivers</div><h2>Where additional value could come from</h2></div>
+          <span class="small">Switch off any irrelevant driver</span>
+        </div>
+        <div id="levers"></div>
+        <div class="divider"></div>
+        <div class="flex-heading"><h2>Scenario assumptions</h2><span class="small">Editable for selected scenario</span></div>
+        <div id="assumptions" class="two"></div>
+      </section>
+      <section class="card panel">
+        <div class="flex-heading">
+          <div><div class="eyebrow">6 · Present the business case</div><h2>Side-by-side investment comparison</h2></div>
+          <span class="small">Benefits after overlap adjustment</span>
+        </div>
+        <div id="scenario-bars"></div>
+        <div class="grid-footer">
+          <div class="mini"><div class="small">Modeled payback*</div><div class="val" id="payback">—</div></div>
+          <div class="mini"><div class="small">Benefit-to-cost ratio</div><div class="val" id="multiple">—</div></div>
+          <div class="mini"><div class="small">Price-point break-even**</div><div class="val" id="breakeven">—</div></div>
+        </div>
+        <p class="section-note" style="margin:15px 0 0">* Simple uniform run-rate estimate, not cash-flow timing. ** Additional price improvement needed after other modeled drivers; zero if those drivers already cover the cost.</p>
+      </section>
+      <section class="pitch">
+        <div class="eyebrow">Executive conversation summary</div>
+        <h2 style="margin-bottom:10px">The case for improvement</h2>
+        <p id="pitch-text" style="margin-bottom:12px"></p>
+        <p id="pitch-caveat" class="small"></p>
+      </section>
+    </main>
+  </div>
+  <footer class="footer">Prototype sales conversation tool. Not an official Sandler ROI guarantee. Figures are hypothetical until validated by the prospect; generated estimates do not establish training causality or realized outcomes.</footer>
+  <script type="module" src="./src/app.mjs"></script>
+</body>
+</html>
