@@ -185,9 +185,21 @@ function renderFields(){
 }
 function renderAssumptions(){
   const target=$("assumptions");target.replaceChildren();
-  for(const key of Object.keys(assumptionSpecs)){
-    const descriptor={[key]:[assumptionSpecs[key][0],"number",assumptionSpecs[key][1]]};
-    field(key,target,scenarios[selected],(k,v)=>{scenarios[selected][k]=v;},descriptor);
+  const sections=[
+    ["Price realization",["pricePoints","priceCapturePct"]],
+    ["Proposal conversion",["winPoints","winCapturePct"]],
+    ["Major accounts",["nationalAccounts","accountFirstYearPct","accountCapturePct"]],
+    ["Seller ramp",["rampMonthsSaved","rampCapturePct"]],
+    ["Overlap adjustment",["overlapPct"]]
+  ];
+  for(const [name,keys] of sections){
+    const group=document.createElement("fieldset");group.className="assumption-group";
+    const title=document.createElement("legend");title.textContent=name;group.append(title);
+    for(const key of keys){
+      const descriptor={[key]:[assumptionSpecs[key][0],"number",assumptionSpecs[key][1]]};
+      field(key,group,scenarios[selected],(k,v)=>{scenarios[selected][k]=v;},descriptor);
+    }
+    target.append(group);
   }
 }
 function item(name,value,enabled){
@@ -248,6 +260,7 @@ function render(){
   const bars=$("scenario-bars");bars.replaceChildren();
   const variants=Object.entries(scenarios).map(([key,s])=>({key,label:s.label,result:calculate(inputs,s,active)}));
   const max=Math.max(result.cost??0,...variants.map(x=>x.result.benefit??0),1);
+  const comparison=$("scenario-table");comparison.replaceChildren();
   for(const entry of variants){
     const row=document.createElement("div");row.className="bar-row"+(entry.key===selected?" active":"");
     const label=document.createElement("span");label.textContent=entry.label;
@@ -259,6 +272,21 @@ function render(){
     track.append(fill);
     const total=document.createElement("strong");total.textContent=entry.result.complete?MONEY(entry.result.benefit):"—";
     row.append(label,track,total);bars.append(row);
+    const tr=document.createElement("tr");
+    if(entry.key===selected)tr.className="current";
+    const cells=[
+      entry.label,
+      entry.result.complete?MONEY(entry.result.benefit):"Incomplete",
+      entry.result.complete?MONEY(entry.result.net):"Incomplete",
+      entry.result.complete?(entry.result.roi===null?"N/A":PERCENT(entry.result.roi)):"Incomplete",
+      entry.result.simplePaybackMonths===null?"N/A":entry.result.simplePaybackMonths.toFixed(1)+" months"
+    ];
+    for(const [index,value] of cells.entries()){
+      const cell=document.createElement(index===0?"th":"td");
+      if(index===0)cell.setAttribute("scope","row");
+      cell.textContent=value;tr.append(cell);
+    }
+    comparison.append(tr);
   }
   const ref=document.createElement("div");ref.className="bar-row";
   const label=document.createElement("span");label.textContent="Investment";
