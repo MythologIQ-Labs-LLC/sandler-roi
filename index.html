@@ -385,7 +385,7 @@
       <button type="button" id="feedback-exit" class="btn" aria-label="Close feedback mode">Close</button>
     </div>
     <p class="section-note">Walk through the tool and capture suggestions as they occur. Nothing is recorded or sent automatically.</p>
-    <div class="feedback-context"><strong>Current screen</strong><span id="feedback-location"></span></div>
+    <div class="feedback-context"><strong>Note location</strong><span id="feedback-location"></span></div>
     <label for="feedback-category">What type of feedback?</label>
     <select id="feedback-category">
       <option value="improvement">Improvement idea</option>
@@ -394,7 +394,7 @@
     </select>
     <label for="feedback-text">Your feedback</label>
     <textarea id="feedback-text" rows="4" maxlength="5000" placeholder="What's working? What would you change?"></textarea>
-    <label class="feedback-check"><input type="checkbox" id="feedback-include-context" checked> Include current screen and scenario (no customer figures)</label>
+    <label class="feedback-check"><input type="checkbox" id="feedback-include-context" checked> Include the screen where this note began. Uncheck for overall feedback (no customer figures).</label>
     <div class="feedback-record-controls">
       <button type="button" class="btn" id="feedback-record">Record voice</button>
       <button type="button" class="btn" id="feedback-stop" disabled>Stop recording</button>
@@ -407,7 +407,7 @@
       <div id="feedback-list" aria-live="polite"></div>
     </div>
     <button type="button" id="feedback-export" class="btn btn-primary" disabled>Download feedback package</button>
-    <p class="section-note">Exports one ZIP with the notes and optional audio clips. Review the files before sharing with the development team. Feedback is not saved automatically.</p>
+    <p class="section-note">Export your captured notes before leaving or refreshing. Voice clips have a 2-minute and 15 MB limit; the package has a 50 MB limit. Neither feedback nor audio is stored or sent automatically. Review the ZIP before sharing; voice and typed comments may contain information you choose to disclose.</p>
     <p id="feedback-status" role="status" aria-live="polite"></p>
   </aside>
   <dialog id="csv-map-dialog" class="csv-map-dialog" aria-labelledby="csv-map-title" aria-describedby="csv-map-description">
