@@ -267,6 +267,11 @@ test("feedback session refuses excess notes rather than constructing an invalid 
     }
     assert.equal(f.id("feedback-count").textContent,"40 captured");
     assert.match(f.id("feedback-status").textContent,/limited to 40 notes/);
+    // The rejected 41st note stays in the composer; export must refuse until cleared.
+    await f.id("feedback-export").fire("click");
+    assert.match(f.id("feedback-status").textContent,/unfinished comment/);
+    f.id("feedback-text").value="";
+    f.id("feedback-text").fire("input");
     await f.id("feedback-export").fire("click");
     assert.equal((await getManifest(f.objects.find(obj=>obj.type==="application/zip"))).notes.length,40);
   }finally{f.restore();}
