@@ -317,3 +317,30 @@ test("discarded or empty audio does not strand previous screen metadata",async()
     assert.equal(manifest.notes[0].context.stage,"model");
   }finally{f.restore();}
 });
+
+
+test("late events from a failed recorder cannot stop or contaminate a newer take",async()=>{
+  const first=audioStream(),second=audioStream();let calls=0;
+  const f=fixture(()=>Promise.resolve(++calls===1?first.stream:second.stream));
+  try{
+    initDevelopmentFeedback(()=>({stage:"compare"}));
+    f.id("feedback-toggle").fire("click");
+    await f.id("feedback-record").fire("click");
+    const old=f.FakeRecorder.instances.at(-1);
+    old.handlers.get("error")();
+    assert.equal(first.track.stopped,true,"error must release first microphone");
+    await f.id("feedback-record").fire("click");
+    const current=f.FakeRecorder.instances.at(-1);
+    assert.notEqual(current,old);
+    assert.equal(current.state,"recording");
+    old.handlers.get("dataavailable")({data:new Blob(["stale data"],{type:"audio/webm"})});
+    old.handlers.get("stop")();
+    assert.equal(current.state,"recording","stale stop must not close new recorder");
+    assert.equal(second.track.stopped,false,"stale stop must not release new microphone");
+    assert.equal(f.id("feedback-clear-audio").disabled,true,
+      "stale data must not be attached to the new draft");
+    f.id("feedback-stop").fire("click");
+    assert.equal(second.track.stopped,true);
+    assert.equal(f.id("feedback-clear-audio").disabled,false,"current recording must remain usable");
+  }finally{f.restore();}
+});
