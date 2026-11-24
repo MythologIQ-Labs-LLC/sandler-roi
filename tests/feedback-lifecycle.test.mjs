@@ -285,7 +285,7 @@ test("denied microphone permission does not pin the next comment to the wrong sc
     initDevelopmentFeedback(()=>({stage}));
     f.id("feedback-toggle").fire("click");
     await f.id("feedback-record").fire("click");
-    assert.match(f.id("feedback-status").textContent,/permission was denied/);
+    assert.match(f.id("feedback-status").textContent,/Microphone access was denied/);
     stage="present";
     f.id("feedback-text").value="New note after permission denial";
     f.id("feedback-text").fire("input");
