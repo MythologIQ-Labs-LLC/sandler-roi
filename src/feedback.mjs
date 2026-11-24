@@ -17,10 +17,18 @@ export function initDevelopmentFeedback(getContext){
   const exportButton=$("feedback-export"),status=$("feedback-status");
   const notes=[];
   let recorder=null,stream=null,chunks=[],pendingAudio=null,previewUrl=null,exported=false;
+  let permissionRequest=0,requesting=false;
   const setStatus=message=>{status.textContent=message;};
   function show(active){
-    // Closing feedback mode must never leave an invisible microphone recording.
-    if(!active&&recorder?.state==="recording")recorder.stop();
+    // Invalidate an unresolved permission request before its promise can start a recorder.
+    if(!active){
+      ++permissionRequest;
+      requesting=false;
+      if(recorder?.state==="recording")recorder.stop();
+      // Stop the tracks now, not later in the asynchronous recorder stop event.
+      if(stream)for(const track of stream.getTracks())track.stop();
+      audioButtons();
+    }
     pane.hidden=!active;
     toggle.setAttribute("aria-pressed",String(active));
     document.body.classList.toggle("feedback-mode",active);
@@ -55,8 +63,8 @@ export function initDevelopmentFeedback(getContext){
     exportButton.disabled=!notes.length;
   }
   function audioButtons(){
-    record.disabled=!!recorder;
-    stop.disabled=!recorder;
+    record.disabled=!!recorder||requesting;
+    stop.disabled=!recorder||recorder.state!=="recording";
     removeAudio.disabled=!pendingAudio;
   }
   function resetAudio(){
@@ -75,19 +83,30 @@ export function initDevelopmentFeedback(getContext){
     el.addEventListener("click",()=>{if(!pane.hidden)queueMicrotask(updateContext);});
   });
   record.addEventListener("click",async()=>{
+    if(pane.hidden||recorder||requesting)return;
     if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==="undefined"){
       setStatus("Audio recording is not supported in this browser. Text feedback remains available.");return;
     }
     resetAudio();
+    exported=false; // New audio must never be considered part of an earlier download.
+    const request=++permissionRequest;
+    requesting=true;audioButtons();
+    let acquired=null;
     try{
-      stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      acquired=await navigator.mediaDevices.getUserMedia({audio:true});
+      if(request!==permissionRequest||pane.hidden){
+        for(const track of acquired.getTracks())track.stop();
+        return;
+      }
+      stream=acquired;
       const types=["audio/webm;codecs=opus","audio/mp4","audio/webm","audio/ogg"];
       const type=types.find(t=>MediaRecorder.isTypeSupported(t));
-      recorder=new MediaRecorder(stream,type?{mimeType:type}:undefined);
+      const nextRecorder=new MediaRecorder(stream,type?{mimeType:type}:undefined);
+      recorder=nextRecorder;
       chunks=[];
-      recorder.addEventListener("dataavailable",event=>{if(event.data?.size)chunks.push(event.data);});
-      recorder.addEventListener("stop",()=>{
-        const blob=new Blob(chunks,{type:recorder?.mimeType||"audio/webm"});
+      nextRecorder.addEventListener("dataavailable",event=>{if(event.data?.size)chunks.push(event.data);});
+      nextRecorder.addEventListener("stop",()=>{
+        const blob=new Blob(chunks,{type:nextRecorder.mimeType||"audio/webm"});
         if(blob.size===0||blob.size>15_000_000){
           setStatus("Recording is empty or exceeds 15 MB. Please record a shorter note.");
         }else{
@@ -97,10 +116,19 @@ export function initDevelopmentFeedback(getContext){
         }
         chunks=[];closeStream();
       },{once:true});
-      recorder.addEventListener("error",()=>{setStatus("Audio recording failed.");closeStream();},{once:true});
-      recorder.start();
-      audioButtons();setStatus("Recording microphone audio. Click Stop when finished.");
-    }catch(err){closeStream();setStatus(err.name==="NotAllowedError"?"Microphone access was denied.":"Unable to record: "+err.message);}
+      nextRecorder.addEventListener("error",()=>{
+        setStatus("Audio recording failed.");closeStream();
+      },{once:true});
+      nextRecorder.start();
+      setStatus("Recording microphone audio. Click Stop when finished.");
+    }catch(err){
+      if(acquired)for(const track of acquired.getTracks())track.stop();
+      if(request===permissionRequest)setStatus(err.name==="NotAllowedError"?"Microphone access was denied.":"Unable to record: "+err.message);
+      closeStream();
+    }finally{
+      if(request===permissionRequest)requesting=false;
+      audioButtons();
+    }
   });
   stop.addEventListener("click",()=>{if(recorder?.state==="recording"){stop.disabled=true;recorder.stop();}});
   removeAudio.addEventListener("click",()=>{resetAudio();setStatus("Voice note removed.");});
@@ -146,9 +174,15 @@ export function initDevelopmentFeedback(getContext){
   });
   if(typeof window.addEventListener==="function"){
     window.addEventListener("beforeunload",event=>{
-      if((notes.length||pendingAudio||recorder)&&!exported){event.preventDefault();event.returnValue="";}
+      if((notes.length&&!exported)||pendingAudio||recorder||requesting||text.value.trim()){
+        event.preventDefault();event.returnValue="";
+      }
     });
-    window.addEventListener("pagehide",()=>{if(recorder?.state==="recording")recorder.stop();closeStream();});
+    window.addEventListener("pagehide",()=>{
+      ++permissionRequest;requesting=false;
+      if(recorder?.state==="recording")recorder.stop();
+      closeStream();
+    });
   }
   audioButtons();refresh();show(false);
 }
