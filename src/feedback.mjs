@@ -138,9 +138,11 @@ export function initDevelopmentFeedback(getContext){
       exported=true;setStatus("Feedback package downloaded. Review its contents before sharing.");
     }catch(err){setStatus("Unable to export feedback: "+err.message);}
   });
-  window.addEventListener("beforeunload",event=>{
-    if(notes.length&&!exported){event.preventDefault();event.returnValue="";}
-  });
-  window.addEventListener("pagehide",()=>{if(recorder?.state==="recording")recorder.stop();closeStream();});
+  if(typeof window.addEventListener==="function"){
+    window.addEventListener("beforeunload",event=>{
+      if(notes.length&&!exported){event.preventDefault();event.returnValue="";}
+    });
+    window.addEventListener("pagehide",()=>{if(recorder?.state==="recording")recorder.stop();closeStream();});
+  }
   audioButtons();refresh();show(false);
 }
