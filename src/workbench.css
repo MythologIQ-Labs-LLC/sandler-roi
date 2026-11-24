@@ -190,8 +190,19 @@ body[data-stage="discover"] .side details:not(.toolbar-menu) .inside{gap:10px}
 .scenario-table thead th{font-size:11px;font-weight:800;background:#f2f5fa;color:#475171}
 .scenario-table tbody th{font-weight:700;color:var(--stable)}
 .scenario-table tbody .current{background:#eff8fd}
-body[data-stage="present"] .top-actions #reset,
-body[data-stage="present"] .toolbar-menu{display:none}
+/* Present is the natural handoff point: keep model export and print available.
+   Suppress only Reset to avoid accidental loss during the customer discussion. */
+body[data-stage="present"] .top-actions #reset{display:none}
+body[data-stage="present"] #file-menu > summary{
+  background:var(--fresh);border-color:var(--fresh);color:var(--stable);
+  font-weight:800
+}
+body[data-stage="present"] #file-menu > summary:hover{
+  background:#3ac9f3;border-color:#3ac9f3
+}
+body[data-stage="present"] .top-actions #present{
+  background:#30346e;border-color:#4e538e;color:#fff
+}
 @media(max-width:700px){
   .model-stage #assumptions{grid-template-columns:1fr}
   .assumption-group{grid-template-columns:repeat(2,minmax(0,1fr))}

@@ -122,3 +122,9 @@ The installed Qortara Logic Demo offers stateless read-only evaluators for **sup
 - Keep the **entire stage cell** as a native button (adequate click/keyboard target), with current blue, earlier-position teal and later muted. 'Previous' is purely position, not attestation of a completed step.
 - Maintain direct stage navigation and keyboard ArrowLeft/ArrowRight/Home/End. The timeline remains visible in Present and hidden for print. Stage transition must not alter the staged financial disclosure logic.
 - Real browser acceptance must measure timeline height, actual one-line connector, stage node positions and narrow viewport overflow. Record nonduplicated estimated effort.
+
+## Present-stage delivery controls
+
+- **Files & export must remain visible and functional in Present**, where saving the model, exporting a customer CSV and printing the case are most relevant. The hidden-on-Present rule was a regression in the original presentation CSS, not a product decision.
+- In Present, keep the export control prominent; hiding Reset while preserving the existing Exit presentation action is acceptable. Print should exclude the toolbar itself.
+- Real-browser acceptance must open Files & export while on Present and verify both actual JSON and CSV downloads for the selected customer/scenario. Check visibility and horizontal overflow on mobile.

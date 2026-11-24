@@ -1,6 +1,6 @@
 import {spawn,spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
-import {mkdir,mkdtemp,readFile,rm,writeFile} from 'node:fs/promises';
+import {mkdir,mkdtemp,readFile,readdir,rm,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -252,6 +252,58 @@ try{
  assert.match(phase.firstMainVisible,/reveal-stage/,'Reveal must be the first visible Present panel');
  assert.ok(phase.revealTop<=320,'Main business case is below the fold: '+phase.revealTop);
  assert.equal(phase.pipelineExpanded,false,'Optional sensitivity should not preempt the reveal');
+
+ // Export remains a primary workflow in the final customer-facing stage.
+ const menuState=()=>evaluate('(()=>{'+
+  'const menu=document.getElementById("file-menu");'+
+  'const summary=menu.querySelector("summary");'+
+  'const visible=el=>el.getClientRects().length>0&&getComputedStyle(el).display!=="none";'+
+  'return {menuVisible:visible(menu),summaryVisible:visible(summary),'+
+  'headerVisible:visible(document.querySelector(".top-actions")),'+
+  'open:menu.open,items:[...menu.querySelectorAll("button")].map(b=>({id:b.id,visible:visible(b)})),'+
+  'viewportWidth:innerWidth,documentWidth:document.documentElement.scrollWidth};})()');
+ let menu=await menuState();
+ assert.equal(menu.menuVisible,true,'Files & export must remain visible during Present');
+ assert.equal(menu.summaryVisible,true,'Present export menu trigger must be visible');
+ assert.equal(menu.headerVisible,true,'Present header actions must remain visible');
+ await evaluate('document.querySelector("#file-menu > summary").click()');
+ menu=await menuState();
+ assert.equal(menu.open,true,'Files & export should expand during Present');
+ for(const id of ['export-json','export-csv','print']){
+  assert.ok(menu.items.some(x=>x.id===id&&x.visible),'Final stage action inaccessible: '+id);
+ }
+ const openMenuShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'present-export-menu-desktop.png'),Buffer.from(openMenuShot.data,'base64'));
+ const downloadDir=join(output,'present-export-downloads');
+ await mkdir(downloadDir,{recursive:true});
+ await command('Page.setDownloadBehavior',{behavior:'allow',downloadPath:downloadDir});
+ await evaluate('document.getElementById("export-json").click()');
+ await evaluate('document.getElementById("export-csv").click()');
+ const downloaded=await until(async()=>{
+  const entries=await readdir(downloadDir);
+  return entries.some(x=>x.endsWith('.json'))&&entries.some(x=>x.endsWith('.csv'))?entries:null;
+ },'JSON and CSV exports from Present');
+ const jsonName=downloaded.find(x=>x.endsWith('.json')),csvName=downloaded.find(x=>x.endsWith('.csv'));
+ assert.equal(jsonName,'sandler-roi-john-doe.json');
+ assert.equal(csvName,'sandler-roi-john-doe.csv');
+ const jsonData=JSON.parse(await readFile(join(downloadDir,jsonName),'utf8'));
+ const csvData=await readFile(join(downloadDir,csvName),'utf8');
+ assert.equal(jsonData.inputs.prospect,'John Doe','Saved JSON must retain the current customer identity');
+ assert.equal(jsonData.selected,'expected','Saved JSON must match the currently selected presentation scenario');
+ assert.match(csvData,/"Customer","John Doe"/,'CSV must contain the customer name');
+ assert.match(csvData,/"Scenario","expected"/,'CSV must contain the current scenario');
+ assert.match(csvData,/"Program cost","79200"/,'CSV must contain the computed investment');
+ await evaluate('document.querySelector("#file-menu > summary").click()');
+ await command('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+ await sleep(100);
+ menu=await menuState();
+ assert.equal(menu.menuVisible,true,'Files & export must remain accessible on narrow Present');
+ assert.ok(menu.documentWidth<=menu.viewportWidth+2,
+  'Present header causes horizontal overflow on mobile: '+JSON.stringify(menu));
+ const mobileExportShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'present-export-mobile.png'),Buffer.from(mobileExportShot.data,'base64'));
+ await command('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
+ await sleep(60);
  const presentImage=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'present-desktop.png'),Buffer.from(presentImage.data,'base64'));
  const beforeChange=phase.gross;
