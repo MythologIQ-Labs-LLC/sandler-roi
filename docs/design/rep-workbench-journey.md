@@ -87,3 +87,16 @@ The typography and navigation design are original implementation, not a copy of 
 **Pending:** real Chrome/Edge visual/keyboard and narrow viewport review, print-to-PDF screenshot, native \`npm test\` on developer machine, approved logo asset usage, and independent representative review of the meeting narrative and financial assertions.
 
 These are named acceptance gates, not reasons to stop source development.
+
+
+## Iteration: reduce scrolling and restore navigation (November 24, 2026)
+
+**Owner UX observation:** Discover was a stacked engagement/performance/pipeline/evidence form; the resulting left column extended far below the financial workspace. Present hid the entire journey navigator and forced a roundabout "Return to modeling" flow.
+
+**Implemented remedy:** Four mutually exclusive tabs control the Discover panels; each panel remains mounted and editable but only one is displayed. Sidebar height is bounded on desktop, with responsive natural flow on phones. Model/Compare/Present remain as they were, except the navigation timeline is now visible and sticky in Present. Switching a tab or step preserves in-session model state.
+
+**CSV:** No official universal Sandler baseline CSV format was located. A canonical workbench template plus a visible column mapper supports prospect spreadsheets without guessing unapproved metrics. Import is a staged local-only operation, not automatic reconciliation. Invalid financial values or conflicting columns block Apply; missing values remain missing, and imported provenance is declared unconfirmed.
+
+**Brand:** The rep owner has confirmed authorized Sandler identity use. Sandler's public [logo kit](https://sandler.com/wp-content/uploads/2023/03/Sandler-Logo-Kit-1.zip) was identified. Its ZIP bytes could not be transferred through the available environment, so an original, verified Sandler-affiliated wordmark is **linked externally** from \`https://go.nextlevel.sandler.com/hs-fs/hubfs/SANDLER-LOGO-R-1C.webp?height=38&name=SANDLER-LOGO-R-1C.webp&width=300\`. The image itself is unchanged; CSS only scales proportionally. The source should be moved into a first-party retained image file once the original logo kit is available. The interface's four inline SVG discovery icons are original and use Sandler's published Style #1 circular-white-line approach, not copied trademark imagery.
+
+**Privacy change:** The logo is fetched from a third-party Sandler-affiliated CDN. The form does not send entered prospect data to that domain and the image uses \`referrerpolicy="no-referrer"\`. A blocked image may not display; the UI's text description remains accessible.
