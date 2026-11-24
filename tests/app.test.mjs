@@ -19,6 +19,7 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
     n.replaceChildren=(...children)=>{n.children=[...children]};
     n.addEventListener=(event,fn)=>{n.listeners[event]=fn};
     n.setAttribute=(key,value)=>{n.attributes[key]=String(value)};
+    n.removeAttribute=key=>{delete n.attributes[key]};
     n.trigger=async(event,arg)=>n.listeners[event]?.(arg??{target:n});
     n.remove=()=>{};
     n.click=()=>{if(tag==="a")downloads.push({name:n.download,blob:urls.get(n.href)});
@@ -29,10 +30,13 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
   const buttons=["conservative","expected","upside"].map(key=>{
     const el=createNode("button");el.dataset.scenario=key;return el;
   });
+  const steps=["discover","model","compare","present"].map(key=>{
+    const el=createNode("button");el.dataset.workbenchNav=key;return el;
+  });
   const document={
     getElementById:id=>elements.get(id),
     createElement:createNode,
-    querySelectorAll:query=>query==="[data-scenario]"?buttons:[],
+    querySelectorAll:query=>query==="[data-scenario]"?buttons:query==="[data-workbench-nav]"?steps:[],
     body:createNode("body")
   };
   for(const match of html.matchAll(/id="([^"]+)"/g)){
@@ -115,6 +119,41 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(elements.get("cost").textContent,"$79,200");
       assert.equal(elements.get("cost-basis").textContent,"Fee-only estimate");
       assert.doesNotMatch(elements.get("roi").textContent,/9999999/);
+    });
+    await t.test("meeting journey starts in Discover and advances without leaving the page",async()=>{
+      assert.equal(document.body.dataset.stage,"discover");
+      await elements.get("step-next").trigger("click");
+      assert.equal(document.body.dataset.stage,"model");
+      await elements.get("step-next").trigger("click");
+      assert.equal(document.body.dataset.stage,"compare");
+      await elements.get("step-next").trigger("click");
+      assert.equal(document.body.dataset.stage,"present");
+      assert.equal(steps[3].attributes["aria-current"],"step");
+    });
+    await t.test("model assumptions are organized by sales value driver",async()=>{
+      await steps[1].trigger("click");
+      const groups=elements.get("assumptions").children;
+      assert.equal(groups.length,5);
+      assert.ok(groups.every(group=>group.tag==="fieldset"));
+    });
+    await t.test("comparison contains three fully labeled scenario rows",async()=>{
+      await steps[2].trigger("click");
+      const rows=elements.get("scenario-table").children;
+      assert.equal(rows.length,3);
+      assert.ok(rows.every(row=>row.children.length===5));
+    });
+    await t.test("present view includes driver math, uncertainty and reversible navigation",async()=>{
+      await steps[3].trigger("click");
+      assert.equal(elements.get("present-driver-summary").children.length,4);
+      assert.match(elements.get("present-evidence").textContent,/None independently verified/);
+      assert.equal(elements.get("present").textContent,"Exit presentation");
+      await elements.get("present").trigger("click");
+      assert.equal(document.body.dataset.stage,"compare");
+    });
+    await t.test("print action opens the customer-facing presentation step",async()=>{
+      await steps[1].trigger("click");
+      await elements.get("print").trigger("click");
+      assert.equal(document.body.dataset.stage,"present");
     });
   } finally {
     if(originalDocument===undefined)delete globalThis.document;else globalThis.document=originalDocument;
