@@ -34,3 +34,24 @@ John needs a nontechnical **save/open customer** flow and a development-only way
 - Feedback mode does not submit to a remote collector; users download and share a package deliberately.
 - Full-window/screen recordings, screenshots, transcription and attachment to GitHub issues are future considerations, not shipped features.
 - Never advertise this public prototype as approved for confidential client storage or Sandler corporate deployment.
+
+
+## Adversarial hardening (2026-11-24)
+
+This phase challenges the earlier happy-path proof. Specific failure hypotheses and mitigations:
+
+| Failure hypothesis | Mitigation / regression |
+| --- | --- |
+| Start typing on Compare, navigate to Present, then Add | Pin metadata to the screen where the first text input or voice recording began; explicit checkbox removes context for overall feedback |
+| Export while text or an unadded recording remains in the composer | Refuse export and explain how to complete or clear the draft |
+| Add/remove a note while an audio file's arrayBuffer is loading for ZIP | Snapshot notes at export start; track revisions and never mark concurrent changes exported |
+| Start a second voice recording while the first is pending review | Block replacement until Add or Remove |
+| Forgot-to-stop microphone capture consumes memory | Maximum 2 minutes, 15 MB per recording, stop immediately when an incoming chunk crosses the cap |
+| Unlimited recordings and notes create unsafe archive size | Limit notes to 40, total pending/captured audio to 48 MB, ZIP to 50 MB; reject duplicate file names and malformed archive entries |
+| Microphone permission resolves after drawer close | Invalidate pending request, immediately stop late-acquired tracks, and never start a hidden recorder |
+| A fresh unexported recording follows an earlier ZIP download | Keep before-unload warnings and dirty state independent of the previous export |
+| Feedback includes customer financial fields without consent | Only stage/panel/scenario metadata is read; no form scraping or analytics. **User-typed or spoken** information may still be sensitive and must be reviewed before sharing |
+
+**Intended verification:** Node lifecycle/ZIP tests, real headless Chromium with a fake microphone, standard app regression and Pages preflight, CodeQL and independent PR review. Physical microphone/permissions on Windows Chrome/Edge remain unverified unless manually completed; do not treat simulation as equivalent.
+
+**Preserved boundaries:** No backend, no cloud upload, no automatic persistence, no invisible recording, no CRM capture, no formula changes, no permission bypass. An ordinary URL still hides development feedback. Users must export before refresh or tab close; a browser unload prompt is a safeguard, not guaranteed recovery on mobile or forced shutdown.
