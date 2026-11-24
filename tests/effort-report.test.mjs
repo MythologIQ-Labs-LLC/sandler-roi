@@ -9,9 +9,9 @@ const source=JSON.parse(await readFile(
 
 test("effort ledger is valid and has a computed total rather than hand-maintained sums",()=>{
   const summary=summarizeEffort(source);
-  assert.equal(summary.entryCount,5);
-  assert.equal(summary.totalTrackedHours,2.75);
-  assert.equal(summary.provisionalHours,2.75);
+  assert.equal(summary.entryCount,source.entries.length);
+  assert.equal(summary.totalTrackedHours,Math.round(source.entries.reduce((total,row)=>total+row.hours,0)*100)/100);
+  assert.equal(summary.provisionalHours,summary.totalTrackedHours);
   assert.equal(summary.ownerConfirmedHours,0);
   assert.equal(summary.invoiceableHours,null);
 });
@@ -29,6 +29,6 @@ test("effort CLI produces a portable machine-readable report",()=>{
   });
   assert.equal(run.status,0,run.stderr);
   const output=JSON.parse(run.stdout);
-  assert.equal(output.totalTrackedHours,2.75);
+  assert.equal(output.totalTrackedHours,summarizeEffort(source).totalTrackedHours);
   assert.equal(output.invoiceableHours,null);
 });
