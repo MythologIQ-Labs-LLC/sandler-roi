@@ -94,7 +94,7 @@ try{
   'Desktop Discover is still a long document: '+JSON.stringify(measurements));
  const desktopHeight=measurements.docHeight;
  for(const tab of ['performance','pipeline','evidence','engagement']){
-  await evaluate('document.querySelector("[data-discover-tab='+JSON.stringify(tab)+']").click()');
+  await evaluate('document.querySelector('+JSON.stringify('[data-discover-tab="'+tab+'"]')+').click()');
   measurements=await sample();
   console.log('Desktop Discover '+tab+':',JSON.stringify(measurements));
   assert.deepEqual(measurements.visiblePanels,[tab]);
