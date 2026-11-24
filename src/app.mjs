@@ -300,20 +300,17 @@ function render(){
     present:"Present "+customer.possessive+" potential business case."
   }[currentStep]);
   put("baseline-title",customer.leadPossessive+" starting point");
-  put("prospect-title","Current figures entered for "+customer.subject+" · source status shown below");
-  put("baseline-description","Review the figures entered for "+customer.subject+
-    ". Confirm their sources before treating them as established performance.");
+  put("prospect-title","Current baseline figures · source status shown below");
+  put("baseline-description","Confirm the sources of these figures before treating them as established performance.");
   put("budget-title",customer.leadPossessive+" modeled program investment");
   put("performance-title",customer.leadPossessive+" current performance");
   put("pipeline-input-title",customer.leadPossessive+" pipeline context");
   put("evidence-title","04 · Evidence and confidence for "+customer.subject);
   put("model-ownership-title","What could improve for "+customer.subject+"?");
   put("review-title","Review "+customer.possessive+" figures and assumptions");
-  put("review-description","Confirm that "+customer.possessive+
-    " baseline figures, proposed improvements and investment reflect the customer's situation. The full financial comparison comes in Present.");
+  put("review-description","Confirm the current figures, proposed improvements and investment with the customer before reviewing modeled financial results.");
   put("reveal-heading","Where "+customer.subject+" stands. What could change.");
-  put("reveal-description","The current figures are entered for "+customer.subject+
-    "; the alternatives are modeled hypotheses, not achieved results.");
+  put("reveal-description","Current values are customer-entered; possible future results are modeled hypotheses, not achieved outcomes.");
   put("scenario-owner-heading",customer.leadPossessive+" modeled financial outcomes");
   put("present-driver-heading","What could create value for "+customer.subject+"?");
   put("pitch-title",customer.leadPossessive+" potential business case");

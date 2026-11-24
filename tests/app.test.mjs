@@ -75,7 +75,7 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(elements.get("budget-title").textContent,"John Doe’s modeled program investment");
       assert.equal(elements.get("step-title").textContent,"Start with John Doe’s numbers.");
       assert.match(elements.get("prospect-title").textContent,/source status shown below/);
-      assert.match(elements.get("baseline-description").textContent,/Confirm their sources/);
+      assert.match(elements.get("baseline-description").textContent,/Confirm the sources/);
       await steps[1].trigger("click");
       assert.equal(elements.get("model-ownership-title").textContent,"What could improve for John Doe?");
       await steps[2].trigger("click");

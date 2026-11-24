@@ -162,7 +162,8 @@ try{
  assert.equal(owned.heading,"John Doe’s starting point");
  assert.equal(owned.budget,"John Doe’s modeled program investment");
  assert.equal(owned.intro,"Start with John Doe’s numbers.");
- assert.match(owned.source,/entered for John Doe/);
+ assert.match(owned.source,/Current baseline figures/);
+ assert.doesNotMatch(owned.source,/John Doe/,"Do not repeat customer name in every supporting sentence");
  assert.match(owned.evidence,/Source status/);
  const namedImage=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'discover-john-doe.png'),Buffer.from(namedImage.data,'base64'));
