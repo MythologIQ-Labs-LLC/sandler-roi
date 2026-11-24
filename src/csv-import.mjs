@@ -1,4 +1,4 @@
-/* CSV import for representative-provided prospect baselines.
+/* CSV import for representative-provided customer baselines.
  * A CSV is NOT a Sandler-certified integration or trusted source.
  * All imports are local-only and require an explicit mapping/confirmation.
  */
@@ -7,11 +7,11 @@ import {BASELINE_FIELDS} from "./evidence.mjs";
 
 export const CSV_FIELDS=Object.freeze(["prospect","consultant",...Object.keys(BASELINE_FIELDS)]);
 const LABELS=Object.freeze({
-  prospect:"Prospect / client",consultant:"Sandler representative",...BASELINE_FIELDS
+  prospect:"Customer name or organization",consultant:"Sandler representative",...BASELINE_FIELDS
 });
 export const CSV_LABELS=LABELS;
 const ALIASES={
-  prospect:["company","company name","organization","customer","client","account name"],
+  prospect:["company","company name","organization","customer","customer name","client","client name","account name","prospect name"],
   consultant:["rep","rep name","representative","sales rep","sandler rep","owner"],
   monthlyFee:["monthly fee","monthly program cost","training fee monthly","monthly investment"],
   programMonths:["duration months","term months","months","program duration","evaluation months"],
@@ -104,7 +104,7 @@ export function prepareCSV(text){
       rows:[[...values.values()].map(x=>x.value)],kind:"key-value"};
   }
   const data=rows.slice(1).filter(row=>row.some(value=>value.trim()!==""));
-  if(data.length===0)throw Error("CSV has headings but no prospect rows");
+  if(data.length===0)throw Error("CSV has headings but no customer rows");
   return {headers:head,rows:data,kind:"table"};
 }
 
@@ -146,7 +146,7 @@ function cleanNumber(raw,key){
 
 export function mappedCSVPreview(prepared,rowIndex,mapping,fileName="import.csv"){
   if(!prepared||!Array.isArray(prepared.rows)||!Array.isArray(prepared.headers))throw Error("Invalid CSV preview");
-  if(!Number.isInteger(rowIndex)||rowIndex<0||rowIndex>=prepared.rows.length)throw Error("Choose a prospect row");
+  if(!Number.isInteger(rowIndex)||rowIndex<0||rowIndex>=prepared.rows.length)throw Error("Choose a customer record");
   const row=prepared.rows[rowIndex],entries=[],used=new Set();
   for(const field of CSV_FIELDS){
     const col=mapping[field];
@@ -187,7 +187,7 @@ export function buildCSVImport(preview){
 }
 
 export const CSV_TEMPLATE_HEADERS=Object.freeze([
-  "prospect","consultant","monthlyFee","programMonths","setupFee",
+  "customer","consultant","monthlyFee","programMonths","setupFee",
   "participantCount","discountedRevenue","priceProfitFlowPct",
   "annualProposals","baselineWinRatePct","avgDealValue","grossMarginPct",
   "newAccountsAnnualValue","newHires","rampMonths","annualSellerRevenue"

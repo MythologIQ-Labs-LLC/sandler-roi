@@ -71,6 +71,16 @@ try{
   'firstMainVisible:[...document.querySelector(".main").children].find(el=>el.getClientRects().length>0)?.className||"",'+
   'revealTop:Math.round(document.querySelector(".reveal-stage").getBoundingClientRect().top),'+
   'pipelineExpanded:document.querySelector(".optional-analysis")?.open||false};})()');
+ const customerLabels=()=>evaluate('(()=>{'+
+  'const text=id=>document.getElementById(id)?.textContent||"";'+
+  'return {heading:text("baseline-title"),budget:text("budget-title"),'+
+  'intro:text("step-title"),performance:text("performance-title"),'+
+  'model:text("model-ownership-title"),review:text("review-title"),'+
+  'reveal:text("reveal-heading"),pitch:text("pitch-title"),'+
+  'source:text("prospect-title"),evidence:text("baseline-confidence"),'+
+  'customer:document.getElementById("field-prospect")?.value||"",'+
+  'visibleCopy:document.body.innerText,'+
+  'scenarioName:document.getElementById("scenario-table")?.getAttribute("aria-label")};})()');
  const sample=()=>evaluate('(()=>{'+
   'const panels=[...document.querySelectorAll("[data-discover-panel]")];'+
   'const visible=panels.filter(p=>!p.hidden&&getComputedStyle(p).display!=="none"&&p.getBoundingClientRect().height>0);'+
@@ -142,9 +152,35 @@ try{
  }
  const desktop=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'discover-desktop.png'),Buffer.from(desktop.data,'base64'));
+ let owned=await customerLabels();
+ assert.equal(owned.heading,"Sample customer’s starting point");
+ assert.match(owned.source,/source status shown below/);
+ assert.doesNotMatch(owned.visibleCopy,/\bprospect\b/i,"Visible UI should use customer language");
+ await evaluate('(()=>{const input=document.getElementById("field-prospect");'+
+  'input.value="John Doe";input.dispatchEvent(new Event("input",{bubbles:true}));})()');
+ owned=await customerLabels();
+ assert.equal(owned.heading,"John Doe’s starting point");
+ assert.equal(owned.budget,"John Doe’s modeled program investment");
+ assert.equal(owned.intro,"Start with John Doe’s numbers.");
+ assert.match(owned.source,/Current baseline figures/);
+ assert.doesNotMatch(owned.source,/John Doe/,"Do not repeat customer name in every supporting sentence");
+ assert.match(owned.evidence,/Source status/);
+ const namedImage=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'discover-john-doe.png'),Buffer.from(namedImage.data,'base64'));
+ await evaluate('(()=>{const input=document.getElementById("field-prospect");'+
+  'input.value="   ";input.dispatchEvent(new Event("input",{bubbles:true}));})()');
+ owned=await customerLabels();
+ assert.equal(owned.heading,"The customer’s starting point");
+ assert.equal(owned.intro,"Start with the customer’s numbers.");
+ await evaluate('(()=>{const input=document.getElementById("field-prospect");'+
+  'input.value="John Doe";input.dispatchEvent(new Event("input",{bubbles:true}));})()');
  await evaluate('document.querySelector("[data-workbench-nav=model]").click()');
  let phase=await visibleStage();
  assert.equal(phase.modelBehavior,true,'Model must show operating hypotheses');
+ owned=await customerLabels();
+ assert.equal(owned.model,"What could improve for John Doe?");
+ assert.match(owned.intro,/John Doe/);
+ assert.doesNotMatch(owned.visibleCopy,/\bprospect\b/i);
  assert.match(phase.modelText,/Current baseline/);
  assert.match(phase.modelText,/26\.4%/);
  for(const key of ['scenario','roi','benefit','comparison']){
@@ -152,7 +188,10 @@ try{
  }
  await evaluate('document.querySelector("[data-workbench-nav=compare]").click()');
  phase=await visibleStage();
- assert.equal(phase.review,true,'Compare must show buyer validation');
+ assert.equal(phase.review,true,'Compare must show customer validation');
+ owned=await customerLabels();
+ assert.equal(owned.review,"Review John Doe’s figures and assumptions");
+ assert.match(owned.intro,/John Doe/);
  for(const key of ['scenario','roi','benefit','comparison']){
   assert.equal(phase[key],false,'Review disclosed full scenario comparison: '+key);
  }
@@ -161,6 +200,11 @@ try{
  await evaluate('document.querySelector("[data-workbench-nav=present]").click()');
  const present=await sample();assert.equal(present.stage,'present');
  assert.equal(present.navVisible,true,'Timeline must remain visible in Present');
+ owned=await customerLabels();
+ assert.equal(owned.reveal,"Where John Doe stands. What could change.");
+ assert.equal(owned.pitch,"John Doe’s potential business case");
+ assert.match(owned.scenarioName,/John Doe’s illustrative financial comparison/);
+ assert.doesNotMatch(owned.visibleCopy,/\bprospect\b/i);
  phase=await visibleStage();
  for(const key of ['presentBehavior','scenario','roi','benefit','comparison']){
   assert.equal(phase[key],true,'Present must reveal the completed financial business case: '+key);
@@ -189,6 +233,14 @@ try{
  assert.deepEqual(mobile.visiblePanels,['engagement']);
  assert.equal(mobile.tabColumns,2,'Mobile tabs need two readable columns');
  assert.ok(mobile.docWidth<=mobile.width+2,'Mobile horizontal overflow: '+JSON.stringify(mobile));
+ await evaluate('(()=>{const input=document.getElementById("field-prospect");'+
+  'input.value="North Atlantic Regional Commercial Development and Training Partners International";'+
+  'input.dispatchEvent(new Event("input",{bubbles:true}));})()');
+ const longMobile=await sample();
+ assert.ok(longMobile.docWidth<=longMobile.width+2,
+  'Long customer name caused horizontal overflow: '+JSON.stringify(longMobile));
+ await evaluate('(()=>{const input=document.getElementById("field-prospect");'+
+  'input.value="John Doe";input.dispatchEvent(new Event("input",{bubbles:true}));})()');
  const mobileShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'discover-mobile.png'),Buffer.from(mobileShot.data,'base64'));
  assert.deepEqual(exceptions,[],'Unexpected browser JavaScript exceptions');

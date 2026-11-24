@@ -68,6 +68,34 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(elements.get("cost").textContent,"$79,200");
       assert.match(elements.get("cost-basis").textContent,/Fee-only/);
     });
+    await t.test("customer-owned headings update on entry and remain source-qualified",async()=>{
+      const name=elements.get("field-prospect"),initial=name.value;
+      name.value="John Doe";await name.trigger("input");
+      assert.equal(elements.get("baseline-title").textContent,"John Doe’s starting point");
+      assert.equal(elements.get("budget-title").textContent,"John Doe’s modeled program investment");
+      assert.equal(elements.get("step-title").textContent,"Start with John Doe’s numbers.");
+      assert.match(elements.get("prospect-title").textContent,/source status shown below/);
+      assert.match(elements.get("baseline-description").textContent,/Confirm the sources/);
+      await steps[1].trigger("click");
+      assert.equal(elements.get("model-ownership-title").textContent,"What could improve for John Doe?");
+      await steps[2].trigger("click");
+      assert.equal(elements.get("review-title").textContent,"Review John Doe’s figures and assumptions");
+      await steps[3].trigger("click");
+      assert.equal(elements.get("reveal-heading").textContent,"Where John Doe stands. What could change.");
+      assert.equal(elements.get("pitch-title").textContent,"John Doe’s potential business case");
+      assert.match(elements.get("scenario-table").attributes["aria-label"],/John Doe’s/);
+      await steps[0].trigger("click");
+      name.value="  ";await name.trigger("input");
+      assert.equal(elements.get("baseline-title").textContent,"The customer’s starting point");
+      assert.equal(elements.get("step-title").textContent,"Start with the customer’s numbers.");
+      name.value=initial;await name.trigger("input");
+    });
+    await t.test("customer name is literal text, not parsed as HTML",async()=>{
+      const name=elements.get("field-prospect"),previous=name.value;
+      name.value="<img src=x onerror=alert(1)>";await name.trigger("input");
+      assert.match(elements.get("baseline-title").textContent,/^<img src=x onerror=alert\(1\)>/);
+      name.value=previous;await name.trigger("input");
+    });
     await t.test("changing fee recalculates ROI and demotes provenance",async()=>{
       const input=elements.get("field-monthlyFee");
       input.value="7000";await input.trigger("input");
@@ -113,7 +141,7 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(model.inputs.costMode,"expanded");
       assert.equal(model.evidence.monthlyFee.status,"finance-reviewed");
     });
-    await t.test("CSV export protects against prospect-name formula injection",async()=>{
+    await t.test("CSV export protects against customer-name formula injection",async()=>{
       const prospect=elements.get("field-prospect");
       prospect.value='=HYPERLINK("https://evil.invalid","x")';
       await prospect.trigger("input");
@@ -121,6 +149,8 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       const csv=await downloads.at(-1).blob.text();
       assert.match(csv,/"'=HYPERLINK/);
       assert.match(csv,/"Evidence independently verified","false"/);
+      assert.match(csv,/"Customer","\x27=HYPERLINK/);
+      assert.match(csv,/"Input customer","\x27=HYPERLINK/);
     });
     await t.test("legacy version 1 model imports as fee-only and never trusts stored ROI",async()=>{
       const {DEFAULT_INPUTS,SCENARIOS,DEFAULT_ACTIVE}=await import("../src/roi.mjs");
@@ -164,7 +194,7 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(prevented,4);
       await tabs[0].trigger("click");
     });
-    await t.test("CSV mapper previews a prospect row but does not import until Apply",async()=>{
+    await t.test("CSV mapper previews a customer row but does not import until Apply",async()=>{
       const original=elements.get("cost").textContent;
       const file=elements.get("import-csv-file");
       file.files=[{name:"prospect-data.csv",size:130,
@@ -199,14 +229,15 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
     await t.test("download CSV template exposes canonical field headings",async()=>{
       await elements.get("csv-template").trigger("click");
       const content=await downloads.at(-1).blob.text();
-      assert.match(content,/"prospect"/);
+      assert.match(content,/"customer"/);
       assert.match(content,/"monthlyFee"/);
       assert.match(content,/"programMonths"/);
     });
     await t.test("reset after CSV import restores illustrative demo inputs",async()=>{
       await elements.get("reset").trigger("click");
       assert.equal(elements.get("cost").textContent,"$79,200");
-      assert.equal(elements.get("field-prospect").value,"Example prospect (illustrative)");
+      assert.equal(elements.get("field-prospect").value,"Sample customer");
+      assert.equal(elements.get("baseline-title").textContent,"Sample customer’s starting point");
     });
     await t.test("present stage keeps navigation active in the workbench DOM",async()=>{
       await steps[3].trigger("click");

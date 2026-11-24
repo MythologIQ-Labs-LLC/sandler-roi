@@ -10,6 +10,7 @@ const files={
   "/src/evidence.mjs":"src/evidence.mjs",
   "/src/csv-import.mjs":"src/csv-import.mjs",
   "/src/story.mjs":"src/story.mjs",
+  "/src/customer-copy.mjs":"src/customer-copy.mjs",
   "/src/workbench.css":"src/workbench.css"
 };
 const types={".html":"text/html; charset=utf-8",".mjs":"text/javascript; charset=utf-8",".css":"text/css; charset=utf-8"};

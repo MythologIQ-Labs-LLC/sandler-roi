@@ -7,14 +7,14 @@
 
 **Live site:** [Open the Sandler ROI Workbench on GitHub Pages](https://mythologiq-labs-llc.github.io/sandler-roi/). GitHub Pages publishes the `main` branch; new work appears after a successful deployment.
 
-**A buyer-led financial conversation, not a promise of ROI.** When a prospect asks whether sales training could pay for itself, a Sandler representative can use this browser-based tool to test the economics with the prospect's own numbers. Enter a few baselines, explore different improvements, and explain how the modeled benefits compare with the program's cost.
+**A customer-centered financial conversation, not a promise of ROI.** A Sandler representative can use this browser-based tool with a customer to review their own starting figures, explore hypothetical improvements, validate sources, and finally examine how the modeled value compares with the training investment. The workbench personalizes its headings using the customer's entered name.
 
 **Status:** Public, illustrative prototype. The Pages URL serves the current `main` revision, not unmerged feature work. This is not an official Sandler publication, a brand-approved tool, or an independently validated financial forecast. The project-specific illustration is original to this repository, not Sandler corporate logo artwork.
 
 ## On this page
 
 - [Quick start](#quick-start)
-- [Use it in a prospect meeting](#use-it-in-a-prospect-meeting)
+- [Use it in a customer conversation](#use-it-in-a-customer-conversation)
 - [What it models](#what-it-models)
 - [How calculations work](#how-calculations-work)
 - [Validation and evidence](#validation-and-evidence)
@@ -28,7 +28,7 @@ Approximate build and refinement effort is tracked in the [public project effort
 
 ## Quick start
 
-**Hosted prototype:** [Open the Sandler ROI Workbench on GitHub Pages](https://mythologiq-labs-llc.github.io/sandler-roi/). No installation or sign-in is required. The initial prospect and financial figures are fictional; **do not enter confidential client information into a public demo** without confirming your organization's data-handling rules.
+**Hosted prototype:** [Open the Sandler ROI Workbench on GitHub Pages](https://mythologiq-labs-llc.github.io/sandler-roi/). No installation or sign-in is required. The initial customer example and financial figures are fictional; **do not enter confidential client information into a public demo** without confirming your organization's data-handling rules.
 
 **Run locally:** Install **Node.js 20 or later** and Git. No `npm install`, cloud account, database, API key, or external runtime dependency is needed. Run:
 
@@ -38,22 +38,22 @@ cd sandler-roi
 npm start
 \`\`\`
 
-**Expected first result:** The local server prints \`Sandler ROI Workbench: http://127.0.0.1:4173\`. Open [http://127.0.0.1:4173](http://127.0.0.1:4173) in a modern browser. You should see an **Example prospect (illustrative)**, a **$79,200 program cost** based on fictional starting inputs, scenario controls, and financial result cards. Change the monthly fee or select a different scenario to see the results recalculate.
+**Expected first result:** The local server prints `Sandler ROI Workbench: http://127.0.0.1:4173`. Open [http://127.0.0.1:4173](http://127.0.0.1:4173). Discover starts with **Sample customer**, a $79,200 illustrative investment and current baseline metrics. Rename the customer to see headings update immediately. Conservative/Expected/Upside results appear only in **Present**, after baseline modeling and review.
 
 The preview server binds to \`127.0.0.1\`. Opening \`index.html\` directly using \`file://\` is not supported because the browser restricts JavaScript modules loaded from local files. The first-use path is **source-inspected** and its user interactions were simulated offline. An actual Chromium/Edge browser acceptance run is still pending.
 
-## Use it in a prospect meeting
+## Use it in a customer conversation
 
-1. **Discover:** Establish the buyer's current win rate, deal volume, average deal, sales ramp, investment and evidence. No ROI or scenario outputs are displayed here.
+1. **Discover:** Establish the customer's current win rate, deal volume, average deal, sales ramp, investment and evidence. No ROI or scenario outputs are displayed here.
 2. **Model:** Explore changes in selling behaviors. Adjust working assumptions and see operating measures evolve, not financial returns.
 3. **Compare:** Validate current-versus-hypothetical operating measures, investment scope, source confidence, pain, budget and decision process.
 4. **Present:** Reveal the current-to-possible operating difference and modeled incremental value, investment, net benefit and ROI. Only here do **Conservative**, **Expected** and **Upside** appear. Return to any earlier stage or use **Print**, local **JSON**, and **CSV** for follow-up.
 
-Every starting value is **fictional demonstration data**, not a prospect fact or a Sandler benchmark. An entered number is not automatically verified. The buyer and representative should confirm definitions, units, periods, and financial sources before circulating a business case.
+Every starting value is **fictional demonstration data**, not a customer fact or a Sandler benchmark. An entered number is not automatically verified. The customer and representative should confirm definitions, units, periods, and financial sources before circulating a business case.
 
 ### Why financial outcomes appear at the end
 
-Showing the full financial payoff during baseline discovery preempted the buyer's own understanding of their current situation. The visual flow now starts with prospect-entered facts, builds and reviews hypotheses, and only then reveals potential ROI. The proposed future win rate and seller ramp use explicit, transparent arithmetic; no invented zero-revenue baseline is used to exaggerate the difference. The calculations have not been changed.
+Showing the full financial payoff during baseline discovery preempted the customer's own understanding of their current situation. The visual flow now starts with customer-entered facts, builds and reviews hypotheses, and only then reveals potential ROI. The proposed future win rate and seller ramp use explicit, transparent arithmetic; no invented zero-revenue baseline is used to exaggerate the difference. The calculations have not been changed.
 
 This pacing draws on Sandler's public [selling system](https://sandler.com/sandler-selling-system/), which emphasizes pain, budget and decision process before presenting fulfillment. The four workbench stages are not a replacement for Sandler's seven-step selling methodology.
 
@@ -70,18 +70,26 @@ Discover is now organized as **four tabs within its sidebar** (Engagement, Perfo
 
 **Import options:**
 - **Saved JSON model:** workbench's versioned \`sandler-roi/1\` and \`sandler-roi/2\` snapshots.
-- **Prospect CSV:** choose a row, review automatically suggested header mappings, adjust any mapping, and explicitly apply. A downloadable blank template defines canonical column names. Only mapped fields are imported, and *every unprovided financial value is missing*, not an illustrative default. The active scenarios reset to the sample assumptions to avoid borrowing a previous client's sensitivity choices.
+- **Customer CSV:** choose a row, review automatically suggested header mappings, adjust any mapping, and explicitly apply. A downloadable blank template defines canonical column names. Only mapped fields are imported, and *every unprovided financial value is missing*, not an illustrative default. The active scenarios reset to the sample assumptions to avoid borrowing a previous client's sensitivity choices.
 - **Key/value CSV:** \`field,value\` (or a workbench-exported \`Metric,Value\` CSV with \`Input <field>\` rows) is recognized; the importer never trusts computed ROI cells or evidence flags from the exported report.
 
 **CSV is not a universal Sandler standard or CRM connector.** Real CRM exports use different columns and time windows. The mapping table is the deliberate compatibility layer. Numeric fields use ROI engine validation, with \`40%\` interpreted as **40 percentage points** rather than 0.4. Maximum input size is 2 MB, 500 data rows, and 100 columns. Client records stay in-memory until the rep applies one row; any imported source labels begin **unconfirmed**, not verified.
 
 **Brand source:** Official [Sandler branding page](https://sandler.com/branding/) and [logo kit](https://sandler.com/wp-content/uploads/2023/03/Sandler-Logo-Kit-1.zip). The on-screen wordmark currently comes unchanged from \`go.nextlevel.sandler.com\` (an affiliated Sandler training center). It requires an image request to that domain; \`referrerpolicy="no-referrer"\` prevents the containing page URL from being forwarded. The four navigation line icons are original artwork following Sandler's published circular white-line icon style. The approved official kit should replace the CDN dependency once its files are available locally.
 
+### Customer-owned language and stable data formats
+
+The workbench is designed to communicate **the customer's own business case**, not an internal prospect worksheet. Entering `John Doe` immediately changes the baseline heading to **John Doe’s starting point**, with customer-owned language throughout Model, Compare, Present, and printed summaries. Clearing the name restores **The customer’s starting point**. Individual card labels remain short for readability.
+
+Names identify the subject of the entered numbers, **not** independent data verification or a completed purchase. Illustrative and unconfirmed source notices remain visible.
+
+**Compatibility:** The internal JSON key `inputs.prospect` remains unchanged for saved model schemas `sandler-roi/1` and `sandler-roi/2`. New CSV templates and reports use `customer` / `Customer` / `Input customer`; the importer also supports legacy `Prospect` / `Input prospect` headers. No financial calculation changes. See the [copy audit](docs/design/customer-ownership-copy-audit.md).
+
 ## What it models
 
 The current version includes four independently enabled financial drivers:
 
-| Financial driver | Prospect question it explores |
+| Financial driver | Customer question it explores |
 | --- | --- |
 | **Price realization** | How much gross profit might be retained by discounting less? |
 | **Win-rate improvement** | What is the value of winning more of the same proposal opportunities? |
@@ -129,12 +137,12 @@ Our [research review of Sandler's public ROI and measurement practices](docs/res
 
 ## Data handling
 
-- The current workbench calculates in the browser. The local preview server serves static files; no prospect metrics are automatically posted to a remote service.
+- The current workbench calculates in the browser. The local preview server serves static files; no customer metrics are automatically posted to a remote service.
 - No automatic data persistence, telemetry, third-party runtime libraries, or cloud account integration is included.
-- Exported JSON and CSV files can contain sensitive commercial information. Store, share, and remove them according to the prospect's data-handling requirements.
+- Exported JSON and CSV files can contain sensitive commercial information. Store, share, and remove them according to the customer's data-handling requirements.
 - JSON imports use recognized model fields; imported text is not evaluated as executable formulas.
 - Input limits reject negative values, invalid percentages, impossible win rates and impossible ramp reductions.
-- Training outcomes depend on the prospect, market conditions, implementation, and adoption. Scenario outputs are **not guarantees, audited financial statements, or evidence of causation**.
+- Training outcomes depend on the customer, market conditions, implementation, and adoption. Scenario outputs are **not guarantees, audited financial statements, or evidence of causation**.
 
 The link to Sandler's public case study opens an external website only if selected. The application does not integrate with Sandler's Sales Performance Ecosystem or its referenced external ROI calculator.
 

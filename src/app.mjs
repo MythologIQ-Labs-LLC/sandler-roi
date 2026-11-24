@@ -2,6 +2,7 @@ import { DEFAULT_INPUTS, SCENARIOS, DEFAULT_ACTIVE, calculate, calculatePipeline
 import { BASELINE_FIELDS, EVIDENCE_STATUSES, defaultEvidence, normalizeEvidence, requiredEvidenceKeys, assessEvidence } from "./evidence.mjs";
 import { CSV_FIELDS, CSV_LABELS, CSV_TEMPLATE_HEADERS, prepareCSV, suggestMapping, mappedCSVPreview, buildCSVImport } from "./csv-import.mjs";
 import {behaviorJourney} from "./story.mjs";
+import {customerCopy} from "./customer-copy.mjs";
 
 const clone = object => JSON.parse(JSON.stringify(object));
 let inputs=clone(DEFAULT_INPUTS);
@@ -14,8 +15,8 @@ let discoveryPanel="engagement";
 let pendingCSV=null, csvMapping={};
 const $=id=>document.getElementById(id);
 const JOURNEY={
-  discover:{label:"01 / DISCOVER",title:"Start with the prospect's numbers.",
-    description:"Define the challenge together. Replace fictional examples with the buyer's own baselines and confirm where the numbers came from.",
+  discover:{label:"01 / DISCOVER",title:"Start with the customer's numbers.",
+    description:"Build the discussion around the customer's numbers, confirming each figure's source and assumptions.",
     next:"Model the opportunity"},
   model:{label:"02 / MODEL",title:"Explore changes in selling behavior.",
     description:"Test realistic changes to win rates, pricing discipline, accounts, and onboarding. The financial outcome comes at the end.",
@@ -79,7 +80,7 @@ function setStep(key){
 
 
 const inputSpecs = {
-  prospect:["Prospect / client","text","Client organization"],
+  prospect:["Customer name or organization","text","Person or organization whose figures are being modeled"],
   consultant:["Sandler representative","text","Person presenting"],
   monthlyFee:["Monthly program fee","number","USD / month"],
   programMonths:["Evaluation period","number","Months; modeled benefits are prorated"],
@@ -102,7 +103,7 @@ const inputSpecs = {
   newHires:["New sellers per year","number","Hires eligible for ramp acceleration"],
   rampMonths:["Current onboarding ramp","number","Months to full productivity"],
   annualSellerRevenue:["Annual sales per productive seller","number","USD / fully productive seller"],
-  pipelineValue:["Qualified pipeline amount","number","Prospect-specific USD, not booked revenue"],
+  pipelineValue:["Qualified pipeline amount","number","Customer-specific USD, not booked revenue"],
   pipelinePeriodWeeks:["Pipeline observation period","number","Weeks; not automatically annualized"],
   pipelineRevenueConversionPct:["Projected revenue realization","number","% of pipeline expected to close, not a case-study benchmark"],
   pipelineAttributionPct:["Scenario attribution factor","number","% allocated to this illustrative hypothesis; not proof of causality"]
@@ -291,7 +292,30 @@ function renderBehavior(id,rows){
 function render(){
   document.querySelectorAll("[data-scenario]").forEach(el=>el.setAttribute("aria-pressed",String(el.dataset.scenario===selected)));
   const scenario=scenarios[selected], result=calculate(inputs,scenario,active);
-  put("prospect-title",(inputs.prospect||"Prospect")+" · figures under review");
+  const customer=customerCopy(inputs.prospect);
+  put("step-title",{
+    discover:"Start with "+customer.possessive+" numbers.",
+    model:"Explore what could change for "+customer.subject+".",
+    compare:"Review "+customer.possessive+" figures and assumptions.",
+    present:"Present "+customer.possessive+" potential business case."
+  }[currentStep]);
+  put("baseline-title",customer.leadPossessive+" starting point");
+  put("prospect-title","Current baseline figures · source status shown below");
+  put("baseline-description","Confirm the sources of these figures before treating them as established performance.");
+  put("budget-title",customer.leadPossessive+" modeled program investment");
+  put("performance-title",customer.leadPossessive+" current performance");
+  put("pipeline-input-title",customer.leadPossessive+" pipeline context");
+  put("evidence-title","04 · Evidence and confidence for "+customer.subject);
+  put("model-ownership-title","What could improve for "+customer.subject+"?");
+  put("review-title","Review "+customer.possessive+" figures and assumptions");
+  put("review-description","Confirm the current figures, proposed improvements and investment with the customer before reviewing modeled financial results.");
+  put("reveal-heading","Where "+customer.subject+" stands. What could change.");
+  put("reveal-description","Current values are customer-entered; possible future results are modeled hypotheses, not achieved outcomes.");
+  put("scenario-owner-heading",customer.leadPossessive+" modeled financial outcomes");
+  put("present-driver-heading","What could create value for "+customer.subject+"?");
+  put("pitch-title",customer.leadPossessive+" potential business case");
+  $("scenario-table").setAttribute("aria-label",
+    customer.leadPossessive+" illustrative financial comparison of three scenarios");
   put("baseline-win",baselineText("baselineWinRatePct",v=>v.toFixed(1)+"%"));
   put("baseline-proposals",baselineText("annualProposals",v=>new Intl.NumberFormat("en-US").format(v)));
   put("baseline-deal",baselineText("avgDealValue",MONEY));
@@ -311,7 +335,7 @@ function render(){
   const proof=assessEvidence(inputs,evidence,active);
   put("evidence-summary",proof.requiredCount+" required inputs: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
     " unconfirmed, "+proof.missingSources.length+" citations missing a reference. Not independently verified.");
-  put("baseline-confidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+" unconfirmed. Review with the prospect.");
+  put("baseline-confidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+" unconfirmed. Review with the customer.");
   put("compare-evidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
     " unconfirmed, "+proof.missingSources.length+" missing references. Status is user-declared.");
   put("present-evidence","Input confidence: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
@@ -405,11 +429,11 @@ function render(){
     pipelineWarning.textContent="Sensitivity analysis only. Not added to ROI: potential overlap with win-rate, pricing and major-account drivers. Scenario allocation is not verified attribution.";
   }
 
-  const client=inputs.prospect||"the prospect";
+  const client=customer.subject;
   put("pitch-text",result.complete
     ? "For "+client+", the "+scenario.label.toLowerCase()+" scenario models "+MONEY(result.benefit)+" of financial value over "+inputs.programMonths+" months, against a "+MONEY(result.cost)+" "+(result.costMode==="fees"?"program-fee-only":"expanded user-declared")+" investment. That implies "+MONEY(result.net)+" in net modeled value and "+(result.roi===null?"an undefined ROI because cost is zero":PERCENT(result.roi)+" ROI")+". These are discussion assumptions, not historical performance."
-    : "Enter the missing financial baselines and assumptions to build a complete, prospect-specific ROI comparison. No total ROI is presented while an included driver remains unverified.");
-  put("pitch-caveat","Use prospect-confirmed baselines. "+proof.illustrative.length+" inputs illustrative and "+proof.unconfirmed.length+
+    : "Enter the missing financial baselines and assumptions to build a complete, customer-specific ROI comparison. No total ROI is presented while an included driver remains unverified.");
+  put("pitch-caveat","Use customer-confirmed baselines. "+proof.illustrative.length+" inputs illustrative and "+proof.unconfirmed.length+
     " unconfirmed. Evidence classifications are user-declared, never independently verified. Training outcomes depend on adoption and external conditions. Deduction for overlapping win-rate and major-account value: "+scenario.overlapPct+"%. Evidence notes: "+(inputs.notes||"Not provided."));
 }
 
@@ -481,7 +505,7 @@ function download(filename,content,type){
   const a=document.createElement("a");a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-function safeSlug(str){return String(str||"client").trim().toLowerCase().replace(/[^a-z0-9-]+/g,"-").slice(0,60)||"client";}
+function safeSlug(str){return String(str||"customer").trim().toLowerCase().replace(/[^a-z0-9-]+/g,"-").slice(0,60)||"customer";}
 function csvCell(value){
   const raw=String(value??"");
   // Excel/Sheets interpret certain user-provided strings as spreadsheet formulas.
@@ -495,10 +519,10 @@ document.querySelectorAll("[data-scenario]").forEach(button=>button.addEventList
 $("export-json").addEventListener("click",()=>download("sandler-roi-"+safeSlug(inputs.prospect)+".json",JSON.stringify(snapshot(),null,2),"application/json"));
 $("export-csv").addEventListener("click",()=>{
   const r=calculate(inputs,scenarios[selected],active);
-  const rows=[["Metric","Value"],["Prospect",inputs.prospect],["Representative",inputs.consultant],["Scenario",selected],["Complete",r.complete],["Cost scope",r.costMode],["Program fee cost",r.costBreakdown.feeCost],["Additional modeled costs",r.costBreakdown.additionalCost],["Program cost",r.cost],["Benefit",r.benefit],["Net benefit",r.net],["ROI percent",r.roi],["Simple payback months",r.simplePaybackMonths],["Break-even price points",r.breakEvenPricePoints],["Source notes",inputs.notes]];
+  const rows=[["Metric","Value"],["Customer",inputs.prospect],["Representative",inputs.consultant],["Scenario",selected],["Complete",r.complete],["Cost scope",r.costMode],["Program fee cost",r.costBreakdown.feeCost],["Additional modeled costs",r.costBreakdown.additionalCost],["Program cost",r.cost],["Benefit",r.benefit],["Net benefit",r.net],["ROI percent",r.roi],["Simple payback months",r.simplePaybackMonths],["Break-even price points",r.breakEvenPricePoints],["Source notes",inputs.notes]];
   for(const [name,part] of Object.entries(r.parts))rows.push([name+" value",part.value], [name+" status",part.status]);
   for(const [name,value] of Object.entries(scenarios[selected]))rows.push(["Assumption "+name,value]);
-  for(const [name,value] of Object.entries(inputs))rows.push(["Input "+name,value]);
+  for(const [name,value] of Object.entries(inputs))rows.push(["Input "+(name==="prospect"?"customer":name),value]);
   for(const [name,record] of Object.entries(evidence)){
     rows.push(["Evidence "+name+" status",record.status],["Evidence "+name+" source",record.source]);
   }

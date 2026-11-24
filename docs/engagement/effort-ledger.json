@@ -69,6 +69,17 @@
       "approval": "unreviewed",
       "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/6",
       "notes": "Approximate active AI-assisted product and engineering time for staged financial disclosure, operational comparisons, regression tests, user journey documentation and acceptance. CI runtime and unattended execution are excluded. Reconcile with owner before billing."
+    },
+    {
+      "id": "roi-2026-11-24-customer-copy",
+      "date": "2026-11-24",
+      "phase": "Customer-owned language and dynamic identity across ROI meeting workflow",
+      "hours": 0.25,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/7",
+      "notes": "Provisional AI-assisted active attention estimate for copy audit, entered-name personalization, CSV/export compatibility, and real-browser validation. No measured time claim; excludes CI/wait time. Requires owner review before billing."
     }
   ]
 }

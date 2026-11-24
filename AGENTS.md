@@ -97,3 +97,11 @@ The installed Qortara Logic Demo offers stateless read-only evaluators for **sup
 - Disabled or invalid drivers must not be shown as successful behavior change. Models remain estimates, and missing data remains missing.
 - Browser acceptance must confirm hidden financial presentation before Present and a visible scenario table, change indicators and navigation during Present. Keep prospect source evidence and caveats visible.
 - Update the [project effort ledger](docs/engagement/effort-ledger.json) in each substantive development phase.
+
+## Customer-centered presentation language
+
+- The Sandler representative operates the workbench; the external individual or organization is called the **customer** in all visible UI, CSV mapping, and reports.
+- Personalize major headings and business-case copy from the entered customer name, with a readable fallback for blanks. Use `textContent` for names, never untrusted HTML.
+- Keep persisted `inputs.prospect` and original JSON schemas stable. New CSV labels use Customer while legacy Prospect / Input prospect aliases still import correctly.
+- The name states whose figures are being modeled. It does **not** certify the figures as verified or assert that a purchase occurred. Retain source caveats and the delayed ROI reveal.
+- Test literal-name safety, live edits, name reset, blank fallback, CSV compatibility, long-name mobile layout, and Present/print.

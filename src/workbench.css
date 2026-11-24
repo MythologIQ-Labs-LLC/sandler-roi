@@ -452,3 +452,10 @@ body[data-stage="present"] .journey{display:block}
 @media(max-width:680px){
   .optional-analysis .results{grid-template-columns:1fr}
 }
+
+/* Names are user-entered: preserve full wording without horizontal overflow. */
+#baseline-title,#model-ownership-title,#review-title,#reveal-heading,
+#pitch-title,#scenario-owner-heading,#performance-title,#pipeline-input-title,
+#present-driver-heading,#budget-title{
+  overflow-wrap:anywhere;word-break:normal;min-width:0;
+}
