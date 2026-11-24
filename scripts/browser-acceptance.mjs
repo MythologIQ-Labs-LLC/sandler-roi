@@ -351,6 +351,63 @@ try{
  assert.equal(resetState.active,'engagement');
  assert.equal(resetState.timeline,'discover');
  assert.deepEqual(resetState.visible,['engagement']);
+ // Customer files: explicit directory connection, save, reopen, and JSON fallback.
+ await command('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
+ await evaluate('(()=>{const disk=new Map();const handle=name=>({kind:"file",name,'+
+  'getFile:async()=>new File([disk.get(name)],name,{type:"application/json"}),'+
+  'createWritable:async()=>({write:async data=>{disk.set(name,String(data))},close:async()=>{},abort:async()=>{}})});'+
+  'window.showDirectoryPicker=async()=>({name:"Sandler Customer Files",'+
+  'entries:async function*(){for(const name of disk.keys())yield [name,handle(name)]},'+
+  'getFileHandle:async(name,options={})=>{if(!disk.has(name)&&!options.create)throw new DOMException("Missing","NotFoundError");return handle(name)},'+
+  'removeEntry:async name=>{disk.delete(name)}});'+
+  'document.getElementById("customer-folder-connect").disabled=false;})()');
+ await evaluate('document.getElementById("customer-files-open").click()');
+ await evaluate('document.getElementById("customer-folder-connect").click()');
+ const folderReady=await until(async()=>evaluate('document.getElementById("customer-folder-hint").textContent.includes("Sandler Customer Files")'),
+  'customer folder picker connected');
+ assert.equal(folderReady,true);
+ await evaluate('(()=>{const e=document.getElementById("field-prospect");e.value="Demo Customer";'+
+  'e.dispatchEvent(new Event("input",{bubbles:true}));document.getElementById("customer-save").click()})()');
+ const saved=await until(async()=>evaluate('document.getElementById("customer-saved-list").options.length===1'),
+   'saved customer visible in selected folder');
+ assert.equal(saved,true);
+ await evaluate('(()=>{const e=document.getElementById("field-prospect");e.value="Changed In Browser";'+
+  'e.dispatchEvent(new Event("input",{bubbles:true}));document.getElementById("customer-open").click()})()');
+ const opened=await until(async()=>evaluate('document.getElementById("field-prospect").value==="Demo Customer"'),
+  'saved customer reloaded');
+ assert.equal(opened,true);
+ assert.equal(await evaluate('document.body.dataset.stage'),"discover");
+ await evaluate('document.getElementById("customer-files-open").click()');
+ await evaluate('document.getElementById("customer-download-backup").click()');
+ const backedUp=await until(async()=>{
+   const entries=await readdir(downloadDir);return entries.includes('sandler-roi-demo-customer.json');
+ },'JSON backup downloaded');
+ assert.equal(backedUp,true);
+ // Opt-in feedback contains only user-entered notes plus screen/scenario context.
+ await evaluate('document.getElementById("customer-files-close").click()');
+ await evaluate('document.getElementById("feedback-toggle").click()');
+ assert.equal(await evaluate('document.getElementById("feedback-panel").hidden'),false);
+ await evaluate('document.querySelector("[data-workbench-nav=compare]").click()');
+ await evaluate('(()=>{document.getElementById("feedback-text").value="Clarify how scenarios compare";'+
+  'document.getElementById("feedback-category").value="improvement";'+
+  'document.getElementById("feedback-add").click()})()');
+ assert.equal(await evaluate('document.getElementById("feedback-count").textContent'),"1 captured");
+ await evaluate('document.getElementById("feedback-export").click()');
+ const archiveName=await until(async()=>{
+   const entries=await readdir(downloadDir);
+   return entries.find(n=>/^sandler-development-feedback-\d{4}-\d{2}-\d{2}\.zip$/.test(n));
+ },'feedback ZIP downloaded');
+ const archive=await readFile(join(downloadDir,archiveName));
+ assert.equal(archive.readUInt32LE(0),0x04034b50,'feedback export must be ZIP');
+ const firstNameLength=archive.readUInt16LE(26);
+ assert.equal(archive.subarray(30,30+firstNameLength).toString(),"feedback.json");
+ const manifestLength=archive.readUInt32LE(18);
+ const manifest=JSON.parse(archive.subarray(30+firstNameLength,30+firstNameLength+manifestLength).toString());
+ assert.equal(manifest.notes.length,1);
+ assert.equal(manifest.notes[0].text,"Clarify how scenarios compare");
+ assert.equal(manifest.notes[0].context.stage,"compare");
+ assert.doesNotMatch(JSON.stringify(manifest),/Demo Customer|79200/,'feedback must not capture customer data');
+ await evaluate('document.getElementById("feedback-exit").click()');
  assert.deepEqual(exceptions,[],'Unexpected browser JavaScript exceptions');
  console.log('REAL BROWSER ACCEPTANCE PASS: Chromium rendered geometry, 4 tabs, desktop scroll budget, mobile overflow, Present nav.');
 }finally{
