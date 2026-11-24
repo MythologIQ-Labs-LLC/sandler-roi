@@ -20,6 +20,7 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
     n.addEventListener=(event,fn)=>{n.listeners[event]=fn};
     n.setAttribute=(key,value)=>{n.attributes[key]=String(value)};
     n.removeAttribute=key=>{delete n.attributes[key]};
+    n.focus=()=>{n.focused=true};
     n.trigger=async(event,arg)=>n.listeners[event]?.(arg??{target:n});
     n.remove=()=>{};
     n.click=()=>{if(tag==="a")downloads.push({name:n.download,blob:urls.get(n.href)});
@@ -133,16 +134,34 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(elements.get("cost-basis").textContent,"Fee-only estimate");
       assert.doesNotMatch(elements.get("roi").textContent,/9999999/);
     });
-    await t.test("Discover uses four single-panel tabs without mixing data",async()=>{
+    await t.test("Discover is a genuine one-active-panel tablist",async()=>{
       assert.equal(tabs.length,4);
-      assert.equal(tabs[0].attributes["aria-pressed"],"true");
-      assert.equal(panels[0].attributes["data-discover-active"],"true");
+      assert.equal(tabs[0].attributes["aria-selected"],"true");
+      assert.equal(tabs[0].attributes.tabindex,"0");
+      assert.equal(panels[0].hidden,false);
+      assert.ok(panels.slice(1).every(panel=>panel.hidden===true));
       const baseline=elements.get("cost").textContent;
       await tabs[2].trigger("click");
-      assert.equal(tabs[2].attributes["aria-pressed"],"true");
-      assert.equal(panels[0].attributes["data-discover-active"],"false");
-      assert.equal(panels[2].attributes["data-discover-active"],"true");
+      assert.equal(tabs[2].attributes["aria-selected"],"true");
+      assert.equal(tabs[0].attributes["aria-selected"],"false");
+      assert.equal(panels[0].hidden,true);
+      assert.equal(panels[2].hidden,false);
+      assert.equal(panels.filter(panel=>panel.hidden!==true).length,1);
       assert.equal(elements.get("cost").textContent,baseline);
+      await tabs[0].trigger("click");
+    });
+    await t.test("Discover supports keyboard Left, Right, Home and End",async()=>{
+      let prevented=0;
+      await tabs[0].trigger("keydown",{key:"ArrowRight",preventDefault:()=>prevented++});
+      assert.equal(panels[1].hidden,false);
+      assert.equal(tabs[1].focused,true);
+      await tabs[1].trigger("keydown",{key:"End",preventDefault:()=>prevented++});
+      assert.equal(panels[3].hidden,false);
+      await tabs[3].trigger("keydown",{key:"Home",preventDefault:()=>prevented++});
+      assert.equal(panels[0].hidden,false);
+      await tabs[0].trigger("keydown",{key:"ArrowLeft",preventDefault:()=>prevented++});
+      assert.equal(panels[3].hidden,false);
+      assert.equal(prevented,4);
       await tabs[0].trigger("click");
     });
     await t.test("CSV mapper previews a prospect row but does not import until Apply",async()=>{

@@ -33,18 +33,28 @@ const DISCOVERY_SECTIONS={
   pipeline:"Optional pipeline modeling. These figures are not added to ROI.",
   evidence:"Inspect sources and confidence before presenting financial claims."
 };
-function setDiscoverPanel(key){
+function setDiscoverPanel(key,{focusTab=false}={}){
   if(!Object.hasOwn(DISCOVERY_SECTIONS,key))return;
   discoveryPanel=key;
+  let activeTab;
   document.querySelectorAll("[data-discover-tab]").forEach(button=>{
-    button.setAttribute("aria-pressed",String(button.dataset.discoverTab===key));
+    const selected=button.dataset.discoverTab===key;
+    button.setAttribute("aria-selected",String(selected));
+    button.setAttribute("tabindex",selected?"0":"-1");
+    if(selected)activeTab=button;
   });
   document.querySelectorAll("[data-discover-panel]").forEach(panel=>{
-    panel.setAttribute("data-discover-active",String(panel.dataset.discoverPanel===key));
+    const selected=panel.dataset.discoverPanel===key;
+    panel.hidden=!selected;
+    // Explicit DOM state, not a CSS-only hint: a non-active panel is removed
+    // from both layout and keyboard accessibility, even before CSS loads.
+    if(selected)panel.removeAttribute("hidden");
+    else panel.setAttribute("hidden","");
   });
   put("discover-panel-hint",DISCOVERY_SECTIONS[key]);
   const aside=document.querySelector(".side");
   if(aside)aside.scrollTop=0;
+  if(focusTab)activeTab?.focus();
 }
 
 function setStep(key){
@@ -440,6 +450,19 @@ document.querySelectorAll("[data-workbench-nav]").forEach(button=>{
 });
 document.querySelectorAll("[data-discover-tab]").forEach(button=>{
   button.addEventListener("click",()=>setDiscoverPanel(button.dataset.discoverTab));
+  button.addEventListener("keydown",event=>{
+    const names=Object.keys(DISCOVERY_SECTIONS);
+    const current=names.indexOf(button.dataset.discoverTab);
+    let next;
+    if(event.key==="ArrowRight")next=names[(current+1)%names.length];
+    else if(event.key==="ArrowLeft")next=names[(current-1+names.length)%names.length];
+    else if(event.key==="Home")next=names[0];
+    else if(event.key==="End")next=names[names.length-1];
+    if(next){
+      event.preventDefault();
+      setDiscoverPanel(next,{focusTab:true});
+    }
+  });
 });
 $("step-next").addEventListener("click",()=>{
   const steps=["discover","model","compare","present"];

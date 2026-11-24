@@ -204,7 +204,7 @@ body[data-stage="discover"] .side{
 body[data-stage="discover"] .side > [data-discover-panel]{
   margin:0;box-shadow:none;border:0;border-radius:0;padding:17px
 }
-body[data-stage="discover"] .side > [data-discover-panel]:not([data-discover-active="true"]){
+body[data-stage="discover"] .side > [data-discover-panel][hidden]{
   display:none!important
 }
 body[data-stage="discover"] .side .divider{margin:13px 0}
