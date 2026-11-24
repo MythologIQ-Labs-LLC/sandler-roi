@@ -80,3 +80,11 @@ The installed Qortara Logic Demo offers stateless read-only evaluators for **sup
 - CSV input is staged until explicit Apply. Auto-map from known labels, allow manual mapping, and prohibit duplicate target column reuse.
 - Reject malformed CSV, invalid numeric units, out-of-range values and silent filling of missing fields. Treat all imported sources as unconfirmed.
 - Do not claim there is an official Sandler-wide CSV standard, or automatically import a computed ROI from spreadsheet exports.
+
+## Project effort tracking (persistent)
+
+- Read [docs/engagement/effort-ledger.md](docs/engagement/effort-ledger.md) before reporting time spent. JSON rows are the source of truth; run `npm run effort` to calculate the cumulative total.
+- With each substantive engineering/refinement PR, append a single, nonduplicative entry in `docs/engagement/effort-ledger.json` with estimated active effort, basis, confidence and a PR/commit link. If no reliable estimate exists, state that and leave it unmeasured instead of manufacturing labor hours.
+- Keep retrospective estimates unreviewed until the owner confirms them. Do not count GitHub Actions runtime, model generation, elapsed time between commits, waiting or parallel work as billable labor automatically.
+- Do not place hourly rates, commercial terms or private customer information in this public repository. Estimated effort is not an invoice.
+- Include the cumulative effort reading and any unresolved estimates in PR handoff notes. For documentation-only administration, explain why no new billable-effort entry was added.

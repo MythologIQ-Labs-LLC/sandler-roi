@@ -1,0 +1,63 @@
+{
+  "schema": "sandler-roi/effort-ledger/1",
+  "updated_on": "2026-11-24",
+  "purpose": "Provisional estimate of active human-directed, AI-assisted build/refinement effort. Not a timer, time sheet, invoice or approval of billable hours.",
+  "reporting_unit": "hours",
+  "entries": [
+    {
+      "id": "roi-2026-11-23-initial",
+      "date": "2026-11-23",
+      "phase": "Initial product discovery, financial engine, scenario UI and early revisions",
+      "hours": 2,
+      "method": "owner-ballpark",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1",
+      "notes": "Backfilled from the owner's earlier 'couple of hours' characterization of work accomplished before the later Pages and UX iterations; not stopwatch time. PR #1 also contains later release work, counted in the next row only."
+    },
+    {
+      "id": "roi-2026-11-24-pages",
+      "date": "2026-11-24",
+      "phase": "GitHub Pages publication and real Actions validation",
+      "hours": 0.15,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1",
+      "notes": "Approximate hands-on development/inspection after initial prototype, excluding prior build and unattended CI wait; GitHub timestamps establish sequence, not labor."
+    },
+    {
+      "id": "roi-2026-11-24-csv-tabs",
+      "date": "2026-11-24",
+      "phase": "Discovery sections, import mapping, Sandler identity, accessibility and QA",
+      "hours": 0.2,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/2",
+      "notes": "Short AI-assisted refinement pass; includes review of code and test results, excludes automation runtime."
+    },
+    {
+      "id": "roi-2026-11-24-scroll",
+      "date": "2026-11-24",
+      "phase": "Discover long-scroll remediation and real-browser acceptance",
+      "hours": 0.25,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/3",
+      "notes": "Based on interaction window and repeated manual diagnosis of Chromium results, not the duration of Actions."
+    },
+    {
+      "id": "roi-2026-11-24-compact",
+      "date": "2026-11-24",
+      "phase": "Compact visual hierarchy, widened editor, screenshot review and release",
+      "hours": 0.15,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/4",
+      "notes": "Approximation for final compact-layout iteration; not a representation of conventional manual-coding hours."
+    }
+  ]
+}

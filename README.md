@@ -22,6 +22,10 @@
 - [Architecture and tests](#architecture-and-tests)
 - [Current limits](#current-limits)
 
+## Project development effort
+
+Approximate build and refinement effort is tracked in the [public project effort ledger](docs/engagement/effort-ledger.md), with an auditable entry for each work phase. Run `npm run effort` to see the current calculated total. The entries are provisional until reviewed; they are **not** an invoice or an assertion of approved billable hours. Hourly rates and commercial terms are deliberately excluded from this public repository.
+
 ## Quick start
 
 **Hosted prototype:** [Open the Sandler ROI Workbench on GitHub Pages](https://mythologiq-labs-llc.github.io/sandler-roi/). No installation or sign-in is required. The initial prospect and financial figures are fictional; **do not enter confidential client information into a public demo** without confirming your organization's data-handling rules.
