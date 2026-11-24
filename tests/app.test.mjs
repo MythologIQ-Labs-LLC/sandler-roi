@@ -42,6 +42,7 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
   for(const match of html.matchAll(/id="([^"]+)"/g)){
     const el=createNode("div");el.id=match[1];
   }
+  let lastCompletedBenefit;
   const originalDocument=globalThis.document;
   const originalWindow=globalThis.window;
   const originalCreate=URL.createObjectURL,originalRevoke=URL.revokeObjectURL;
@@ -67,6 +68,8 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       await buttons[0].trigger("click");
       assert.equal(buttons[0].attributes["aria-pressed"],"true");
       assert.equal(elements.get("print-scenario").textContent,"Conservative");
+      lastCompletedBenefit=elements.get("benefit").textContent;
+      assert.notEqual(lastCompletedBenefit,"Incomplete");
     });
     await t.test("expanded cost remains incomplete until every extra is stated",async()=>{
       const select=elements.get("cost-mode-select");select.value="expanded";
@@ -74,7 +77,6 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(elements.get("roi").textContent,"Incomplete");
     });
     await t.test("expanded cost entries update fee-only amount without modifying benefits",async()=>{
-      const before=elements.get("benefit").textContent;
       const fields={trainingHoursPerPerson:"20",participantHourlyCost:"50",
         additionalMonthlyCost:"100",travelCost:"2000",technologyCost:"3000",
         adminCost:"4000",otherCost:"1000"};
@@ -82,7 +84,7 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
         const el=elements.get("field-"+name);el.value=value;await el.trigger("input");
       }
       assert.equal(elements.get("cost").textContent,"$107,200");
-      assert.equal(elements.get("benefit").textContent,before);
+      assert.equal(elements.get("benefit").textContent,lastCompletedBenefit);
       assert.notEqual(elements.get("roi").textContent,"Incomplete");
     });
     await t.test("self-declared finance review cannot authenticate evidence",async()=>{
