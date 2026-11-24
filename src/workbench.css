@@ -488,3 +488,72 @@ body[data-stage="present"] .journey{display:block}
 #present-driver-heading,#budget-title{
   overflow-wrap:anywhere;word-break:normal;min-width:0;
 }
+
+
+/* Customer work is distinct from CSV data exchange and report export. */
+.toolbar-menu-content{width:min(250px,calc(100vw - 28px));max-height:min(78vh,620px);overflow-y:auto}
+.toolbar-group-label{
+  font-size:10px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);padding:10px 7px 3px;border-top:1px solid var(--hairline)
+}
+.toolbar-group-label:first-child{border-top:0;padding-top:5px}
+.customer-files-dialog{
+  border:1px solid var(--hairline);border-radius:15px;padding:24px;
+  width:min(660px,calc(100vw - 24px));max-height:88vh;overflow:auto;
+  box-shadow:0 24px 60px rgba(24,35,64,.22);color:var(--ink);background:#fff
+}
+.customer-files-dialog::backdrop{background:rgba(10,19,47,.54)}
+.customer-files-heading,.customer-folder-actions,.customer-file-actions{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap
+}
+.customer-files-heading{justify-content:space-between;margin-bottom:12px}
+.customer-files-heading h2{color:var(--stable);margin:0;font-size:23px}
+.customer-files-dialog .section-note{margin:10px 0;font-size:12px}
+.customer-files-label{display:block;font-weight:750;font-size:13px;margin:15px 0 6px}
+#customer-saved-list{
+  display:block;width:100%;min-height:132px;padding:9px;border-radius:9px;
+  border:1px solid var(--hairline);background:#f7f9fc;color:var(--ink);font:inherit
+}
+#customer-saved-list option{padding:6px}
+.customer-file-actions{margin:13px 0}
+.customer-backup{border-top:1px solid var(--hairline);padding-top:14px;margin-top:16px}
+.customer-backup .btn{margin:4px 6px 2px 0}
+.customer-files-status{font-size:12px;color:var(--stable);min-height:20px;font-weight:650}
+.feedback-panel{
+  position:fixed;z-index:70;top:12px;right:12px;width:min(360px,calc(100vw - 24px));
+  max-height:calc(100vh - 24px);overflow-y:auto;background:#fff;color:var(--ink);
+  border:1px solid var(--hairline);border-radius:14px;
+  box-shadow:0 14px 48px rgba(18,28,68,.24);padding:17px;display:grid;gap:10px
+}
+.feedback-panel-heading,.feedback-review-heading{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.feedback-panel-heading h2{font-size:18px;color:var(--stable);margin:0}
+.feedback-panel label{font-size:12px;font-weight:750;color:var(--stable)}
+.feedback-panel select,.feedback-panel textarea{
+  width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--hairline);
+  border-radius:8px;background:#fff;color:var(--ink);font:inherit;padding:9px
+}
+.feedback-panel textarea{resize:vertical;font-size:13px}
+.feedback-panel .section-note{font-size:11px;margin:0;line-height:1.45}
+.feedback-context{background:#f3f6fc;padding:9px;border-radius:8px;font-size:12px;display:grid;gap:4px}
+.feedback-context span{overflow-wrap:anywhere}
+.feedback-check{display:flex;gap:8px;align-items:start;font-weight:500!important}
+.feedback-check input{margin:2px 0 0}
+.feedback-record-controls{display:flex;gap:6px;flex-wrap:wrap}
+.feedback-record-controls .btn{font-size:11px;padding:7px 9px}
+#feedback-audio-preview{width:100%;max-height:48px}
+.feedback-review{border-top:1px solid var(--hairline);padding-top:10px}
+.feedback-review-heading{font-size:12px}
+#feedback-list{display:grid;gap:7px;margin-top:8px;max-height:170px;overflow-y:auto}
+.feedback-item{border:1px solid var(--hairline);background:#fafbff;border-radius:8px;padding:8px}
+.feedback-item strong{display:block;font-size:11px;overflow-wrap:anywhere}
+.feedback-item p{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}
+.feedback-item .btn{padding:4px 8px;font-size:11px}
+#feedback-status{min-height:18px;font-size:11px;color:var(--stable);margin:0}
+#feedback-toggle[aria-pressed="true"]{background:var(--fresh);color:var(--stable)}
+@media(max-width:600px){
+  .customer-files-dialog{padding:16px}
+  .feedback-panel{top:0;right:0;width:100vw;max-height:100dvh;height:100dvh;border-radius:0}
+}
+@media print{
+  .customer-files-dialog,.feedback-panel,#feedback-toggle{display:none!important}
+}
