@@ -113,6 +113,17 @@
       "approval": "unreviewed",
       "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/10",
       "notes": "Approximate AI-assisted active effort to remove outdated Present-only export hiding, visually prioritize final-stage handoff and verify actual JSON/CSV downloads in Chromium. CI execution and waiting excluded; owner confirmation required before billing."
+    },
+    {
+      "id": "roi-2026-11-24-reset-stage",
+      "date": "2026-11-24",
+      "phase": "Reset example returns to Discover and Engagement",
+      "hours": 0.05,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/11",
+      "notes": "Small, provisional AI-assisted change to restore the initial UI stage and Engagement tab on confirmed reset; tests and visual validation. Excludes CI and waiting. No stopwatch measurement."
     }
   ]
 }

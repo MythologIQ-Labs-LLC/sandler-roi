@@ -604,7 +604,12 @@ $("print").addEventListener("click",()=>{setStep("present");window.print();});
 $("reset").addEventListener("click",()=>{
   if(!window.confirm("Replace all current inputs and assumptions with the illustrative example?"))return;
   inputs=clone(DEFAULT_INPUTS);evidence=defaultEvidence(inputs);scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
-  renderFields();renderAssumptions();render();
+  presentationSeen=false;
+  priorStep="compare";
+  renderFields();
+  renderAssumptions();
+  setDiscoverPanel("engagement");
+  setStep("discover");
 });
 $("import").addEventListener("click",()=>$("import-file").click());
 $("import-csv").addEventListener("click",()=>$("import-csv-file").click());

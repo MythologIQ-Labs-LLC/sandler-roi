@@ -335,6 +335,22 @@ try{
   'input.value="John Doe";input.dispatchEvent(new Event("input",{bubbles:true}));})()');
  const mobileShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'discover-mobile.png'),Buffer.from(mobileShot.data,'base64'));
+ // From a later stage, Reset returns to the beginning of the customer's journey.
+ await evaluate('document.querySelector("[data-discover-tab=evidence]").click()');
+ await evaluate('document.querySelector("[data-workbench-nav=compare]").click()');
+ await evaluate('window.confirm=()=>true;document.getElementById("reset").click()');
+ const resetState=await evaluate('(()=>({stage:document.body.dataset.stage,'+
+  'customer:document.getElementById("field-prospect").value,'+
+  'cost:document.getElementById("cost").textContent,'+
+  'active:document.querySelector("[data-discover-tab][aria-selected=true]")?.dataset.discoverTab,'+
+  'timeline:document.getElementById("journey-timeline").dataset.current,'+
+  'visible:[...document.querySelectorAll("[data-discover-panel]")].filter(p=>!p.hidden).map(p=>p.dataset.discoverPanel)}))()');
+ assert.equal(resetState.stage,'discover');
+ assert.equal(resetState.customer,'Sample customer');
+ assert.equal(resetState.cost,'$79,200');
+ assert.equal(resetState.active,'engagement');
+ assert.equal(resetState.timeline,'discover');
+ assert.deepEqual(resetState.visible,['engagement']);
  assert.deepEqual(exceptions,[],'Unexpected browser JavaScript exceptions');
  console.log('REAL BROWSER ACCEPTANCE PASS: Chromium rendered geometry, 4 tabs, desktop scroll budget, mobile overflow, Present nav.');
 }finally{

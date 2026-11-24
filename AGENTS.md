@@ -128,3 +128,9 @@ The installed Qortara Logic Demo offers stateless read-only evaluators for **sup
 - **Files & export must remain visible and functional in Present**, where saving the model, exporting a customer CSV and printing the case are most relevant. The hidden-on-Present rule was a regression in the original presentation CSS, not a product decision.
 - In Present, keep the export control prominent; hiding Reset while preserving the existing Exit presentation action is acceptable. Print should exclude the toolbar itself.
 - Real-browser acceptance must open Files & export while on Present and verify both actual JSON and CSV downloads for the selected customer/scenario. Check visibility and horizontal overflow on mobile.
+
+## Reset example navigation contract
+
+- After **confirming** Reset example, restore demo data and scenarios, and return to **Discover → Engagement** with the timeline at Discover.
+- Canceling reset must preserve all inputs, selection and current stage. The Reset control remains hidden during Present under the existing UI decision.
+- Regression tests must cover confirmed and canceled resets plus a real-browser reset from a later stage.
