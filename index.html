@@ -141,12 +141,17 @@
     <div class="top-actions no-print">
       <button type="button" id="reset" class="btn btn-dark">Reset example</button>
       <button type="button" id="present" class="btn btn-primary" aria-pressed="false">Present case</button>
-      <details class="toolbar-menu" id="file-menu"><summary class="btn btn-dark">Files &amp; export</summary><div class="toolbar-menu-content">
-        <button type="button" id="import" class="btn">Import saved JSON</button><input type="file" id="import-file" accept=".json,application/json" hidden>
-        <button type="button" id="import-csv" class="btn">Import CSV with mapping</button><input type="file" id="import-csv-file" accept=".csv,text/csv" hidden>
+      <button type="button" id="feedback-toggle" class="btn btn-dark" aria-pressed="false" aria-controls="feedback-panel">Feedback mode</button>
+      <details class="toolbar-menu" id="file-menu"><summary class="btn btn-dark">Work &amp; reports</summary><div class="toolbar-menu-content">
+        <div class="toolbar-group-label">Saved customer work</div>
+        <button type="button" id="customer-files-open" class="btn">Customer files</button>
+        <button type="button" id="import" class="btn">Open JSON backup</button><input type="file" id="import-file" accept=".json,application/json" hidden>
+        <button type="button" id="export-json" class="btn">Download JSON backup</button>
+        <div class="toolbar-group-label">Data exchange</div>
+        <button type="button" id="import-csv" class="btn">Import customer CSV</button><input type="file" id="import-csv-file" accept=".csv,text/csv" hidden>
         <button type="button" id="csv-template" class="btn">Download blank CSV template</button>
-        <button type="button" id="export-json" class="btn">Save JSON model</button>
         <button type="button" id="export-csv" class="btn">Export CSV</button>
+        <div class="toolbar-group-label">Customer report</div>
         <button type="button" id="print" class="btn">Print summary</button>
       </div></details>
     </div>
@@ -347,6 +352,64 @@
     </main>
   </div>
 
+  <dialog id="customer-files-dialog" class="customer-files-dialog" aria-labelledby="customer-files-title">
+    <div class="customer-files-heading">
+      <div><div class="eyebrow">Saved customer work</div><h2 id="customer-files-title">Customer files</h2></div>
+      <button type="button" class="btn" id="customer-files-close">Close</button>
+    </div>
+    <p class="section-note">Choose a folder on your own computer to save and reopen customer work. Nothing is uploaded. Browser permission is required each time you connect.</p>
+    <div class="customer-folder-actions">
+      <button type="button" class="btn btn-primary" id="customer-folder-connect">Choose customer folder</button>
+      <button type="button" class="btn" id="customer-refresh">Refresh list</button>
+    </div>
+    <p class="section-note" id="customer-folder-hint">No folder connected yet.</p>
+    <label for="customer-saved-list" class="customer-files-label">Saved customers</label>
+    <select id="customer-saved-list" size="5" aria-label="Saved customer files"></select>
+    <div class="customer-file-actions">
+      <button type="button" class="btn btn-primary" id="customer-save" disabled>Save current customer</button>
+      <button type="button" class="btn" id="customer-open" disabled>Open selected customer</button>
+      <button type="button" class="btn" id="customer-remove" disabled>Delete selected file</button>
+    </div>
+    <div class="customer-backup">
+      <strong>JSON backup and recovery</strong>
+      <p class="section-note">Use these when folder access is unavailable or to move saved work to another device.</p>
+      <button type="button" class="btn" id="customer-download-backup">Download JSON backup</button>
+      <button type="button" class="btn" id="customer-open-backup">Open JSON backup</button>
+    </div>
+    <p class="section-note">Customer files are plain JSON, not encrypted. Use only an approved, secure device and location for confidential customer data.</p>
+    <p id="customer-files-status" role="status" aria-live="polite" class="customer-files-status"></p>
+  </dialog>
+  <aside id="feedback-panel" class="feedback-panel no-print" aria-label="Development feedback" hidden>
+    <div class="feedback-panel-heading">
+      <div><div class="eyebrow">Development only</div><h2>Feedback mode</h2></div>
+      <button type="button" id="feedback-exit" class="btn" aria-label="Close feedback mode">Close</button>
+    </div>
+    <p class="section-note">Walk through the tool and capture suggestions as they occur. Nothing is recorded or sent automatically.</p>
+    <div class="feedback-context"><strong>Current screen</strong><span id="feedback-location"></span></div>
+    <label for="feedback-category">What type of feedback?</label>
+    <select id="feedback-category">
+      <option value="improvement">Improvement idea</option>
+      <option value="positive">Working well</option>
+      <option value="issue">Issue or confusion</option>
+    </select>
+    <label for="feedback-text">Your feedback</label>
+    <textarea id="feedback-text" rows="4" maxlength="5000" placeholder="What's working? What would you change?"></textarea>
+    <label class="feedback-check"><input type="checkbox" id="feedback-include-context" checked> Include current screen and scenario (no customer figures)</label>
+    <div class="feedback-record-controls">
+      <button type="button" class="btn" id="feedback-record">Record voice</button>
+      <button type="button" class="btn" id="feedback-stop" disabled>Stop recording</button>
+      <button type="button" class="btn" id="feedback-clear-audio" disabled>Remove voice</button>
+    </div>
+    <audio id="feedback-audio-preview" controls hidden aria-label="Review voice note"></audio>
+    <button type="button" id="feedback-add" class="btn btn-primary">Add feedback</button>
+    <div class="feedback-review">
+      <div class="feedback-review-heading"><strong>Captured notes</strong><span id="feedback-count">0 captured</span></div>
+      <div id="feedback-list" aria-live="polite"></div>
+    </div>
+    <button type="button" id="feedback-export" class="btn btn-primary" disabled>Download feedback package</button>
+    <p class="section-note">Exports one ZIP with the notes and optional audio clips. Review the files before sharing with the development team. Feedback is not saved automatically.</p>
+    <p id="feedback-status" role="status" aria-live="polite"></p>
+  </aside>
   <dialog id="csv-map-dialog" class="csv-map-dialog" aria-labelledby="csv-map-title" aria-describedby="csv-map-description">
     <div class="csv-modal-head">
       <div>
