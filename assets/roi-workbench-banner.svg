@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 288" role="img" aria-labelledby="title description">
+<title id="title">ROI Workbench</title>
+<desc id="description">A schematic showing four value drivers flowing into a calculated return on investment.</desc>
+<defs>
+<linearGradient id="back" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#112846"/><stop offset="1" stop-color="#1e3f60"/></linearGradient>
+<linearGradient id="line" x1="0" x2="1"><stop offset="0" stop-color="#67c8da"/><stop offset="1" stop-color="#efb975"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="1200" height="288" rx="18" fill="url(#back)"/>
+<rect x="32" y="32" width="5" height="224" rx="2" fill="#e9ae6e"/>
+<text x="68" y="96" font-size="14" font-family="Arial, sans-serif" font-weight="bold" letter-spacing="3" fill="#e9ae6e">PROSPECT-LED SALES VALUE MODELING</text>
+<text x="68" y="155" font-size="50" font-family="Arial, sans-serif" font-weight="bold" letter-spacing="-1" fill="#ffffff">ROI WORKBENCH</text>
+<text x="68" y="199" font-size="19" font-family="Arial, sans-serif" fill="#b9d1e2">Adjust assumptions. See the math. Explain the tradeoffs.</text>
+<text x="68" y="243" font-size="13" font-family="Arial, sans-serif" fill="#a6bbc9">Illustrative scenarios  |  No guaranteed financial outcome</text>
+<g transform="translate(735 38)">
+<rect x="0" y="0" width="410" height="212" rx="12" fill="#12283f" stroke="#3c637a"/>
+<path d="M24 170H384" stroke="#38536d" stroke-width="2"/>
+<path d="M24 122H384" stroke="#314c65" stroke-width="1" stroke-dasharray="6 6"/>
+<rect x="35" y="129" width="60" height="41" rx="5" fill="#386a83"/>
+<rect x="119" y="104" width="60" height="66" rx="5" fill="#3a8196"/>
+<rect x="203" y="75" width="60" height="95" rx="5" fill="#58a1aa"/>
+<rect x="287" y="48" width="60" height="122" rx="5" fill="#c69d69"/>
+<path d="M65 120L148 94L233 64L315 32" stroke="url(#line)" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="65" cy="120" r="5" fill="#67c8da"/><circle cx="148" cy="94" r="5" fill="#67c8da"/>
+<circle cx="233" cy="64" r="5" fill="#67c8da"/><circle cx="315" cy="32" r="7" fill="#efb975"/>
+<text x="35" y="194" fill="#b9d1e2" font-family="Arial, sans-serif" font-size="12">Pricing</text>
+<text x="125" y="194" fill="#b9d1e2" font-family="Arial, sans-serif" font-size="12">Wins</text>
+<text x="207" y="194" fill="#b9d1e2" font-family="Arial, sans-serif" font-size="12">Accounts</text>
+<text x="294" y="194" fill="#b9d1e2" font-family="Arial, sans-serif" font-size="12">Ramp</text>
+</g>
+</svg>

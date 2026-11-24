@@ -1,81 +1,140 @@
 # Sandler ROI Workbench
 
-A lightweight, **rep-led sales conversation tool** for a Sandler consultant to demonstrate the *potential* financial value of sales training and coaching services to a prospective client.
+![Sandler ROI Workbench banner showing four financial value drivers converging toward a projected outcome](assets/roi-workbench-banner.svg)
 
-**Status:** Early working prototype. Independent illustrative financial modeling tool, **not** an official Sandler publication, assurance, performance claim, or guaranteed return.
+[![Prototype](https://img.shields.io/badge/status-unreleased_prototype-b07937)](https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1)
+[![Node 20+](https://img.shields.io/badge/Node.js-20%2B-3e885b)](https://github.com/MythologIQ-Labs-LLC/sandler-roi/blob/feat/sandler-roi-workbench-mvp/package.json)
 
-**Architecture and contributor guidance:** [Architecture and model contracts](docs/ARCHITECTURE.md) · [Agent instructions](AGENTS.md). This is a rep-led illustrative demo, not an automated ROI attestation.
+**A buyer-led financial conversation, not a promise of ROI.** When a prospect asks whether sales training could pay for itself, a Sandler representative can use this browser-based tool to test the economics with the prospect's own numbers. Enter a few baselines, explore different improvements, and explain how the modeled benefits compare with the program's cost.
 
-## Run it
+**Status:** Unreleased internal prototype on [PR #1](https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1), not a deployed Sandler product or an independently verified financial forecast. The project-specific illustration is original to this repository; it is not Sandler corporate branding or evidence of endorsement.
 
-Requires Node.js **20+**. No packages need to be installed.
+## On this page
 
-```bash
+- [Quick start](#quick-start)
+- [Use it in a prospect meeting](#use-it-in-a-prospect-meeting)
+- [What it models](#what-it-models)
+- [How calculations work](#how-calculations-work)
+- [Validation and evidence](#validation-and-evidence)
+- [Data handling](#data-handling)
+- [Architecture and tests](#architecture-and-tests)
+- [Current limits](#current-limits)
+
+## Quick start
+
+**Access:** This repository is currently internal; you need an account with repository read permission. Install **Node.js 20 or later** and Git. No \`npm install\`, cloud account, database, API key, or external runtime dependency is needed for this prototype.
+
+From a shell with access to the repository:
+
+\`\`\`bash
+git clone https://github.com/MythologIQ-Labs-LLC/sandler-roi.git
+cd sandler-roi
+git switch feat/sandler-roi-workbench-mvp
 npm start
-```
+\`\`\`
 
-Open **http://127.0.0.1:4173**. This starts a local-only server bound to `127.0.0.1`; the application has no cloud services, authentication, cookies, analytics, or external network dependencies.
+**Expected first result:** The local server prints \`Sandler ROI Workbench: http://127.0.0.1:4173\`. Open [http://127.0.0.1:4173](http://127.0.0.1:4173) in a modern browser. You should see an **Example prospect (illustrative)**, a **$79,200 program cost** based on fictional starting inputs, scenario controls, and financial result cards. Change the monthly fee or select a different scenario to see the results recalculate.
 
-Run tests with:
+The preview server binds to \`127.0.0.1\`. Opening \`index.html\` directly using \`file://\` is not supported because the browser restricts JavaScript modules loaded from local files. The first-use path and visible result are **source-inspected**, not independently browser-verified in this README review.
 
-```bash
+## Use it in a prospect meeting
+
+1. **Discover:** Ask the prospect for its commercial baseline, training investment, sales process constraints, and the figures it can confirm.
+2. **Model:** Include only relevant financial drivers, then adjust **Conservative**, **Expected**, and **Upside** hypotheses in the meeting.
+3. **Explain:** Show each modeled contribution, program cost, net value, ROI and simple payback alongside the assumptions driving them.
+4. **Present:** Select **Present** to hide the worksheet while discussing results; use **Print** for a summary. Save a model as local **JSON** or export **CSV** for follow-up.
+
+Every starting value is **fictional demonstration data**, not a prospect fact or a Sandler benchmark. An entered number is not automatically verified. The buyer and representative should confirm definitions, units, periods, and financial sources before circulating a business case.
+
+## What it models
+
+The current version includes four independently enabled financial drivers:
+
+| Financial driver | Prospect question it explores |
+| --- | --- |
+| **Price realization** | How much gross profit might be retained by discounting less? |
+| **Win-rate improvement** | What is the value of winning more of the same proposal opportunities? |
+| **Major accounts** | What might additional qualified national or multi-site accounts contribute? |
+| **Faster onboarding** | How much extra productive selling time could shorter new-hire ramps unlock? |
+
+A separate **optional pipeline bridge** accepts qualified pipeline, observation weeks, assumed conversion, gross margin, and a scenario attribution factor. It estimates potential closed revenue and gross profit, but **never adds that bridge to the four-driver ROI total** because the same deals may already be counted elsewhere. Missing pipeline figures do not invalidate the main ROI model.
+
+Sandler's [Revelry GTM case study](https://sandler.com/case-study/revelry-gtm/) appears as **illustrative reference context only**, not a source of preset ROI effects. See the [case-study evidence mapping](docs/case-studies/revelry-gtm.md).
+
+## How calculations work
+
+The model estimates **incremental gross-profit contribution**, not total sales revenue or verified cash flow. All percentage inputs are shown as 0–100 in the interface and divided by 100 in calculations. **Percentage-point improvements are different from relative percent changes.**
+
+The current engine scales annual baseline flows by \`programMonths / 12\` as a simplifying assumption. It does not model calendar-specific sales cycles, staggered hiring, delayed wins, or month-by-month benefit realization.
+
+| Driver | Contribution formula for the evaluation period |
+| --- | --- |
+| Price realization | Discount-affected annual revenue × price improvement points / 100 × price profit-flow rate × realization rate × period years |
+| Proposal wins | Annual proposals × win-rate improvement points / 100 × average deal revenue × gross margin × realization rate × period years |
+| Major accounts | New accounts × annual revenue/account × first-year revenue capture × gross margin × realization rate × period years |
+| Faster onboarding | New hires × saved ramp months / 12 × productive seller annual revenue × gross margin × realization rate × period years |
+
+The model uses a configurable overlap deduction on **win-rate and major-account** contributions. This is a rough sensitivity control; it is **not** a complete attribution method. Price retention and onboarding can also overlap with other value sources.
+
+- **Modeled benefit** = included contributions, less the implemented overlap deduction.
+- **Program cost** = monthly fee × program months + one-time setup fee.
+- **Net value** = modeled benefit − program cost.
+- **ROI (%)** = net value ÷ program cost × 100, when cost is positive.
+- **Benefit-to-cost multiple** = modeled benefit ÷ program cost, when cost is positive.
+- **Simple payback** = program cost ÷ (modeled benefit ÷ program months), assuming even monthly benefit. This is **not** verified cash-flow payback.
+- **Break-even additional price points** = remaining program cost after other modeled drivers ÷ eligible, contribution-adjusted discounted revenue × 100, where the pricing driver and denominator are valid.
+
+Missing or invalid inputs for an **included** driver make total ROI **incomplete** rather than silently counting that benefit as zero. Disabling a driver is an explicit choice to exclude it.
+
+For exact assumptions, known horizon/attribution limitations, and component contracts, see [Architecture and model contracts](docs/ARCHITECTURE.md).
+
+## Validation and evidence
+
+This prototype helps a representative **project** potential value. It does **not** certify achieved financial return or prove that Sandler caused a result. A client-reported baseline, validated financial extract, skill adoption score, and attributable profit gain represent different levels of evidence.
+
+Our [research review of Sandler's public ROI and measurement practices](docs/research/sandler-roi-validation-2026.md) distinguishes Sandler's published **Sales Performance Ecosystem** from independent financial ROI verification. Sandler publicly describes Baseline → Improve → Reassess → Reinforce → Retain → Optimize, but we have **not** inspected an official Sandler ROI calculation specification or its third-party-operated calculator.
+
+**Verification status:** Source code and tests are committed on [PR #1](https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1). GitHub Actions has reported failures with unavailable execution logs in prior inspections. A passing full repository test suite, browser acceptance, and human financial review have **not been established**; do not treat the PR as merge-ready merely because code exists.
+
+## Data handling
+
+- The current workbench calculates in the browser. The local preview server serves static files; no prospect metrics are automatically posted to a remote service.
+- No automatic data persistence, telemetry, third-party runtime libraries, or cloud account integration is included.
+- Exported JSON and CSV files can contain sensitive commercial information. Store, share, and remove them according to the prospect's data-handling requirements.
+- JSON imports use recognized model fields; imported text is not evaluated as executable formulas.
+- Input limits reject negative values, invalid percentages, impossible win rates and impossible ramp reductions.
+- Training outcomes depend on the prospect, market conditions, implementation, and adoption. Scenario outputs are **not guarantees, audited financial statements, or evidence of causation**.
+
+The link to Sandler's public case study opens an external website only if selected. The application does not integrate with Sandler's Sales Performance Ecosystem or its referenced external ROI calculator.
+
+## Architecture and tests
+
+| Path | Purpose |
+| --- | --- |
+| [\`src/roi.mjs\`](src/roi.mjs) | Deterministic calculations, numeric input validation, and pipeline bridge |
+| [\`src/app.mjs\`](src/app.mjs) | User inputs, scenarios, visualization, exports, and presentation controls |
+| [\`index.html\`](index.html) | Browser page and responsive/print layout |
+| [\`server.mjs\`](server.mjs) | Restricted loopback static preview server |
+| [\`tests/roi.test.mjs\`](tests/roi.test.mjs) | Financial formula and boundary-case regression tests |
+| [\`AGENTS.md\`](AGENTS.md) | Repository-local contributor instructions, not an approved corporate policy |
+| [Architecture and model contracts](docs/ARCHITECTURE.md) | Units, formula boundaries, risks and future design decisions |
+| [Sandler measurement research](docs/research/sandler-roi-validation-2026.md) | Corporate/vendor claims versus recommended verification controls |
+
+From the feature-branch checkout, run:
+
+\`\`\`bash
 npm test
-```
+\`\`\`
 
-Opening `index.html` with a `file://` URL is not supported because browser security restricts JavaScript module loading from local files; use the local server above.
+This invokes the repository's Node.js test suite. It does not run a browser usability test or independently certify the financial assumptions. The repository uses no package dependencies in its current \`package.json\`.
 
-## How a Sandler rep uses it
+## Current limits
 
-1. **Discover**: enter the prospect, training investment, team size, and confirmed commercial performance baselines.
-2. **Model**: include or exclude four relevant value drivers, then adjust the conservative, expected and upside scenarios in the meeting.
-3. **Explain**: compare cost versus modeled benefit, review source and assumption notes, and show contribution by each driver.
-4. **Present**: use **Present** to hide the worksheet during the discussion; use **Print** for a clean meeting summary. Export an editable JSON model or CSV snapshot for follow-up.
+- Four financial driver formulas are implemented; **user-authored drivers and a general KPI formula registry are not**.
+- Price effects assume no lost deal volume unless adjusted by user-defined realization assumptions.
+- First-year national-account capture, annual hiring counts, multi-year periods and cross-driver attribution require more modeling.
+- Paid training time, travel, software, and indirect implementation costs are **not** included in the current program-cost formula.
+- Simple payback assumes a uniform benefit run rate; a measured monthly cash-flow ledger does not exist.
+- Verified realized ROI, CRM/SPE integration, authenticated user accounts, formal data provenance and production deployment are outside this version.
 
-Every starting number is *fictional example data*, not an asserted COIT or Sandler benchmark. Blank an unverified field to see the missing-input warning. The calculator refuses to present a complete ROI when an enabled driver lacks required inputs.
-
-
-## Optional pipeline opportunity bridge
-
-A separate, prospect-specific pipeline sensitivity model accepts **qualified pipeline value**, the **number of weeks observed**, **expected percent of pipeline dollars converting to closed revenue**, commercial **gross margin**, and a configurable **scenario attribution factor**. It displays modeled closed revenue, gross profit and scenario-allocated gross profit. This analysis is deliberately **not added to modeled ROI**, because it may overlap with win-rate and major-account benefits. Missing pipeline inputs do not invalidate the main four-driver ROI model.
-
-The workbench displays the [Sandler Revelry GTM case study](https://sandler.com/case-study/revelry-gtm/) as optional reference context, not as a prospect default, forecast, or reported ROI. See [source analysis and evidence boundaries](docs/case-studies/revelry-gtm.md).
-
-## Transparent financial formulas
-
-Evaluation horizon = configured program months. Annual baselines are scaled proportionally to that period, a simplifying assumption that is **not** a month-by-month cash flow model.
-
-| Driver | Modeled gross profit in period |
-|---|---|
-| Price realization | Annual discount-affected revenue × percentage-point improvement / 100 × price contribution rate × realization rate × months / 12 |
-| Win-rate improvement | Annual proposals × win-rate improvement in percentage points / 100 × average deal revenue × gross margin × realization rate × months / 12 |
-| National / major accounts | New accounts × full-year revenue per account × first-year revenue capture rate × gross margin × realization rate × months / 12 |
-| Faster onboarding | New hires × ramp months saved / 12 × annual productive seller sales × gross margin × realization rate × months / 12 |
-
-All “rates” above are percentages expressed between 0 and 100 in the UI and divided by 100 in calculations.
-
-A separate **overlap deduction** reduces the sum of win-rate and national-account benefits to mitigate double-counting when an account win might appear in both measures. This is a rough sensitivity control, **not** formal causal attribution. Discount-holding and seller productivity can also overlap with other improvements, so a rep must discuss the dependencies.
-
-- **Total modeled benefit** = sum of included drivers − win/account overlap deduction.
-- **Program cost** = monthly fee × evaluation months + one-time fee.
-- **Net modeled value** = total modeled benefit − program cost.
-- **ROI %** = net modeled value / program cost × 100.
-- **Benefit/cost multiple** = total modeled benefit / program cost.
-- **Simple payback** = program cost / (modeled total benefit / evaluation months). This assumes even monthly benefits; it is not actual cash-flow payback.
-- **Break-even additional price points** = max(0, program cost − other modeled benefits) / (discount-affected revenue × price contribution rate × price realization rate × months / 12) × 100. Displayed only if the pricing driver is active and its denominator is positive.
-
-ROI and multiples are intentionally unavailable when program cost is zero.
-
-## Data safeguards
-
-- No automatic transmission, persistence, third-party libraries, or tracking.
-- JSON imports are limited to recognized model fields; no imported data is executed.
-- Input ranges, percentage limits, whole-number counts, impossible ramp savings and win rates over 100% are rejected in the shared calculation engine.
-- Unfilled inputs remain incomplete, never silently become zero.
-- JSON and CSV exports contain prospect information; handle them as confidential files.
-- Estimates are **scenario projections**, not client financial statements, achieved outcomes, or proof that Sandler training caused an improvement.
-
-## Out of scope for this prototype
-
-CRM integrations, AI agent chat, user accounts, remote data storage, verified realized ROI tracking, and actual monthly cash flow. These are potential later phases after the sales demonstration workflow is validated.
-
-Sandler training context: [official Sandler site](https://sandler.com/).
+**Licensing:** No standalone software license was found in the inspected repository root; do not assume public redistribution or reuse rights. Sandler and associated names are used to describe the intended sales workflow, not to claim official ownership or sponsorship. See [Sandler](https://sandler.com/) for its published training materials.
