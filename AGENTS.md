@@ -66,3 +66,10 @@ The installed Qortara Logic Demo offers stateless read-only evaluators for **sup
 - Maintain the Discover → Model → Compare → Present journey without manufacturing evidence certainty.
 - Use public Sandler palette tokens recorded in `docs/design/rep-workbench-journey.md`; approved logo assets require authorization, unmodified placement and accessibility review.
 - Do not run GitHub Actions while the account has no budget; keep source and local/offline tests distinct from real rendered-browser acceptance.
+
+## GitHub Pages and public release
+
+- The public Pages URL is https://mythologiq-labs-llc.github.io/sandler-roi/, published from `main`; maintain the README's live-site link.
+- Use project-relative module/style paths so GitHub Pages works under `/sandler-roi/`.
+- Validate via `npm test`, `npm run check:pages` and existing PR Actions, then confirm Pages build/deploy at the merged exact commit. Do not bypass required checks or claim successful deployment before GitHub reports it.
+- Pages is publicly accessible without authentication. The workbench processes inputs in the browser, but representatives must not treat the public demo as approved for sensitive financial client data or as officially Sandler-branded without authorization.

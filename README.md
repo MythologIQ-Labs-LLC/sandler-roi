@@ -2,12 +2,14 @@
 
 ![Sandler ROI Workbench banner showing four financial value drivers converging toward a projected outcome](assets/roi-workbench-banner.svg)
 
-[![Prototype](https://img.shields.io/badge/status-unreleased_prototype-b07937)](https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1)
-[![Node 20+](https://img.shields.io/badge/Node.js-20%2B-3e885b)](https://github.com/MythologIQ-Labs-LLC/sandler-roi/blob/feat/roi-evidence-cost-hardening/package.json)
+[![Prototype](https://img.shields.io/badge/status-public_prototype-b07937)](https://mythologiq-labs-llc.github.io/sandler-roi/)
+[![Node 20+](https://img.shields.io/badge/Node.js-20%2B-3e885b)](https://github.com/MythologIQ-Labs-LLC/sandler-roi/blob/main/package.json)
+
+**Live site:** [Open the Sandler ROI Workbench on GitHub Pages](https://mythologiq-labs-llc.github.io/sandler-roi/). GitHub Pages publishes the `main` branch; new work appears after a successful deployment.
 
 **A buyer-led financial conversation, not a promise of ROI.** When a prospect asks whether sales training could pay for itself, a Sandler representative can use this browser-based tool to test the economics with the prospect's own numbers. Enter a few baselines, explore different improvements, and explain how the modeled benefits compare with the program's cost.
 
-**Status:** Unreleased internal prototype. MVP is in [PR #1](https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1); the latest guided workbench and validation improvements are on the separate [development branch](https://github.com/MythologIQ-Labs-LLC/sandler-roi/tree/feat/roi-evidence-cost-hardening). Neither is deployed or independently financially verified. The project-specific illustration is original to this repository; it is not Sandler corporate branding or evidence of endorsement.
+**Status:** Public, illustrative prototype. The Pages URL serves the current `main` revision, not unmerged feature work. This is not an official Sandler publication, a brand-approved tool, or an independently validated financial forecast. The project-specific illustration is original to this repository, not Sandler corporate logo artwork.
 
 ## On this page
 
@@ -22,14 +24,13 @@
 
 ## Quick start
 
-**Access:** This repository is currently internal; you need an account with repository read permission. Install **Node.js 20 or later** and Git. No \`npm install\`, cloud account, database, API key, or external runtime dependency is needed for this prototype.
+**Hosted prototype:** [Open the Sandler ROI Workbench on GitHub Pages](https://mythologiq-labs-llc.github.io/sandler-roi/). No installation or sign-in is required. The initial prospect and financial figures are fictional; **do not enter confidential client information into a public demo** without confirming your organization's data-handling rules.
 
-From a shell with access to the repository:
+**Run locally:** Install **Node.js 20 or later** and Git. No `npm install`, cloud account, database, API key, or external runtime dependency is needed. Run:
 
 \`\`\`bash
 git clone https://github.com/MythologIQ-Labs-LLC/sandler-roi.git
 cd sandler-roi
-git switch feat/roi-evidence-cost-hardening
 npm start
 \`\`\`
 
@@ -48,7 +49,7 @@ Every starting value is **fictional demonstration data**, not a prospect fact or
 
 ### Guided meeting workbench
 
-The current [visual development branch](https://github.com/MythologIQ-Labs-LLC/sandler-roi/tree/feat/roi-evidence-cost-hardening) introduces a **four-stage journey**: **Discover** (prospect data and sources), **Model** (financial levers and assumptions), **Compare** (three scenarios, charts and a table), and **Present** (client-facing scenario summary). The journey navigation does not certify evidence or block a conversation while figures are unknown.
+The [guided workbench implementation](src/app.mjs) introduces a **four-stage journey**: **Discover** (prospect data and sources), **Model** (financial levers and assumptions), **Compare** (three scenarios, charts and a table), and **Present** (client-facing scenario summary). The journey navigation does not certify evidence or block a conversation while figures are unknown.
 
 The UI uses Sandler's published **Stable** (\`#21245c\`), **Fresh** (\`#00aded\`), and **Energetic** (\`#0045c2\`) palette. The header is a **text-only prototype brand treatment**, not Sandler's stylized corporate logo. Official asset rights and final marketing approval remain open. See [workbench user journey and branding decisions](docs/design/rep-workbench-journey.md).
 
@@ -100,7 +101,7 @@ This prototype helps a representative **project** potential value. It does **not
 
 Our [research review of Sandler's public ROI and measurement practices](docs/research/sandler-roi-validation-2026.md) distinguishes Sandler's published **Sales Performance Ecosystem** from independent financial ROI verification. Sandler publicly describes Baseline → Improve → Reassess → Reinforce → Retain → Optimize, but we have **not** inspected an official Sandler ROI calculation specification or its third-party-operated calculator.
 
-**Verification status:** Source code and tests are committed on [PR #1](https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1). GitHub Actions has reported failures with unavailable execution logs in prior inspections. A passing full repository test suite, browser acceptance, and human financial review have **not been established**; do not treat the PR as merge-ready merely because code exists.
+**Verification status:** Source code and tests are checked into this repository. Review exact-commit GitHub Actions results before any release claim. Real-browser usability, Sandler brand approval, and human financial review are **separate acceptance gates**.
 
 ## Data handling
 
@@ -146,8 +147,8 @@ This invokes the repository's Node.js test suite. It does not run a browser usab
 **Licensing:** No standalone software license was found in the inspected repository root; do not assume public redistribution or reuse rights. Sandler and associated names are used to describe the intended sales workflow, not to claim official ownership or sponsorship. See [Sandler](https://sandler.com/) for its published training materials.
 
 
-## Continued development without GitHub Actions
+## Investment and evidence hardening
 
-The separate [cost and evidence hardening branch](https://github.com/MythologIQ-Labs-LLC/sandler-roi/tree/feat/roi-evidence-cost-hardening) introduces **fee-only versus expanded cost estimates** and **per-input source declarations**. Expanded cost inputs account for paid training time, monthly support, travel, technology, administration and other relevant expenses. Expanded inputs must be explicitly entered, including zero when appropriate. Source classifications remain self-declared and cannot certify realized ROI.
+The [cost and evidence implementation](src/evidence.mjs) introduces **fee-only versus expanded cost estimates** and **per-input source declarations**. Expanded cost inputs account for paid training time, monthly support, travel, technology, administration and other relevant expenses. Expanded inputs must be explicitly entered, including zero when appropriate. Source classifications remain self-declared and cannot certify realized ROI.
 
-The branch deliberately has no open PR and does not modify existing CI requirements; code changes should be tested locally while the GitHub Actions budget is exhausted. The original MVP PR remains separately unmerged.
+**GitHub Pages delivery:** The site is published from `main` at https://mythologiq-labs-llc.github.io/sandler-roi/ through GitHub Pages. The PR validation workflow runs `npm test`, a static Pages preflight, and a loopback server smoke test. A successful Pages deployment confirms the publication, not Sandler branding approval, client-data security certification, or financial correctness.

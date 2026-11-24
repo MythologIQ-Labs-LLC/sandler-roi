@@ -7,6 +7,8 @@ on:
       - 'tests/**'
       - 'package.json'
       - 'server.mjs'
+      - 'scripts/**'
+      - '.nojekyll'
       - '.github/workflows/test.yml'
   workflow_dispatch:
 permissions:
@@ -20,10 +22,15 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Verify Node version
         run: node --version
       - name: Test calculation engine
         run: npm test
+      - name: Validate static GitHub Pages payload
+        run: npm run check:pages
       - name: Smoke test local preview server
         run: |
           node server.mjs &
@@ -35,4 +42,6 @@ jobs:
           done
           grep -q 'Sandler ROI Workbench' /tmp/sandler-roi.html
           curl -fsS http://127.0.0.1:4173/src/roi.mjs -o /dev/null
+          curl -fsS http://127.0.0.1:4173/src/evidence.mjs -o /dev/null
+          curl -fsS http://127.0.0.1:4173/src/workbench.css -o /dev/null
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4173/secrets)" = 404
