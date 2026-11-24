@@ -119,6 +119,72 @@
       .print-only{display:block}
       .top .brand-sub{color:#555}
     }
+
+    /* Non-negotiable viewport guard: keep these rules inline so tab behavior
+       never depends on an optional secondary stylesheet or cache state. */
+    [hidden]{display:none!important}
+    body[data-stage="discover"] [data-workbench-step]:not([data-workbench-step~="discover"]),
+    body[data-stage="model"] [data-workbench-step]:not([data-workbench-step~="model"]),
+    body[data-stage="compare"] [data-workbench-step]:not([data-workbench-step~="compare"]),
+    body[data-stage="present"] [data-workbench-step]:not([data-workbench-step~="present"]){display:none!important}
+    body:not([data-stage="discover"]) .side,
+    body:not([data-stage="discover"]) .discover-tabbar{display:none!important}
+    body:not([data-stage="discover"]) .shell{grid-template-columns:minmax(0,1fr)}
+    body[data-stage="discover"] .shell{
+      grid-template-columns:minmax(0,1.2fr) minmax(345px,.8fr);
+      align-items:start;padding-top:14px
+    }
+    body[data-stage="discover"] .side{
+      display:block!important;position:static!important;align-self:start;
+      margin:0;border:1px solid #dee6f1;border-radius:14px;background:#fff;
+      box-shadow:0 7px 26px rgba(27,38,79,.045);
+      height:clamp(390px,55dvh,630px);max-height:clamp(390px,55dvh,630px);
+      min-height:0;overflow:hidden!important
+    }
+    body[data-stage="discover"] .side > [data-discover-panel]{
+      display:block;margin:0;border:0;border-radius:0;box-shadow:none;
+      padding:20px 23px;height:100%;min-height:0;
+      overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;
+    }
+    body[data-stage="discover"] .side > [data-discover-panel][hidden]{display:none!important}
+    .discover-tabbar{max-width:1450px;margin:0 auto;padding:5px 24px 0}
+    .discover-panel-nav{
+      background:#fff;border:1px solid #dee6f1;border-radius:14px;
+      padding:13px 16px 11px;position:static!important
+    }
+    .discover-switcher{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;margin:8px 0
+    }
+    .discover-switcher [role="tab"]{
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      min-height:44px;border-radius:10px;background:#f7f9fc;
+      color:#334168;border:1px solid #e1e8f3;
+      padding:7px 11px;font-weight:740;font-size:13px;
+    }
+    .discover-switcher [role="tab"][aria-selected="true"]{
+      background:#e7f8fd;border:2px solid #00aded;color:#21245c;
+      box-shadow:inset 0 -3px #00aded
+    }
+    .discover-switcher [role="tab"]:hover{background:#eef7fc}
+    .discover-panel-hint{font-size:11px;color:#64718c;margin:6px 0 0;min-height:0}
+    body[data-stage="discover"] .dashboard-card{position:static!important}
+    body[data-stage="discover"] .main{align-content:start}
+    body[data-stage="discover"] .footer{padding-top:0}
+    @media(max-width:850px){
+      body[data-stage="discover"] .shell{grid-template-columns:1fr!important;padding:14px 16px}
+      body[data-stage="discover"] .side{
+        height:min(64dvh,660px);max-height:min(64dvh,660px)
+      }
+      .discover-tabbar{padding:0 16px}
+      .discover-switcher [role="tab"]{flex-direction:column;gap:3px;font-size:11px;padding:6px 3px}
+    }
+    @media(max-width:520px){
+      body[data-stage="discover"] .side{height:min(62dvh,590px);max-height:min(62dvh,590px)}
+      .discover-panel-nav{padding:10px}
+      .discover-switcher .mini-circle{width:24px;height:24px}
+    }
+    @media print{.discover-tabbar{display:none!important}}
   </style>
   <link rel="stylesheet" href="./src/workbench.css">
 </head>
@@ -150,19 +216,19 @@
     <h1 id="step-title">Start with the prospect's numbers.</h1>
     <p id="step-description">Use the conversation to define the challenge and its cost. Replace illustrative defaults with the buyer's own figures.</p>
   </div><button type="button" id="step-next" class="btn btn-primary no-print">Continue to Model</button></div>
+  <nav class="discover-tabbar no-print"><div class="discover-panel-nav" aria-label="Discovery workspace tabs">
+        <div class="eyebrow">DISCOVER / SELECT ONE WORKSPACE</div>
+        <div class="discover-switcher" role="tablist" aria-label="Choose discovery inputs">
+          <button type="button" id="tab-engagement" role="tab" aria-controls="panel-engagement" data-discover-tab="engagement" aria-selected="true" tabindex="0"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3"/><path d="M5 20v-2.5c0-3.5 14-3.5 14 0V20"/></svg></span> Engagement</button>
+          <button type="button" id="tab-performance" role="tab" aria-controls="panel-performance" data-discover-tab="performance" aria-selected="false" tabindex="-1"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V14h3v6M10.5 20V9h3v11M17 20V4h3v16"/></svg></span> Performance</button>
+          <button type="button" id="tab-pipeline" role="tab" aria-controls="panel-pipeline" data-discover-tab="pipeline" aria-selected="false" tabindex="-1"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 4 3 7-10"/><path d="M15 6h5v5"/></svg></span> Pipeline</button>
+          <button type="button" id="tab-evidence" role="tab" aria-controls="panel-evidence" data-discover-tab="evidence" aria-selected="false" tabindex="-1"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.3 8.5-8 11-4.7-2.5-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></span> Evidence</button>
+        </div>
+        <p class="discover-panel-hint" id="discover-panel-hint" role="status">Define the engagement and investment.</p>
+      </div></nav>
   <div class="shell" id="main-workbench">
     <aside class="side no-print" aria-label="Discovery workspace">
-      <div class="discover-panel-nav">
-        <div class="eyebrow">Discovery sections</div>
-        <div class="discover-switcher" role="group" aria-label="Choose discovery inputs">
-          <button type="button" data-discover-tab="engagement" aria-pressed="true"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3"/><path d="M5 20v-2.5c0-3.5 14-3.5 14 0V20"/></svg></span> Engagement</button>
-          <button type="button" data-discover-tab="performance" aria-pressed="false"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V14h3v6M10.5 20V9h3v11M17 20V4h3v16"/></svg></span> Performance</button>
-          <button type="button" data-discover-tab="pipeline" aria-pressed="false"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 4 3 7-10"/><path d="M15 6h5v5"/></svg></span> Pipeline</button>
-          <button type="button" data-discover-tab="evidence" aria-pressed="false"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.3 8.5-8 11-4.7-2.5-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></span> Evidence</button>
-        </div>
-        <p class="discover-panel-hint" id="discover-panel-hint">Define the engagement and investment.</p>
-      </div>
-      <section class="card panel" data-discover-panel="engagement">
+      <section class="card panel" id="panel-engagement" role="tabpanel" aria-labelledby="tab-engagement" tabindex="0" data-discover-panel="engagement">
         <div class="eyebrow">01 · The engagement</div>
         <h2>Prospect & investment</h2>
         <p class="small" style="margin:8px 0 14px">Adjust the inputs live with your prospect. All starting numbers are fictional examples.</p>
@@ -172,20 +238,20 @@
         <div class="field" id="cost-mode" style="margin:14px 0 10px"></div>
         <div class="two" id="expanded-cost-fields"></div>
       </section>
-      <section class="card panel" data-discover-panel="performance">
+      <section class="card panel" id="panel-performance" role="tabpanel" aria-labelledby="tab-performance" tabindex="0" data-discover-panel="performance" hidden="">
         <div class="eyebrow">02 · Current performance</div>
         <h2>Current commercial performance</h2>
         <p class="small" style="margin:8px 0 2px">Use the categories relevant to the prospect. Disable a value driver in the results to exclude it.</p>
         <div id="baseline-fields"></div>
       </section>
-      <section class="card panel" data-discover-panel="pipeline">
+      <section class="card panel" id="panel-pipeline" role="tabpanel" aria-labelledby="tab-pipeline" tabindex="0" data-discover-panel="pipeline" hidden="">
         <div class="eyebrow">Optional · Pipeline bridge</div>
         <h2>From pipeline to potential value</h2>
         <p class="small" style="margin:8px 0 14px">Enter your prospect's figures. This independent illustration is never added to the ROI total.</p>
         <div class="stack" id="pipeline-fields"></div>
         <p class="section-note" style="margin:10px 0 0">Uses the commercial gross-margin input above. Leave this section blank if pipeline data is unavailable.</p>
       </section>
-      <section class="card panel" data-discover-panel="evidence">
+      <section class="card panel" id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" tabindex="0" data-discover-panel="evidence" hidden="">
         <div class="eyebrow">04 · Evidence &amp; confidence</div>
         <div class="field"><label for="evidence-notes">Source notes and assumptions</label><textarea id="evidence-notes" placeholder="Where did baseline data come from? What has not been validated?"></textarea></div>
         <p class="small" id="evidence-summary" role="status">Input evidence is user-declared, not independently verified.</p>
