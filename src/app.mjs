@@ -1,4 +1,4 @@
-import { DEFAULT_INPUTS, SCENARIOS, DEFAULT_ACTIVE, calculate, MONEY, PERCENT } from "./roi.mjs";
+import { DEFAULT_INPUTS, SCENARIOS, DEFAULT_ACTIVE, calculate, calculatePipelineBridge, MONEY, PERCENT } from "./roi.mjs";
 
 const clone = object => JSON.parse(JSON.stringify(object));
 let inputs=clone(DEFAULT_INPUTS);
@@ -23,7 +23,11 @@ const inputSpecs = {
   newAccountsAnnualValue:["One national-account annual value","number","USD / year per account"],
   newHires:["New sellers per year","number","Hires eligible for ramp acceleration"],
   rampMonths:["Current onboarding ramp","number","Months to full productivity"],
-  annualSellerRevenue:["Annual sales per productive seller","number","USD / fully productive seller"]
+  annualSellerRevenue:["Annual sales per productive seller","number","USD / fully productive seller"],
+  pipelineValue:["Qualified pipeline amount","number","Prospect-specific USD, not booked revenue"],
+  pipelinePeriodWeeks:["Pipeline observation period","number","Weeks; not automatically annualized"],
+  pipelineRevenueConversionPct:["Projected revenue realization","number","% of pipeline expected to close, not a case-study benchmark"],
+  pipelineAttributionPct:["Scenario attribution factor","number","% allocated to this illustrative hypothesis; not proof of causality"]
 };
 const groups=[
   {title:"Pricing discipline", keys:["discountedRevenue","priceProfitFlowPct"]},
@@ -75,6 +79,9 @@ function renderFields(){
     for(const key of group.keys) field(key,inside,inputs,(k,v)=>{inputs[k]=v;},inputSpecs);
     det.append(summary,inside);$("baseline-fields").append(det);
   }
+  $("pipeline-fields").replaceChildren();
+  for(const key of ["pipelineValue","pipelinePeriodWeeks","pipelineRevenueConversionPct","pipelineAttributionPct"])
+    field(key,$("pipeline-fields"),inputs,(k,v)=>{inputs[k]=v;},inputSpecs);
   $("evidence-notes").value=inputs.notes||"";
 }
 function renderAssumptions(){
@@ -146,6 +153,20 @@ function render(){
   put("payback",result.simplePaybackMonths===null?"N/A":result.simplePaybackMonths.toFixed(1)+" mo");
   put("multiple",result.multiple===null?"N/A":result.multiple.toFixed(2)+"×");
   put("breakeven",result.breakEvenPricePoints===null?"N/A":result.breakEvenPricePoints.toFixed(3)+" pts");
+
+  const pipeline=calculatePipelineBridge(inputs);
+  put("pipeline-revenue",pipeline.complete?MONEY(pipeline.modeledClosedRevenue):"Needs input");
+  put("pipeline-profit",pipeline.complete?MONEY(pipeline.modeledGrossProfit):"Needs input");
+  put("pipeline-allocated",pipeline.complete?MONEY(pipeline.scenarioAllocatedProfit):"Needs input");
+  put("pipeline-period",pipeline.complete?"Over "+pipeline.periodWeeks+" weeks; no annualization.":"Optional inputs not yet complete.");
+  const pipelineWarning=$("pipeline-warning");
+  if(!pipeline.complete){
+    const missing=pipeline.problems.map(p=>(inputSpecs[p.field]?.[0]||p.field)+": "+p.message);
+    pipelineWarning.textContent="Pipeline projection unavailable: "+missing.join("; ")+". Existing ROI is unaffected.";
+  } else {
+    pipelineWarning.textContent="Sensitivity analysis only. Not added to ROI: potential overlap with win-rate, pricing and major-account drivers. Scenario allocation is not verified attribution.";
+  }
+
   const client=inputs.prospect||"the prospect";
   put("pitch-text",result.complete
     ? "For "+client+", the "+scenario.label.toLowerCase()+" scenario models "+MONEY(result.benefit)+" of financial value over "+inputs.programMonths+" months, against a "+MONEY(result.cost)+" program investment. That implies "+MONEY(result.net)+" in net modeled value and "+(result.roi===null?"an undefined ROI because cost is zero":PERCENT(result.roi)+" ROI")+". These are discussion assumptions, not historical performance."

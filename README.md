@@ -33,6 +33,13 @@ Opening `index.html` with a `file://` URL is not supported because browser secur
 
 Every starting number is *fictional example data*, not an asserted COIT or Sandler benchmark. Blank an unverified field to see the missing-input warning. The calculator refuses to present a complete ROI when an enabled driver lacks required inputs.
 
+
+## Optional pipeline opportunity bridge
+
+A separate, prospect-specific pipeline sensitivity model accepts **qualified pipeline value**, the **number of weeks observed**, **expected percent of pipeline dollars converting to closed revenue**, commercial **gross margin**, and a configurable **scenario attribution factor**. It displays modeled closed revenue, gross profit and scenario-allocated gross profit. This analysis is deliberately **not added to modeled ROI**, because it may overlap with win-rate and major-account benefits. Missing pipeline inputs do not invalidate the main four-driver ROI model.
+
+The workbench displays the [Sandler Revelry GTM case study](https://sandler.com/case-study/revelry-gtm/) as optional reference context, not as a prospect default, forecast, or reported ROI. See [source analysis and evidence boundaries](docs/case-studies/revelry-gtm.md).
+
 ## Transparent financial formulas
 
 Evaluation horizon = configured program months. Annual baselines are scaled proportionally to that period, a simplifying assumption that is **not** a month-by-month cash flow model.

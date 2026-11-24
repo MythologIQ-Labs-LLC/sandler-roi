@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {calculate, parseValue, DEFAULT_INPUTS, SCENARIOS} from "../src/roi.mjs";
+import {calculate, calculatePipelineBridge, parseValue, DEFAULT_INPUTS, SCENARIOS} from "../src/roi.mjs";
 
 const baseline=()=>structuredClone(DEFAULT_INPUTS);
 const expected=()=>structuredClone(SCENARIOS.expected);
@@ -99,4 +99,40 @@ test("evaluation term scales revenue benefit and recurring program cost",()=>{
   const half=calculate({...i,programMonths:6},s,only("pricing"));
   near(half.benefit,year.benefit/2);
   near(half.cost,year.cost/2);
+});
+
+test("pipeline bridge calculates prospective revenue, margin, allocation without adding to ROI",()=>{
+  const i={...baseline(),pipelineValue:6000000,pipelinePeriodWeeks:10,pipelineRevenueConversionPct:10,pipelineAttributionPct:50,grossMarginPct:40};
+  const before=calculate(i,expected());
+  const p=calculatePipelineBridge(i);
+  const after=calculate(i,expected());
+  assert.equal(p.complete,true);
+  near(p.modeledClosedRevenue,600000);
+  near(p.modeledGrossProfit,240000);
+  near(p.scenarioAllocatedProfit,120000);
+  assert.equal(p.periodWeeks,10);
+  assert.equal(p.includesInRoi,false);
+  assert.equal(after.benefit,before.benefit);
+});
+test("blank pipeline inputs do not make the main ROI model incomplete",()=>{
+  const i=baseline();
+  const p=calculatePipelineBridge(i);
+  assert.equal(p.complete,false);
+  assert.equal(p.modeledClosedRevenue,null);
+  assert.ok(p.problems.some(x=>x.field==="pipelineValue"));
+  assert.equal(calculate(i,expected()).complete,true);
+});
+test("pipeline bridge refuses invalid weeks and over-100 percent conversion",()=>{
+  const i={...baseline(),pipelineValue:100000,pipelinePeriodWeeks:0,pipelineRevenueConversionPct:120,pipelineAttributionPct:50};
+  const p=calculatePipelineBridge(i);
+  assert.equal(p.complete,false);
+  assert.equal(p.scenarioAllocatedProfit,null);
+  assert.ok(p.problems.some(x=>x.field==="pipelinePeriodWeeks"));
+  assert.ok(p.problems.some(x=>x.field==="pipelineRevenueConversionPct"));
+});
+test("pipeline bridge retains zero as a real value distinct from missing",()=>{
+  const i={...baseline(),pipelineValue:0,pipelinePeriodWeeks:10,pipelineRevenueConversionPct:10,pipelineAttributionPct:50};
+  const p=calculatePipelineBridge(i);
+  assert.equal(p.complete,true);
+  assert.equal(p.modeledClosedRevenue,0);
 });

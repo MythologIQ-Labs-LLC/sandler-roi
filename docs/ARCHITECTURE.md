@@ -162,3 +162,17 @@ Qortara Logic Demo capabilities were consulted on 2026-11-23. The hosted tool is
 An applicability request for this documentation change returned `resolved` with **zero governance sources supplied**. This means **no authoritative repository/org governance rules were established by that evaluation**, not that governance requirements are absent or fulfilled. Context selection classified the supplied paths as a proposed read set; it did not read them. No validated canonical governance manifest, route policy, gate or release approval has been established in this document.
 
 The documents here are a proposed engineering baseline for review, not an assertion that Qortara has installed or formally approved governance.
+
+## 9. Case-study informed pipeline analysis (2026-11-23)
+
+**Decision:** add an independent, optional pipeline-to-value *bridge*, not a fifth additive ROI driver. See [Revelry GTM source mapping](case-studies/revelry-gtm.md).
+
+It accepts prospect-specific qualified pipeline value, its observed time period in weeks, expected percent of pipeline dollars converting to closed revenue, existing gross margin, and a separate scenario attribution factor. It calculates projected closed revenue, projected gross profit, and scenario-allocated profit. The amount is **excluded from total modeled ROI**, even when the inputs are complete. The model does **not** annualize or extrapolate 10-week results; projection for another period requires new prospect-specific assumptions.
+
+**Adversarial review:**
+- Reusing a reported case-study outcome as default ROI input would falsely imply transferability. **Rejected.**
+- Treating reported $3.5M pipeline and $364K closed sales as a general 10.4% pipeline conversion benchmark would assume matching cohorts and time windows not documented. **Rejected.**
+- Automatically adding pipeline value to the win-rate and national-account levers would double count overlapping deals. **Rejected.**
+- Separate prospect-defined sensitivity with clear source references, independent validity and no additive ROI contribution gives the rep a useful illustration without inflating financial results. **Accepted for the MVP.**
+
+Pipeline is a leading indicator, not revenue. Revenue is not gross profit. Higher AI roleplay scores are a skills measure, not a direct financial benefit. The reported case study does not provide total training cost, verified attributable incremental profit or defensible ROI.

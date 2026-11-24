@@ -6,6 +6,7 @@ export const DEFAULT_INPUTS = {
   annualProposals: 250, baselineWinRatePct: 25, avgDealValue: 30000,
   grossMarginPct: 40, newAccountsAnnualValue: 300000,
   newHires: 4, rampMonths: 6, annualSellerRevenue: 750000,
+  pipelineValue: "", pipelinePeriodWeeks: "", pipelineRevenueConversionPct: "", pipelineAttributionPct: "",
   notes: "Illustrative values only. Replace all assumptions with prospect-specific data."
 };
 export const SCENARIOS = {
@@ -20,6 +21,7 @@ const BOUNDS = {
   annualProposals:[0,1e9], baselineWinRatePct:[0,100], avgDealValue:[0,1e12],
   grossMarginPct:[0,100], newAccountsAnnualValue:[0,1e12],
   newHires:[0,1e7], rampMonths:[0,120], annualSellerRevenue:[0,1e12],
+  pipelineValue:[0,1e14], pipelinePeriodWeeks:[1,520], pipelineRevenueConversionPct:[0,100], pipelineAttributionPct:[0,100],
   pricePoints:[0,100], priceCapturePct:[0,100], winPoints:[0,100], winCapturePct:[0,100],
   nationalAccounts:[0,1e7], accountFirstYearPct:[0,100], accountCapturePct:[0,100],
   rampMonthsSaved:[0,120], rampCapturePct:[0,100], overlapPct:[0,100]
@@ -30,7 +32,7 @@ export function parseValue(raw, key) {
   const value = Number(raw);
   const bounds = BOUNDS[key] ?? [0,Number.MAX_SAFE_INTEGER];
   if (!Number.isFinite(value) || value < bounds[0] || value > bounds[1]) return { value:null, error:"Outside allowed range" };
-  if (["programMonths","participantCount","annualProposals","newHires","nationalAccounts"].includes(key) && !Number.isInteger(value)) return { value:null, error:"Must be a whole number" };
+  if (["programMonths","participantCount","annualProposals","newHires","nationalAccounts","pipelinePeriodWeeks"].includes(key) && !Number.isInteger(value)) return { value:null, error:"Must be a whole number" };
   return { value, error:null };
 }
 export function calculate(input, scenario, enabled=DEFAULT_ACTIVE) {
@@ -92,5 +94,37 @@ export function calculate(input, scenario, enabled=DEFAULT_ACTIVE) {
   }
   return {cost,parts,knownBenefit:overlap===null?null:Math.max(0,known-deduction),deduction,benefit,net,roi,multiple,simplePaybackMonths,breakEvenPricePoints,complete,problems};
 }
+/**
+ * Optional prospect-specific pipeline bridge.
+ * Pipeline is NOT booked revenue or ROI; deliberately excluded from calculate().
+ * The period in weeks labels the observation but is never silently annualized.
+ */
+export function calculatePipelineBridge(input) {
+  const keys=["pipelineValue","pipelinePeriodWeeks","pipelineRevenueConversionPct","grossMarginPct","pipelineAttributionPct"];
+  const values={};
+  const problems=[];
+  for(const key of keys){
+    const parsed=parseValue(input[key],key);
+    values[key]=parsed.value;
+    if(parsed.error)problems.push({field:key,message:parsed.error});
+  }
+  if(problems.length) return {
+    complete:false,problems,periodWeeks:values.pipelinePeriodWeeks,
+    pipelineValue:values.pipelineValue,modeledClosedRevenue:null,
+    modeledGrossProfit:null,scenarioAllocatedProfit:null,includesInRoi:false
+  };
+  const modeledClosedRevenue=values.pipelineValue*values.pipelineRevenueConversionPct/100;
+  const modeledGrossProfit=modeledClosedRevenue*values.grossMarginPct/100;
+  const scenarioAllocatedProfit=modeledGrossProfit*values.pipelineAttributionPct/100;
+  if(![modeledClosedRevenue,modeledGrossProfit,scenarioAllocatedProfit].every(Number.isFinite)) return {
+    complete:false,problems:[{field:"pipeline",message:"Non-finite projected outcome"}],
+    periodWeeks:values.pipelinePeriodWeeks,pipelineValue:values.pipelineValue,
+    modeledClosedRevenue:null,modeledGrossProfit:null,scenarioAllocatedProfit:null,includesInRoi:false
+  };
+  return {complete:true,problems:[],periodWeeks:values.pipelinePeriodWeeks,
+    pipelineValue:values.pipelineValue,modeledClosedRevenue,
+    modeledGrossProfit,scenarioAllocatedProfit,includesInRoi:false};
+}
+
 export const MONEY = value=>value===null?"Needs input":new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(value);
 export const PERCENT = value=>value===null?"Needs input":value.toFixed(1)+"%";

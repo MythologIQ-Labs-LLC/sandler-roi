@@ -31,6 +31,7 @@ Build and maintain a transparent, configurable tool that lets a **Sandler sales 
 - Avoid benefit double counting. Known overlap is currently only partially modeled and must remain disclosed.
 - Do not claim causal attribution or payback timing without measured evidence and an appropriate time series.
 - Keep projections separate from future realized-value reporting.
+- Case-study figures are never copied into a prospect baseline without a disclosed user decision. The optional pipeline bridge is not an additive ROI benefit, and AI roleplay scores are not financial returns.
 
 ## Security and privacy
 

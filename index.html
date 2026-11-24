@@ -147,6 +147,13 @@
         <div id="baseline-fields"></div>
       </section>
       <section class="card panel">
+        <div class="eyebrow">Optional · Pipeline bridge</div>
+        <h2>From pipeline to potential value</h2>
+        <p class="small" style="margin:8px 0 14px">Enter your prospect's figures. This independent illustration is never added to the ROI total.</p>
+        <div class="stack" id="pipeline-fields"></div>
+        <p class="section-note" style="margin:10px 0 0">Uses the commercial gross-margin input above. Leave this section blank if pipeline data is unavailable.</p>
+      </section>
+      <section class="card panel">
         <div class="eyebrow">3 · Validate</div>
         <div class="field"><label for="evidence-notes">Source notes and assumptions</label><textarea id="evidence-notes" placeholder="Where did baseline data come from? What has not been validated?"></textarea></div>
         <p class="section-note" style="margin:12px 0 0">Private by design: no data sent anywhere. Use Save model to preserve your work as a local JSON file.</p>
@@ -198,6 +205,24 @@
           <div class="mini"><div class="small">Price-point break-even**</div><div class="val" id="breakeven">—</div></div>
         </div>
         <p class="section-note" style="margin:15px 0 0">* Simple uniform run-rate estimate, not cash-flow timing. ** Additional price improvement needed after other modeled drivers; zero if those drivers already cover the cost.</p>
+      </section>
+      <section class="card panel" aria-labelledby="pipeline-heading">
+        <div class="eyebrow">Optional analysis · Excluded from ROI</div>
+        <div class="flex-heading"><h2 id="pipeline-heading">Pipeline-to-value bridge</h2><span class="pill">Not additive</span></div>
+        <div class="results">
+          <div class="stat"><div class="k">Modeled closed revenue</div><div class="v" id="pipeline-revenue">Needs input</div><div class="note">Pipeline × expected conversion</div></div>
+          <div class="stat"><div class="k">Modeled gross profit</div><div class="v" id="pipeline-profit">Needs input</div><div class="note">Closed revenue × margin</div></div>
+          <div class="stat"><div class="k">Scenario-allocated profit</div><div class="v" id="pipeline-allocated">Needs input</div><div class="note">Sensitivity, not measured attribution</div></div>
+        </div>
+        <p class="small" id="pipeline-period" style="margin:10px 0 6px">Optional inputs not yet complete.</p>
+        <p class="section-note" id="pipeline-warning" role="status">Pipeline is not closed revenue and is excluded from total ROI.</p>
+        <details>
+          <summary>Reference: Revelry GTM case study (not a benchmark)</summary>
+          <div class="inside">
+            <p class="small">Sandler reports $6M–$8M combined pipeline over 10 weeks, one participant's $3.5M pipeline and $364K closed revenue, and an average 75% improvement in AI roleplay scores. These are case-study observations, not an expected prospect conversion rate or financial ROI.</p>
+            <p class="small"><a href="https://sandler.com/case-study/revelry-gtm/" target="_blank" rel="noopener noreferrer">Read Sandler's original case study</a></p>
+          </div>
+        </details>
       </section>
       <section class="pitch">
         <div class="eyebrow">Executive conversation summary</div>
