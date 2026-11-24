@@ -123,8 +123,10 @@ export function initDevelopmentFeedback(getContext){
       setStatus("Recording microphone audio. Click Stop when finished.");
     }catch(err){
       if(acquired)for(const track of acquired.getTracks())track.stop();
-      if(request===permissionRequest)setStatus(err.name==="NotAllowedError"?"Microphone access was denied.":"Unable to record: "+err.message);
-      closeStream();
+      if(request===permissionRequest){
+        setStatus(err.name==="NotAllowedError"?"Microphone access was denied.":"Unable to record: "+err.message);
+        closeStream();
+      }
     }finally{
       if(request===permissionRequest)requesting=false;
       audioButtons();
