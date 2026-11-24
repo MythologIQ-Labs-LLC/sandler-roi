@@ -174,7 +174,7 @@ test("a draft stays associated with its originating stage through navigation",as
     const zip=f.objects.find(obj=>obj.type==="application/zip");
     const manifest=await getManifest(zip);
     assert.equal(manifest.notes[0].context.stage,"compare","must pin draft origin rather than Add stage");
-    assert.ok(!JSON.stringify(manifest).includes("customer"));
+    assert.doesNotMatch(JSON.stringify(manifest),/Sample customer|Demo Customer|79200/);
   }finally{f.restore();}
 });
 
