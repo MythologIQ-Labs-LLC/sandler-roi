@@ -18,6 +18,9 @@ export const SCENARIOS = {
   upside: { label: "Upside", pricePoints: 1, priceCapturePct: 85, winPoints: 4, winCapturePct: 85, nationalAccounts: 2, accountFirstYearPct: 70, accountCapturePct: 80, rampMonthsSaved: 3, rampCapturePct: 65, overlapPct: 20 }
 };
 export const DEFAULT_ACTIVE = { pricing: true, wins: true, accounts: true, ramp: true };
+// Refuse totals above the shared model/cost bound instead of displaying
+// imprecise dollar amounts after JavaScript Number loses integer precision.
+const MAX_MODELED_DOLLARS=1e15;
 const BOUNDS = {
   monthlyFee:[0,1e11], programMonths:[1,60], setupFee:[0,1e11], participantCount:[1,1e6],
   trainingHoursPerPerson:[0,10000], participantHourlyCost:[0,1e6], additionalMonthlyCost:[0,1e11],
@@ -82,7 +85,7 @@ export function calculateCost(input) {
     }
   }
   const total=feeCost===null||additionalCost===null?null:feeCost+additionalCost;
-  if(total!==null && (!Number.isFinite(total)||total>1e15)){
+  if(total!==null && (!Number.isFinite(total)||total>MAX_MODELED_DOLLARS)){
     problems.push({field:"cost",message:"Combined investment exceeds supported range"});
     return {mode,feeCost,additionalCost:null,total:null,components,problems};
   }
@@ -108,8 +111,8 @@ export function calculate(input, scenario, enabled=DEFAULT_ACTIVE) {
     for(const key of assumptions) b[key]=need(key,scenario);
     if(before!==problems.length || scale===null) {parts[name]={status:"needs-input",value:null};return;}
     const output=formula(a,b);
-    if(!Number.isFinite(output) || output<0) {
-      problems.push({field:name,message:"Invalid financial result"});
+    if(!Number.isFinite(output) || output<0 || output>MAX_MODELED_DOLLARS) {
+      problems.push({field:name,message:"Financial contribution outside supported precision range"});
       parts[name]={status:"invalid",value:null};
     } else parts[name]={status:"ready",value:output};
   }
@@ -128,25 +131,52 @@ export function calculate(input, scenario, enabled=DEFAULT_ACTIVE) {
       return a.newHires*s.rampMonthsSaved/12*a.annualSellerRevenue*a.grossMarginPct/100*s.rampCapturePct/100*scale;
     });
   const overlap=need("overlapPct",scenario);
-  const complete=cost!==null && overlap!==null && Object.values(parts).every(v=>v.status==="ready" || v.status==="excluded");
   const known=Object.values(parts).filter(v=>v.status==="ready").reduce((sum,v)=>sum+v.value,0);
+  const totalWithinRange=Number.isFinite(known)&&known<=MAX_MODELED_DOLLARS;
+  if(!totalWithinRange)problems.push({field:"benefit",message:"Combined benefit exceeds supported dollar precision"});
   const wins=parts.wins?.value??0, accounts=parts.accounts?.value??0;
-  const deduction=overlap===null ? null : (wins+accounts)*overlap/100;
-  const benefit=complete ? Math.max(0,known-deduction) : null;
-  const net=benefit===null?null:benefit-cost;
-  const roi=net===null||cost===0?null:net/cost*100;
-  const multiple=benefit===null||cost===0?null:benefit/cost;
-  const simplePaybackMonths=benefit===null||benefit<=0||months===null?null:cost/(benefit/months);
-  let breakEvenPricePoints=null;
+  const deduction=overlap===null||!totalWithinRange?null:(wins+accounts)*overlap/100;
+  let complete=cost!==null && overlap!==null && totalWithinRange &&
+    Object.values(parts).every(v=>v.status==="ready" || v.status==="excluded");
+  let benefit=complete?Math.max(0,known-deduction):null;
+  let net=benefit===null?null:benefit-cost;
+  let roi=net===null||cost===0?null:net/cost*100;
+  let multiple=benefit===null||cost===0?null:benefit/cost;
+  let simplePaybackMonths=benefit===null||benefit<=0||months===null?null:cost/(benefit/months);
+  const derived=[benefit,net,roi,multiple,simplePaybackMonths].filter(v=>v!==null);
+  if(complete&&derived.some(v=>!Number.isFinite(v))){
+    problems.push({field:"financialResult",message:"Derived financial ratio outside supported numeric range"});
+    complete=false;
+    benefit=null;net=null;roi=null;multiple=null;simplePaybackMonths=null;
+  }
+  let breakEvenPricePoints=null,breakEvenStatus="not-applicable";
   if(complete && enabled.pricing && scale>0){
     const revenue=parseValue(input.discountedRevenue,"discountedRevenue").value;
     const flow=parseValue(input.priceProfitFlowPct,"priceProfitFlowPct").value;
     const capture=parseValue(scenario.priceCapturePct,"priceCapturePct").value;
     const denominator=revenue*flow/100*capture/100*scale;
     const others=(parts.wins.value??0)+(parts.accounts.value??0)+(parts.ramp.value??0)-deduction;
-    if(denominator>0) breakEvenPricePoints=Math.max(0,(cost-others)/denominator*100);
+    const remaining=Math.max(0,cost-others);
+    if(remaining===0){
+      // Other benefits already cover investment, even if pricing revenue is zero.
+      breakEvenPricePoints=0;
+      breakEvenStatus="covered-by-other-drivers";
+    }else if(denominator<=0){
+      breakEvenStatus="no-eligible-pricing-revenue";
+    }else{
+      const points=remaining/denominator*100;
+      if(!Number.isFinite(points)||points>BOUNDS.pricePoints[1]){
+        breakEvenStatus="outside-supported-range";
+      }else{
+        breakEvenPricePoints=points;
+        breakEvenStatus="within-range";
+      }
+    }
   }
-  return {cost,costMode:costResult.mode,costBreakdown:costResult,parts,knownBenefit:overlap===null?null:Math.max(0,known-deduction),deduction,benefit,net,roi,multiple,simplePaybackMonths,breakEvenPricePoints,complete,problems};
+  return {cost,costMode:costResult.mode,costBreakdown:costResult,parts,
+    knownBenefit:overlap===null||!totalWithinRange?null:Math.max(0,known-deduction),
+    deduction,benefit,net,roi,multiple,simplePaybackMonths,
+    breakEvenPricePoints,breakEvenStatus,complete,problems};
 }
 /**
  * Optional customer-specific pipeline bridge.
