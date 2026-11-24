@@ -258,25 +258,6 @@
         <p id="compare-warning" class="section-note" role="status">Review pending.</p>
         <p class="section-note">The financial opportunity and alternative scenarios appear in Present. All preceding figures remain editable.</p>
       </section>
-      <section class="card panel" data-workbench-step="present" aria-labelledby="pipeline-heading">
-        <div class="eyebrow">Optional analysis · Excluded from ROI</div>
-        <div class="flex-heading"><h2 id="pipeline-heading">Pipeline-to-value bridge</h2><span class="pill">Not additive</span></div>
-        <div class="results">
-          <div class="stat"><div class="k">Modeled closed revenue</div><div class="v" id="pipeline-revenue">Needs input</div><div class="note">Pipeline × expected conversion</div></div>
-          <div class="stat"><div class="k">Modeled gross profit</div><div class="v" id="pipeline-profit">Needs input</div><div class="note">Closed revenue × margin</div></div>
-          <div class="stat"><div class="k">Scenario-allocated profit</div><div class="v" id="pipeline-allocated">Needs input</div><div class="note">Sensitivity, not measured attribution</div></div>
-        </div>
-        <p class="small" id="pipeline-period" style="margin:10px 0 6px">Optional inputs not yet complete.</p>
-        <p class="section-note" id="pipeline-warning" role="status">Pipeline is not closed revenue and is excluded from total ROI.</p>
-        <details>
-          <summary>Reference: Revelry GTM case study (not a benchmark)</summary>
-          <div class="inside">
-            <p class="small">Sandler reports $6M–$8M combined pipeline over 10 weeks, one participant's $3.5M pipeline and $364K closed revenue, and an average 75% improvement in AI roleplay scores. These are case-study observations, not an expected prospect conversion rate or financial ROI.</p>
-            <p class="small"><a href="https://sandler.com/case-study/revelry-gtm/" target="_blank" rel="noopener noreferrer">Read Sandler's original case study</a></p>
-          </div>
-        </details>
-      </section>
-
       <section class="card panel reveal-stage" data-workbench-step="present" aria-labelledby="reveal-heading">
         <div class="eyebrow">04 · Present the opportunity</div>
         <h2 id="reveal-heading">Where you are. What could change.</h2>
@@ -329,6 +310,25 @@
         <p id="pitch-text" style="margin-bottom:12px"></p>
         <p id="pitch-caveat" class="small"></p>
       </section>
+      <details class="card panel optional-analysis" data-workbench-step="present">
+        <summary>Optional pipeline sensitivity (excluded from ROI)</summary>
+        <div class="inside"><div class="eyebrow">Optional analysis · Excluded from ROI</div>
+        <div class="flex-heading"><h2 id="pipeline-heading">Pipeline-to-value bridge</h2><span class="pill">Not additive</span></div>
+        <div class="results">
+          <div class="stat"><div class="k">Modeled closed revenue</div><div class="v" id="pipeline-revenue">Needs input</div><div class="note">Pipeline × expected conversion</div></div>
+          <div class="stat"><div class="k">Modeled gross profit</div><div class="v" id="pipeline-profit">Needs input</div><div class="note">Closed revenue × margin</div></div>
+          <div class="stat"><div class="k">Scenario-allocated profit</div><div class="v" id="pipeline-allocated">Needs input</div><div class="note">Sensitivity, not measured attribution</div></div>
+        </div>
+        <p class="small" id="pipeline-period" style="margin:10px 0 6px">Optional inputs not yet complete.</p>
+        <p class="section-note" id="pipeline-warning" role="status">Pipeline is not closed revenue and is excluded from total ROI.</p>
+        <details>
+          <summary>Reference: Revelry GTM case study (not a benchmark)</summary>
+          <div class="inside">
+            <p class="small">Sandler reports $6M–$8M combined pipeline over 10 weeks, one participant's $3.5M pipeline and $364K closed revenue, and an average 75% improvement in AI roleplay scores. These are case-study observations, not an expected prospect conversion rate or financial ROI.</p>
+            <p class="small"><a href="https://sandler.com/case-study/revelry-gtm/" target="_blank" rel="noopener noreferrer">Read Sandler's original case study</a></p>
+          </div>
+        </details></div>
+      </details>
     </main>
   </div>
 

@@ -443,3 +443,12 @@ body[data-stage="present"] .journey{display:block}
   }
   .reveal-primary span,.reveal-primary small{color:#21245c!important}
 }
+
+/* Keep separate optional pipeline analysis subordinate to the reveal. */
+.optional-analysis{padding:16px 22px}
+.optional-analysis>summary{padding:2px 0;font-size:13px}
+.optional-analysis>.inside{display:block;margin-top:12px}
+.optional-analysis .results{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:680px){
+  .optional-analysis .results{grid-template-columns:1fr}
+}

@@ -67,7 +67,10 @@ try{
   'modelText:document.querySelector("#model-behavior")?.textContent||"",'+
   'winReveal:document.querySelector("#present-behavior")?.textContent||"",'+
   'gross:document.querySelector("#benefit")?.textContent||"",'+
-  'rows:document.querySelectorAll("#scenario-table tr").length};})()');
+  'rows:document.querySelectorAll("#scenario-table tr").length,'+
+  'firstMainVisible:[...document.querySelector(".main").children].find(el=>el.getClientRects().length>0)?.className||"",'+
+  'revealTop:Math.round(document.querySelector(".reveal-stage").getBoundingClientRect().top),'+
+  'pipelineExpanded:document.querySelector(".optional-analysis")?.open||false};})()');
  const sample=()=>evaluate('(()=>{'+
   'const panels=[...document.querySelectorAll("[data-discover-panel]")];'+
   'const visible=panels.filter(p=>!p.hidden&&getComputedStyle(p).display!=="none"&&p.getBoundingClientRect().height>0);'+
@@ -165,13 +168,18 @@ try{
  assert.match(phase.winReveal,/26\.4%/);
  assert.match(phase.gross,/\$/);
  assert.equal(phase.rows,3,'Present must include all three scenario rows');
+ assert.match(phase.firstMainVisible,/reveal-stage/,'Reveal must be the first visible Present panel');
+ assert.ok(phase.revealTop<=320,'Main business case is below the fold: '+phase.revealTop);
+ assert.equal(phase.pipelineExpanded,false,'Optional sensitivity should not preempt the reveal');
+ const presentImage=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'present-desktop.png'),Buffer.from(presentImage.data,'base64'));
  const beforeChange=phase.gross;
  await evaluate('document.querySelector("[data-scenario=upside]").click()');
  phase=await visibleStage();
  assert.notEqual(phase.gross,beforeChange,'Scenario selection must update financial reveal');
  assert.match(phase.winReveal,/28\.4%/);
- const presentImage=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
- await writeFile(join(output,'present-desktop.png'),Buffer.from(presentImage.data,'base64'));
+ const upsideImage=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'present-upside-desktop.png'),Buffer.from(upsideImage.data,'base64'));
  await evaluate('document.querySelector("[data-workbench-nav=discover]").click()');
  phase=await visibleStage();
  assert.equal(phase.scenario,false,'Returning to Discover must hide scenario controls');
