@@ -148,3 +148,126 @@ test("unexported audio prompts on unload even after a previous export",async()=>
     assert.equal(cleared.prevented,true,"new audio work cannot retroactively mark earlier export current");
   }finally{f.restore();}
 });
+
+
+async function getManifest(zip){
+  const bytes=new Uint8Array(await zip.arrayBuffer()),view=new DataView(bytes.buffer);
+  assert.equal(view.getUint32(0,true),0x04034b50);
+  const dataSize=view.getUint32(18,true),nameSize=view.getUint16(26,true);
+  const start=30+nameSize+view.getUint16(28,true);
+  assert.equal(new TextDecoder().decode(bytes.slice(30,30+nameSize)),"feedback.json");
+  return JSON.parse(new TextDecoder().decode(bytes.slice(start,start+dataSize)));
+}
+
+test("a draft stays associated with its originating stage through navigation",async()=>{
+  let stage="compare";
+  const f=fixture(()=>Promise.reject(new Error("not recording")));
+  try{
+    initDevelopmentFeedback(()=>({stage}));
+    f.id("feedback-toggle").fire("click");
+    f.id("feedback-text").value="The comparison needs context";
+    f.id("feedback-text").fire("input");
+    assert.match(f.id("feedback-location").textContent,/Draft from: compare/);
+    stage="present";
+    f.id("feedback-add").fire("click");
+    await f.id("feedback-export").fire("click");
+    const zip=f.objects.find(obj=>obj.type==="application/zip");
+    const manifest=await getManifest(zip);
+    assert.equal(manifest.notes[0].context.stage,"compare","must pin draft origin rather than Add stage");
+    assert.ok(!JSON.stringify(manifest).includes("customer"));
+  }finally{f.restore();}
+});
+
+test("overall feedback excludes stage and unfinished draft is not silently exported",async()=>{
+  const f=fixture(()=>Promise.reject(new Error("not recording")));
+  try{
+    initDevelopmentFeedback(()=>({stage:"discover",panel:"performance"}));
+    f.id("feedback-toggle").fire("click");
+    f.id("feedback-text").value="Useful overview";
+    f.id("feedback-text").fire("input");
+    f.id("feedback-include-context").checked=false;
+    f.id("feedback-add").fire("click");
+    f.id("feedback-text").value="Unfinished second comment";
+    f.id("feedback-text").fire("input");
+    await f.id("feedback-export").fire("click");
+    assert.match(f.id("feedback-status").textContent,/Add or clear the unfinished comment/);
+    assert.equal(f.objects.filter(obj=>obj.type==="application/zip").length,0);
+    const pending={preventDefault(){this.prevented=true;}};
+    f.listeners.get("beforeunload")(pending);
+    assert.equal(pending.prevented,true);
+    f.id("feedback-text").value="";
+    f.id("feedback-text").fire("input");
+    await f.id("feedback-export").fire("click");
+    const manifest=await getManifest(f.objects.find(obj=>obj.type==="application/zip"));
+    assert.equal(manifest.notes[0].context,null,"overall notes must omit stage metadata");
+  }finally{f.restore();}
+});
+
+test("new notes during asynchronous audio export remain marked unexported",async()=>{
+  const acquired=audioStream(),gate=deferred();
+  const original=Blob.prototype.arrayBuffer;
+  const f=fixture(()=>Promise.resolve(acquired.stream));
+  try{
+    initDevelopmentFeedback(()=>({stage:"model"}));
+    f.id("feedback-toggle").fire("click");
+    await f.id("feedback-record").fire("click");
+    f.id("feedback-stop").fire("click");
+    f.id("feedback-text").value="First note with voice";
+    f.id("feedback-add").fire("click");
+    Blob.prototype.arrayBuffer=function(){
+      if(this.type.startsWith("audio/"))return gate.promise;
+      return original.call(this);
+    };
+    const processing=f.id("feedback-export").fire("click");
+    assert.equal(f.id("feedback-export").disabled,true);
+    f.id("feedback-text").value="Added while an audio file was being read";
+    f.id("feedback-text").fire("input");
+    f.id("feedback-add").fire("click");
+    gate.resolve(new Uint8Array([1,2,3]).buffer);
+    await processing;
+    assert.match(f.id("feedback-status").textContent,/additional changes still need exporting/);
+    const unloading={preventDefault(){this.prevented=true;}};
+    f.listeners.get("beforeunload")(unloading);
+    assert.equal(unloading.prevented,true,"an old export cannot mark newly added notes as saved");
+    const manifest=await getManifest(f.objects.find(obj=>obj.type==="application/zip"));
+    assert.equal(manifest.notes.length,1,"in-flight export must use a stable snapshot");
+  }finally{Blob.prototype.arrayBuffer=original;f.restore();}
+});
+
+test("voice recording cannot replace an unadded clip, and oversized chunks are rejected",async()=>{
+  const first=audioStream(),second=audioStream();let calls=0;
+  const f=fixture(()=>Promise.resolve(++calls===1?first.stream:second.stream));
+  try{
+    initDevelopmentFeedback(()=>({stage:"present"}));
+    f.id("feedback-toggle").fire("click");
+    await f.id("feedback-record").fire("click");
+    const recorder=f.FakeRecorder.instances[0];
+    recorder.handlers.get("dataavailable")({data:{size:15_000_001}});
+    assert.equal(recorder.state,"inactive","oversized audio must stop recording immediately");
+    assert.equal(f.id("feedback-clear-audio").disabled,true,"oversized voice must not be attached");
+    await f.id("feedback-record").fire("click");
+    assert.equal(f.FakeRecorder.instances.length,2);
+    f.id("feedback-stop").fire("click");
+    assert.equal(f.id("feedback-clear-audio").disabled,false);
+    await f.id("feedback-record").fire("click");
+    assert.equal(f.FakeRecorder.instances.length,2,"pending clip cannot be silently overwritten");
+    f.id("feedback-add").fire("click");
+    assert.equal(f.id("feedback-count").textContent,"1 captured");
+  }finally{f.restore();}
+});
+
+test("feedback session refuses excess notes rather than constructing an invalid ZIP",async()=>{
+  const f=fixture(()=>Promise.reject(new Error("not recording")));
+  try{
+    initDevelopmentFeedback(()=>({stage:"compare"}));
+    f.id("feedback-toggle").fire("click");
+    for(let i=0;i<41;i++){
+      f.id("feedback-text").value="Note "+i;
+      f.id("feedback-add").fire("click");
+    }
+    assert.equal(f.id("feedback-count").textContent,"40 captured");
+    assert.match(f.id("feedback-status").textContent,/limited to 40 notes/);
+    await f.id("feedback-export").fire("click");
+    assert.equal((await getManifest(f.objects.find(obj=>obj.type==="application/zip"))).notes.length,40);
+  }finally{f.restore();}
+});
