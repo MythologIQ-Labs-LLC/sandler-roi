@@ -16,7 +16,7 @@ function mockNode(){
     fire:(name,event={})=>handlers.get(name)?.(event),
     setAttribute:(name,value)=>{n.attributes[name]=String(value);},
     removeAttribute:name=>{delete n.attributes[name];},
-    remove:()=>{},focus:()=>{},append:(...children)=>{n.children.push(...children);},
+    remove:()=>{},focus:()=>{},click:()=>{},append:(...children)=>{n.children.push(...children);},
     replaceChildren:(...children)=>{n.children=[...children];},
     classList:{toggle:()=>{}}
   };
