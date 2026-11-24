@@ -39,6 +39,10 @@ export function initDevelopmentFeedback(getContext){
     draftContext=null;
     updateContext();
   }
+  function releaseEmptyDraft(){
+    // Failed, canceled, empty and discarded recordings must not pin a future comment.
+    if(!text.value.trim()&&!pendingAudio)clearDraftContext();
+  }
   function markChanged(){++revision;exported=false;}
   function updateContext(){
     const pinned=!!draftContext;
@@ -68,6 +72,7 @@ export function initDevelopmentFeedback(getContext){
       requesting=false;
       if(recorder?.state==="recording")recorder.stop();
       if(stream)for(const track of stream.getTracks())track.stop();
+      if(!recorder)releaseEmptyDraft();
       audioButtons();
     }
     pane.hidden=!active;
@@ -119,7 +124,6 @@ export function initDevelopmentFeedback(getContext){
       setStatus("Audio recording is not supported in this browser. Text feedback remains available.");return;
     }
     pinDraft();
-    markChanged();
     const request=++permissionRequest;
     requesting=true;audioButtons();
     let acquired=null;
@@ -157,12 +161,14 @@ export function initDevelopmentFeedback(getContext){
           setStatus("Voice note ready. Add it with your comment or remove it.");
         }
         closeStream();
+        releaseEmptyDraft();
       },{once:true});
       nextRecorder.addEventListener("error",()=>{
         discardRecording=true;chunks=[];
-        setStatus("Audio recording failed.");closeStream();
+        setStatus("Audio recording failed.");closeStream();releaseEmptyDraft();
       },{once:true});
       nextRecorder.start(1000);
+      markChanged();
       recordTimeout=setTimeout(()=>{
         if(nextRecorder.state==="recording"){
           setStatus("Voice recording reached its 2-minute limit and was stopped.");
@@ -176,6 +182,7 @@ export function initDevelopmentFeedback(getContext){
       if(request===permissionRequest){
         setStatus(err.name==="NotAllowedError"?"Microphone access was denied.":"Unable to record: "+err.message);
         closeStream();
+        releaseEmptyDraft();
       }
     }finally{
       if(request===permissionRequest)requesting=false;
