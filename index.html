@@ -190,7 +190,7 @@
       </section>
       <section class="card panel" id="panel-pipeline" role="tabpanel" aria-labelledby="tab-pipeline" tabindex="0" data-discover-panel="pipeline" hidden="">
         <div class="eyebrow">Optional · Pipeline bridge</div>
-        <h2>From pipeline to potential value</h2>
+        <h2>Current pipeline context</h2>
         <p class="small" style="margin:8px 0 14px">Enter your prospect's figures. This independent illustration is never added to the ROI total.</p>
         <div class="stack" id="pipeline-fields"></div>
         <p class="section-note" style="margin:10px 0 0">Uses the commercial gross-margin input above. Leave this section blank if pipeline data is unavailable.</p>
@@ -205,48 +205,89 @@
       </section>
     </aside>
     <main class="main">
-      <section class="card panel dashboard-card" data-workbench-step="discover model compare present">
-        <div class="headline">
-          <div>
-            <div class="eyebrow">Live financial perspective</div>
-            <h2 id="prospect-title" class="prospect-headline">Illustrative value opportunity</h2>
-            <p class="layout-description">What would modest improvements in sales execution be worth? Change the assumptions and test the answer together.</p>
-          </div>
-          <span class="pill">Projection, not a promise</span>
+
+      <section class="card panel baseline-stage" data-workbench-step="discover" aria-labelledby="baseline-title">
+        <div class="eyebrow">01 · Establish the baseline</div>
+        <h2 id="baseline-title">The prospect's starting point</h2>
+        <p class="small" id="prospect-title">Illustrative prospect</p>
+        <p class="layout-description">Begin with the buyer's current numbers. Review what is known and what is still illustrative before discussing projected improvements.</p>
+        <div class="baseline-grid">
+          <div class="baseline-point"><span>Current proposal win rate</span><strong id="baseline-win">—</strong></div>
+          <div class="baseline-point"><span>Annual proposals</span><strong id="baseline-proposals">—</strong></div>
+          <div class="baseline-point"><span>Average deal value</span><strong id="baseline-deal">—</strong></div>
+          <div class="baseline-point"><span>Current seller ramp</span><strong id="baseline-ramp">—</strong></div>
         </div>
-        <div class="selects no-print" role="group" aria-label="Select scenario">
+        <div class="baseline-investment">
+          <div><div class="eyebrow">Budget discussion</div><h3>Program investment for evaluation period</h3><p id="cost-basis" class="small">Fee-only estimate</p></div>
+          <strong id="cost">—</strong>
+        </div>
+        <p class="section-note" id="cost-extras">Other training costs are excluded.</p>
+        <p class="section-note" id="baseline-confidence">Source status will appear here.</p>
+        <div id="warnings" class="warnings" role="status" aria-live="polite"></div>
+      </section>
+      <section class="card panel model-stage" data-workbench-step="model">
+        <div class="flex-heading">
+          <div><div class="eyebrow">02 · Build a working hypothesis</div><h2>Which selling behaviors could improve?</h2></div>
+          <span class="small">Exclude irrelevant drivers</span>
+        </div>
+        <p class="section-note">Explore the operating assumptions first. The combined financial results come at the end.</p>
+        <div id="model-behavior" class="behavior-strip behavior-preview"></div>
+        <div id="levers"></div>
+        <div class="divider"></div>
+        <div class="flex-heading"><h2>Working assumptions</h2><span class="small" id="model-scenario-note">Explore one working hypothesis</span></div>
+        <div id="assumptions" class="two"></div>
+      </section>
+
+      <section class="card panel validation-stage" data-workbench-step="compare" aria-labelledby="review-title">
+        <div class="eyebrow">03 · Check the reasoning</div>
+        <h2 id="review-title">Validate the baseline and potential changes</h2>
+        <p class="layout-description">Confirm that the source figures, proposed behaviors and investment reflect the buyer's situation. No combined financial return is presented yet.</p>
+        <div class="validation-grid">
+          <div class="validation-box">
+            <h3>Current performance versus the working hypothesis</h3>
+            <div id="compare-behavior" class="behavior-strip"></div>
+          </div>
+          <div class="validation-box">
+            <h3>Investment and evidence review</h3>
+            <p>Modeled program investment: <strong id="compare-cost">—</strong></p>
+            <p id="compare-cost-basis" class="section-note">Cost scope</p>
+            <p id="compare-evidence" class="small">Review input source classifications.</p>
+            <p class="section-note">Check the buyer's pain, budget and decision process before presenting fulfillment.</p>
+          </div>
+        </div>
+        <p id="compare-warning" class="section-note" role="status">Review pending.</p>
+        <p class="section-note">The financial opportunity and alternative scenarios appear in Present. All preceding figures remain editable.</p>
+      </section>
+      <section class="card panel reveal-stage" data-workbench-step="present" aria-labelledby="reveal-heading">
+        <div class="eyebrow">04 · Present the opportunity</div>
+        <h2 id="reveal-heading">Where you are. What could change.</h2>
+        <p class="layout-description">Current figures come from the prospect's entered baseline; the possible future figures are scenario hypotheses, not achieved outcomes.</p>
+        <div id="present-behavior" class="behavior-strip behavior-reveal"></div>
+        <div class="flex-heading reveal-select-heading"><h3>Explore possible outcomes together</h3><span class="small">Select an illustrative scenario</span></div>
+        <div class="selects no-print" role="group" aria-label="Select illustrative financial scenario">
           <button class="scenario" type="button" data-scenario="conservative" aria-pressed="false">Conservative</button>
           <button class="scenario" type="button" data-scenario="expected" aria-pressed="true">Expected</button>
           <button class="scenario" type="button" data-scenario="upside" aria-pressed="false">Upside</button>
         </div>
         <p class="print-only"><strong id="print-scenario">Expected</strong> scenario</p>
-        <div class="results">
-          <div class="stat feature"><div class="k">Modeled ROI</div><div class="v" id="roi">—</div><div class="note">Net modeled benefit ÷ program cost</div></div>
-          <div class="stat"><div class="k">Net value</div><div class="v" id="net">—</div><div class="note">After training investment</div></div>
-          <div class="stat"><div class="k">Gross benefit</div><div class="v" id="benefit">—</div><div class="note">After attribution adjustments</div></div>
-          <div class="stat"><div class="k">Modeled investment</div><div class="v" id="cost">—</div><div class="note" id="cost-basis">Fee-only estimate</div></div>
+        <div class="reveal-financials">
+          <div class="reveal-primary"><span>Potential incremental modeled value</span><strong id="benefit">—</strong><small>Over the chosen period, after overlap adjustment</small></div>
+          <div class="reveal-submetric"><span>Program investment</span><strong id="present-cost">—</strong></div>
+          <div class="reveal-submetric"><span>Potential net benefit</span><strong id="net">—</strong></div>
+          <div class="reveal-submetric"><span>Modeled ROI</span><strong id="roi">—</strong></div>
         </div>
-        <p class="small" id="cost-extras" style="margin:12px 0 3px">Other training costs are excluded.</p>
-        <div id="warnings" class="warnings" role="status" aria-live="polite"></div>
+        <p id="present-cost-basis" class="section-note">Investment scope</p>
+        <p class="section-note">Incremental value is hypothetical and is not a measured comparison against a zero-revenue business.</p>
+        <p id="reveal-warning" class="section-note" role="status"></p>
       </section>
-      <section class="card panel model-stage" data-workbench-step="model">
+      <section class="card panel compare-stage" data-workbench-step="present">
         <div class="flex-heading">
-          <div><div class="eyebrow">Your improvement hypotheses</div><h2>Where additional value could come from</h2></div>
-          <span class="small">Switch off any irrelevant driver</span>
-        </div>
-        <div id="levers"></div>
-        <div class="divider"></div>
-        <div class="flex-heading"><h2>Scenario assumptions</h2><span class="small">Editable for selected scenario</span></div>
-        <div id="assumptions" class="two"></div>
-      </section>
-      <section class="card panel compare-stage" data-workbench-step="compare">
-        <div class="flex-heading">
-          <div><div class="eyebrow">Scenarios side by side</div><h2>Side-by-side investment comparison</h2></div>
-          <span class="small">Benefits after overlap adjustment</span>
+          <div><div class="eyebrow">After the reveal · Explore the range</div><h2>Conservative, expected, and upside outcomes</h2></div>
+          <span class="small">Alternatives, not promises</span>
         </div>
         <div id="scenario-bars"></div>
         <div class="comparison-table-wrap">
-          <table class="scenario-table" aria-label="Financial comparison of all three scenarios">
+          <table class="scenario-table" aria-label="Illustrative financial comparison of three outcomes">
             <thead><tr><th scope="col">Scenario</th><th scope="col">Modeled profit</th><th scope="col">Net value</th><th scope="col">ROI</th><th scope="col">Simple payback</th></tr></thead>
             <tbody id="scenario-table"></tbody>
           </table>
@@ -258,8 +299,20 @@
         </div>
         <p class="section-note" style="margin:15px 0 0">* Simple uniform run-rate estimate, not cash-flow timing. ** Additional price improvement needed after other modeled drivers; zero if those drivers already cover the cost.</p>
       </section>
-      <section class="card panel" data-workbench-step="compare" aria-labelledby="pipeline-heading">
-        <div class="eyebrow">Optional analysis · Excluded from ROI</div>
+      <section class="card panel" data-workbench-step="present" aria-labelledby="present-driver-heading">
+        <div class="eyebrow">Show the math</div><h2 id="present-driver-heading">What creates the modeled value?</h2>
+        <div id="present-driver-summary" class="present-drivers"></div>
+        <p id="present-evidence" class="section-note">Source status will appear here.</p>
+      </section>
+      <section class="pitch" data-workbench-step="present">
+        <div class="eyebrow">Executive conversation summary</div>
+        <h2 style="margin-bottom:10px">The case for improvement</h2>
+        <p id="pitch-text" style="margin-bottom:12px"></p>
+        <p id="pitch-caveat" class="small"></p>
+      </section>
+      <details class="card panel optional-analysis" data-workbench-step="present">
+        <summary>Optional pipeline sensitivity (excluded from ROI)</summary>
+        <div class="inside"><div class="eyebrow">Optional analysis · Excluded from ROI</div>
         <div class="flex-heading"><h2 id="pipeline-heading">Pipeline-to-value bridge</h2><span class="pill">Not additive</span></div>
         <div class="results">
           <div class="stat"><div class="k">Modeled closed revenue</div><div class="v" id="pipeline-revenue">Needs input</div><div class="note">Pipeline × expected conversion</div></div>
@@ -274,19 +327,8 @@
             <p class="small">Sandler reports $6M–$8M combined pipeline over 10 weeks, one participant's $3.5M pipeline and $364K closed revenue, and an average 75% improvement in AI roleplay scores. These are case-study observations, not an expected prospect conversion rate or financial ROI.</p>
             <p class="small"><a href="https://sandler.com/case-study/revelry-gtm/" target="_blank" rel="noopener noreferrer">Read Sandler's original case study</a></p>
           </div>
-        </details>
-      </section>
-      <section class="card panel" data-workbench-step="present" aria-labelledby="present-driver-heading">
-        <div class="eyebrow">Show the math</div><h2 id="present-driver-heading">What creates the modeled value?</h2>
-        <div id="present-driver-summary" class="present-drivers"></div>
-        <p id="present-evidence" class="section-note">Source status will appear here.</p>
-      </section>
-      <section class="pitch" data-workbench-step="present">
-        <div class="eyebrow">Executive conversation summary</div>
-        <h2 style="margin-bottom:10px">The case for improvement</h2>
-        <p id="pitch-text" style="margin-bottom:12px"></p>
-        <p id="pitch-caveat" class="small"></p>
-      </section>
+        </details></div>
+      </details>
     </main>
   </div>
 

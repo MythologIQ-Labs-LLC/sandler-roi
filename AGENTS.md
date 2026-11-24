@@ -88,3 +88,12 @@ The installed Qortara Logic Demo offers stateless read-only evaluators for **sup
 - Keep retrospective estimates unreviewed until the owner confirms them. Do not count GitHub Actions runtime, model generation, elapsed time between commits, waiting or parallel work as billable labor automatically.
 - Do not place hourly rates, commercial terms or private customer information in this public repository. Estimated effort is not an invoice.
 - Include the cumulative effort reading and any unresolved estimates in PR handoff notes. For documentation-only administration, explain why no new billable-effort entry was added.
+
+## Consultative disclosure sequence
+
+- Do not reveal three-scenario financial results or full modeled ROI on Discover, Model or Compare. Stage-based UI is not an access-control boundary; free navigation to Present always remains possible.
+- Discover establishes entered commercial baselines and investment. Model tests hypothetical behavior without financial payoff amounts. Compare reviews working operational changes, cost, inputs, evidence and buyer qualification. Present reveals honest current-versus-possible operating changes, modeled incremental value, ROI, scenario alternatives and financial math.
+- The "before" state is never invented as zero revenue or zero profit. Use only actual entered win-rate and seller-ramp baselines where comparable operating measures exist.
+- Disabled or invalid drivers must not be shown as successful behavior change. Models remain estimates, and missing data remains missing.
+- Browser acceptance must confirm hidden financial presentation before Present and a visible scenario table, change indicators and navigation during Present. Keep prospect source evidence and caveats visible.
+- Update the [project effort ledger](docs/engagement/effort-ledger.json) in each substantive development phase.

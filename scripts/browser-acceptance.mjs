@@ -58,6 +58,19 @@ try{
   if(data.exceptionDetails)throw new Error(data.exceptionDetails.text||'Evaluation failed');
   return data.result?.value;
  }
+ const visibleStage=()=>evaluate('(()=>{'+
+  'const shown=sel=>{const el=document.querySelector(sel);return !!el&&el.getClientRects().length>0};'+
+  'return {baseline:shown(".baseline-stage"),modelBehavior:shown("#model-behavior"),'+
+  'review:shown(".validation-stage"),presentBehavior:shown("#present-behavior"),'+
+  'scenario:shown("[data-scenario]"),benefit:shown("#benefit"),roi:shown("#roi"),'+
+  'comparison:shown(".compare-stage"),'+
+  'modelText:document.querySelector("#model-behavior")?.textContent||"",'+
+  'winReveal:document.querySelector("#present-behavior")?.textContent||"",'+
+  'gross:document.querySelector("#benefit")?.textContent||"",'+
+  'rows:document.querySelectorAll("#scenario-table tr").length,'+
+  'firstMainVisible:[...document.querySelector(".main").children].find(el=>el.getClientRects().length>0)?.className||"",'+
+  'revealTop:Math.round(document.querySelector(".reveal-stage").getBoundingClientRect().top),'+
+  'pipelineExpanded:document.querySelector(".optional-analysis")?.open||false};})()');
  const sample=()=>evaluate('(()=>{'+
   'const panels=[...document.querySelectorAll("[data-discover-panel]")];'+
   'const visible=panels.filter(p=>!p.hidden&&getComputedStyle(p).display!=="none"&&p.getBoundingClientRect().height>0);'+
@@ -90,6 +103,12 @@ try{
   'ROI Workbench app initialization');
  let measurements=await sample();
  console.log('Desktop Discover initial:',JSON.stringify(measurements));
+ const initialVisibility=await visibleStage();
+ assert.equal(initialVisibility.baseline,true,'Discover must show buyer baseline');
+ for(const key of ['scenario','roi','benefit','comparison','presentBehavior']){
+  assert.equal(initialVisibility[key],false,'Premature financial reveal in Discover: '+key);
+ }
+
  const initialShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'discover-desktop.png'),Buffer.from(initialShot.data,'base64'));
  assert.deepEqual(measurements.visiblePanels,['engagement'],'Only Engagement may occupy layout space');
@@ -123,10 +142,47 @@ try{
  }
  const desktop=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'discover-desktop.png'),Buffer.from(desktop.data,'base64'));
+ await evaluate('document.querySelector("[data-workbench-nav=model]").click()');
+ let phase=await visibleStage();
+ assert.equal(phase.modelBehavior,true,'Model must show operating hypotheses');
+ assert.match(phase.modelText,/Current baseline/);
+ assert.match(phase.modelText,/26\.4%/);
+ for(const key of ['scenario','roi','benefit','comparison']){
+  assert.equal(phase[key],false,'Model disclosed financial return too early: '+key);
+ }
+ await evaluate('document.querySelector("[data-workbench-nav=compare]").click()');
+ phase=await visibleStage();
+ assert.equal(phase.review,true,'Compare must show buyer validation');
+ for(const key of ['scenario','roi','benefit','comparison']){
+  assert.equal(phase[key],false,'Review disclosed full scenario comparison: '+key);
+ }
+ const reviewImage=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'review-desktop.png'),Buffer.from(reviewImage.data,'base64'));
  await evaluate('document.querySelector("[data-workbench-nav=present]").click()');
  const present=await sample();assert.equal(present.stage,'present');
  assert.equal(present.navVisible,true,'Timeline must remain visible in Present');
+ phase=await visibleStage();
+ for(const key of ['presentBehavior','scenario','roi','benefit','comparison']){
+  assert.equal(phase[key],true,'Present must reveal the completed financial business case: '+key);
+ }
+ assert.match(phase.winReveal,/26\.4%/);
+ assert.match(phase.gross,/\$/);
+ assert.equal(phase.rows,3,'Present must include all three scenario rows');
+ assert.match(phase.firstMainVisible,/reveal-stage/,'Reveal must be the first visible Present panel');
+ assert.ok(phase.revealTop<=320,'Main business case is below the fold: '+phase.revealTop);
+ assert.equal(phase.pipelineExpanded,false,'Optional sensitivity should not preempt the reveal');
+ const presentImage=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'present-desktop.png'),Buffer.from(presentImage.data,'base64'));
+ const beforeChange=phase.gross;
+ await evaluate('document.querySelector("[data-scenario=upside]").click()');
+ phase=await visibleStage();
+ assert.notEqual(phase.gross,beforeChange,'Scenario selection must update financial reveal');
+ assert.match(phase.winReveal,/28\.4%/);
+ const upsideImage=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'present-upside-desktop.png'),Buffer.from(upsideImage.data,'base64'));
  await evaluate('document.querySelector("[data-workbench-nav=discover]").click()');
+ phase=await visibleStage();
+ assert.equal(phase.scenario,false,'Returning to Discover must hide scenario controls');
  await command('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
  await sleep(150);
  const mobile=await sample();console.log('Mobile Discover:',JSON.stringify(mobile));
