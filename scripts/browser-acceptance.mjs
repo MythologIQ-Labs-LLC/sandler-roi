@@ -354,16 +354,28 @@ try{
  assert.deepEqual(resetState.visible,['engagement']);
  // Customer files: explicit directory connection, save, reopen, and JSON fallback.
  await command('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
- await evaluate('(()=>{const disk=new Map();const handle=name=>({kind:"file",name,'+
+ await evaluate('(()=>{const disk=new Map();window.__customerTestDisk=disk;const handle=name=>({kind:"file",name,'+
   'getFile:async()=>new File([disk.get(name)],name,{type:"application/json"}),'+
   'createWritable:async()=>({write:async data=>{disk.set(name,String(data))},close:async()=>{},abort:async()=>{}})});'+
   'window.showDirectoryPicker=async()=>({name:"Sandler Customer Files",'+
   'entries:async function*(){for(const name of disk.keys())yield [name,handle(name)]},'+
   'getFileHandle:async(name,options={})=>{if(!disk.has(name)&&!options.create)throw new DOMException("Missing","NotFoundError");return handle(name)},'+
   'removeEntry:async name=>{disk.delete(name)}});'+
-  'document.getElementById("customer-folder-connect").disabled=false;})()');
+  'document.getElementById("customer-folder-connect").disabled=false;'+
+  'window.__customerTestPicker=window.showDirectoryPicker;})()');
  await evaluate('document.getElementById("customer-files-open").click()');
- await evaluate('document.getElementById("customer-folder-connect").click()');
+ // Denied and canceled permissions must leave folder save unavailable.
+ await evaluate('(()=>{window.showDirectoryPicker=async()=>{throw new DOMException("No permission","NotAllowedError")};'+
+  'document.getElementById("customer-folder-connect").click()})()');
+ const folderDenied=await until(async()=>evaluate('document.getElementById("customer-files-status").textContent.includes("Unable to open folder")'),
+   'folder permission denied');
+ assert.equal(folderDenied,true);
+ assert.equal(await evaluate('document.getElementById("customer-save").disabled'),true);
+ await evaluate('(()=>{window.showDirectoryPicker=async()=>{throw new DOMException("Cancelled","AbortError")};'+
+  'document.getElementById("customer-folder-connect").click()})()');
+ assert.equal(await evaluate('document.getElementById("customer-save").disabled'),true);
+ await evaluate('(()=>{window.showDirectoryPicker=window.__customerTestPicker;'+
+  'document.getElementById("customer-folder-connect").click()})()');
  const folderReady=await until(async()=>evaluate('document.getElementById("customer-folder-hint").textContent.includes("Sandler Customer Files")'),
   'customer folder picker connected');
  assert.equal(folderReady,true);
@@ -386,6 +398,15 @@ try{
    const entries=await readdir(downloadDir);return entries.includes('sandler-roi-demo-customer.json');
  },'JSON backup downloaded');
  assert.equal(backedUp,true);
+ const originalCustomerJson=await evaluate('window.__customerTestDisk.get("sandler-roi-demo-customer.json")');
+ await evaluate('(()=>{window.confirm=()=>false;document.getElementById("customer-save").click()})()');
+ assert.equal(await evaluate('window.__customerTestDisk.get("sandler-roi-demo-customer.json")'),originalCustomerJson,
+   'declined overwrite must preserve saved customer');
+ await evaluate('document.getElementById("customer-remove").click()');
+ assert.equal(await evaluate('window.__customerTestDisk.size'),1,'declined deletion must preserve customer');
+ await evaluate('(()=>{window.confirm=()=>true;document.getElementById("customer-remove").click()})()');
+ const removed=await until(async()=>evaluate('window.__customerTestDisk.size===0'), 'explicit deletion');
+ assert.equal(removed,true);
  // Opt-in feedback contains only user-entered notes plus screen/scenario context.
  await evaluate('document.getElementById("customer-files-close").click()');
  await evaluate('document.getElementById("feedback-toggle").click()');
