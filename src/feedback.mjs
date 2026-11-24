@@ -140,7 +140,7 @@ export function initDevelopmentFeedback(getContext){
       recorder=nextRecorder;
       chunks=[];recordingBytes=0;discardRecording=false;
       nextRecorder.addEventListener("dataavailable",event=>{
-        if(!event.data?.size||discardRecording)return;
+        if(recorder!==nextRecorder||!event.data?.size||discardRecording)return;
         recordingBytes+=event.data.size;
         if(recordingBytes>MAX_AUDIO_BYTES){
           discardRecording=true;chunks=[];
@@ -151,6 +151,8 @@ export function initDevelopmentFeedback(getContext){
         chunks.push(event.data);
       });
       nextRecorder.addEventListener("stop",()=>{
+        // Recorder events can arrive after an error and after a newer take begins.
+        if(recorder!==nextRecorder)return;
         const blob=discardRecording?null:new Blob(chunks,{type:nextRecorder.mimeType||"audio/webm"});
         chunks=[];
         if(!blob||blob.size===0||blob.size>MAX_AUDIO_BYTES){
@@ -164,6 +166,7 @@ export function initDevelopmentFeedback(getContext){
         releaseEmptyDraft();
       },{once:true});
       nextRecorder.addEventListener("error",()=>{
+        if(recorder!==nextRecorder)return;
         discardRecording=true;chunks=[];
         setStatus("Audio recording failed.");closeStream();releaseEmptyDraft();
       },{once:true});
