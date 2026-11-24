@@ -1,5 +1,6 @@
 import { DEFAULT_INPUTS, SCENARIOS, DEFAULT_ACTIVE, calculate, calculatePipelineBridge, MONEY, PERCENT } from "./roi.mjs";
 import { BASELINE_FIELDS, EVIDENCE_STATUSES, defaultEvidence, normalizeEvidence, requiredEvidenceKeys, assessEvidence } from "./evidence.mjs";
+import { CSV_FIELDS, CSV_LABELS, CSV_TEMPLATE_HEADERS, prepareCSV, suggestMapping, mappedCSVPreview, buildCSVImport } from "./csv-import.mjs";
 
 const clone = object => JSON.parse(JSON.stringify(object));
 let inputs=clone(DEFAULT_INPUTS);
@@ -8,6 +9,8 @@ let scenarios=clone(SCENARIOS);
 let active=clone(DEFAULT_ACTIVE);
 let selected="expected";
 let currentStep="discover", priorStep="compare";
+let discoveryPanel="engagement";
+let pendingCSV=null, csvMapping={};
 const $=id=>document.getElementById(id);
 const JOURNEY={
   discover:{label:"01 / DISCOVER",title:"Start with the prospect's numbers.",
@@ -23,6 +26,27 @@ const JOURNEY={
     description:"Share a concise summary of projected value, investment, and assumptions. These are estimates, never guaranteed outcomes.",
     next:"Return to modeling"}
 };
+
+const DISCOVERY_SECTIONS={
+  engagement:"Define the engagement and program investment.",
+  performance:"Check baseline pricing, proposal, account and onboarding metrics.",
+  pipeline:"Optional pipeline modeling. These figures are not added to ROI.",
+  evidence:"Inspect sources and confidence before presenting financial claims."
+};
+function setDiscoverPanel(key){
+  if(!Object.hasOwn(DISCOVERY_SECTIONS,key))return;
+  discoveryPanel=key;
+  document.querySelectorAll("[data-discover-tab]").forEach(button=>{
+    button.setAttribute("aria-pressed",String(button.dataset.discoverTab===key));
+  });
+  document.querySelectorAll("[data-discover-panel]").forEach(panel=>{
+    panel.setAttribute("data-discover-active",String(panel.dataset.discoverPanel===key));
+  });
+  put("discover-panel-hint",DISCOVERY_SECTIONS[key]);
+  const aside=document.querySelector(".side");
+  if(aside)aside.scrollTop=0;
+}
+
 function setStep(key){
   if(!Object.prototype.hasOwnProperty.call(JOURNEY,key))return;
   if(key==="present"&&currentStep!=="present")priorStep=currentStep;
@@ -318,6 +342,66 @@ function render(){
   put("pitch-caveat","Use prospect-confirmed baselines. "+proof.illustrative.length+" inputs illustrative and "+proof.unconfirmed.length+
     " unconfirmed. Evidence classifications are user-declared, never independently verified. Training outcomes depend on adoption and external conditions. Deduction for overlapping win-rate and major-account value: "+scenario.overlapPct+"%. Evidence notes: "+(inputs.notes||"Not provided."));
 }
+
+function closeCSVDialog(){
+  const dialog=$("csv-map-dialog");
+  if(typeof dialog.close==="function")dialog.close();
+  else dialog.removeAttribute("open");
+}
+function openCSVDialog(){
+  const dialog=$("csv-map-dialog");
+  if(typeof dialog.showModal==="function")dialog.showModal();
+  else dialog.setAttribute("open","");
+}
+function csvSelectedRow(){
+  return Number($("csv-record").value||0);
+}
+function validateCSVMapping(){
+  if(!pendingCSV)return null;
+  try{
+    const preview=mappedCSVPreview(pendingCSV,csvSelectedRow(),csvMapping,pendingCSV.filename);
+    const names=preview.entries.map(entry=>CSV_LABELS[entry.field]);
+    put("csv-map-preview",preview.entries.length+" mapped values. "+
+      (names.slice(0,5).join(", ")||"None")+
+      (names.length>5?", and "+(names.length-5)+" more.":".")+
+      " Unmapped fields will be blank; all imported sources start unconfirmed.");
+    $("csv-apply").disabled=false;
+    return preview;
+  }catch(err){
+    put("csv-map-preview",err.message);
+    $("csv-apply").disabled=true;
+    return null;
+  }
+}
+function drawCSVMapping(){
+  const target=$("csv-map-fields");target.replaceChildren();
+  const selector=$("csv-record");selector.replaceChildren();
+  for(const [i,row] of pendingCSV.rows.entries()){
+    const option=document.createElement("option");option.value=String(i);
+    option.textContent="Row "+(i+2)+(row[0]?" · "+row[0].slice(0,70):"");
+    selector.append(option);
+  }
+  selector.value="0";
+  for(const key of CSV_FIELDS){
+    const block=document.createElement("div");block.className="field";
+    const label=document.createElement("label");label.textContent=CSV_LABELS[key]||key;
+    const select=document.createElement("select");
+    select.setAttribute("aria-label","CSV column for "+(CSV_LABELS[key]||key));
+    const no=document.createElement("option");no.value="";no.textContent="Not mapped";select.append(no);
+    pendingCSV.headers.forEach((header,index)=>{
+      const option=document.createElement("option");
+      option.value=String(index);option.textContent=header.slice(0,90);select.append(option);
+    });
+    select.value=csvMapping[key]===undefined?"":String(csvMapping[key]);
+    select.addEventListener("change",()=>{
+      csvMapping[key]=select.value===""?null:Number(select.value);
+      validateCSVMapping();
+    });
+    block.append(label,select);target.append(block);
+  }
+  validateCSVMapping();
+}
+
 function snapshot(){
   const result=calculate(inputs,scenarios[selected],active);
   return {schema:"sandler-roi/2",savedAt:new Date().toISOString(),selected,inputs,scenarios,active,evidence,calculated:result};
@@ -354,6 +438,9 @@ $("export-csv").addEventListener("click",()=>{
 document.querySelectorAll("[data-workbench-nav]").forEach(button=>{
   button.addEventListener("click",()=>setStep(button.dataset.workbenchNav));
 });
+document.querySelectorAll("[data-discover-tab]").forEach(button=>{
+  button.addEventListener("click",()=>setDiscoverPanel(button.dataset.discoverTab));
+});
 $("step-next").addEventListener("click",()=>{
   const steps=["discover","model","compare","present"];
   setStep(currentStep==="present"?"model":steps[Math.min(3,steps.indexOf(currentStep)+1)]);
@@ -366,6 +453,36 @@ $("reset").addEventListener("click",()=>{
   renderFields();renderAssumptions();render();
 });
 $("import").addEventListener("click",()=>$("import-file").click());
+$("import-csv").addEventListener("click",()=>$("import-csv-file").click());
+$("csv-template").addEventListener("click",()=>{
+  download("sandler-roi-blank-import-template.csv",
+    CSV_TEMPLATE_HEADERS.map(csvCell).join(",")+"\r\n","text/csv");
+});
+$("csv-close").addEventListener("click",closeCSVDialog);
+$("csv-record").addEventListener("change",validateCSVMapping);
+$("csv-apply").addEventListener("click",()=>{
+  const preview=validateCSVMapping();
+  if(!preview)return;
+  const imported=buildCSVImport(preview);
+  inputs=imported.inputs;
+  evidence=normalizeEvidence(imported.evidence,inputs);
+  scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
+  closeCSVDialog();
+  pendingCSV=null;csvMapping={};
+  renderFields();renderAssumptions();setDiscoverPanel("engagement");setStep("discover");
+});
+$("import-csv-file").addEventListener("change",async event=>{
+  const file=event.target.files?.[0];event.target.value="";if(!file)return;
+  if(file.size>2_000_000){window.alert("CSV file exceeds 2 MB.");return;}
+  try{
+    const prepared=prepareCSV(await file.text());
+    pendingCSV={...prepared,filename:file.name||"import.csv"};
+    csvMapping=suggestMapping(prepared.headers);
+    drawCSVMapping();
+    openCSVDialog();
+  }catch(err){pendingCSV=null;window.alert("CSV could not be read: "+err.message);}
+});
+
 $("import-file").addEventListener("change",async event=>{
   const f=event.target.files?.[0];event.target.value="";if(!f)return;
   if(f.size>2000000){window.alert("JSON file exceeds 2 MB.");return;}
@@ -387,4 +504,4 @@ $("import-file").addEventListener("change",async event=>{
     renderFields();renderAssumptions();render();
   }catch(err){window.alert("Could not import model: "+err.message);}
 });
-renderFields();renderAssumptions();setStep("discover");
+renderFields();renderAssumptions();setDiscoverPanel("engagement");setStep("discover");

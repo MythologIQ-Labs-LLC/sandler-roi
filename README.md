@@ -51,7 +51,21 @@ Every starting value is **fictional demonstration data**, not a prospect fact or
 
 The [guided workbench implementation](src/app.mjs) introduces a **four-stage journey**: **Discover** (prospect data and sources), **Model** (financial levers and assumptions), **Compare** (three scenarios, charts and a table), and **Present** (client-facing scenario summary). The journey navigation does not certify evidence or block a conversation while figures are unknown.
 
-The UI uses Sandler's published **Stable** (\`#21245c\`), **Fresh** (\`#00aded\`), and **Energetic** (\`#0045c2\`) palette. The header is a **text-only prototype brand treatment**, not Sandler's stylized corporate logo. Official asset rights and final marketing approval remain open. See [workbench user journey and branding decisions](docs/design/rep-workbench-journey.md).
+The UI uses Sandler's published **Stable** (\`#21245c\`), **Fresh** (\`#00aded\`), and **Energetic** (\`#0045c2\`) palette. The header uses the authentic Sandler white wordmark with cyan UpStep from a Sandler-affiliated training-center CDN. Its source and the official [logo kit](https://sandler.com/wp-content/uploads/2023/03/Sandler-Logo-Kit-1.zip) are documented below. The logo is loaded from Sandler's affiliated domain, not copied into this repository, and that image request is the only external asset request introduced by this UI change. See [workbench user journey and branding decisions](docs/design/rep-workbench-journey.md).
+
+
+## Discovery layout and CSV import
+
+Discover is now organized as **four tabs within its sidebar** (Engagement, Performance, Pipeline, Evidence), rather than a single vertically stacked form. The sidebar has a bounded viewport on desktop; selecting a tab preserves the inputs and reduces whole-page scrolling. The **Discover → Model → Compare → Present** journey stays visible even on the Present step. Print still excludes the interactive navigation.
+
+**Import options:**
+- **Saved JSON model:** workbench's versioned \`sandler-roi/1\` and \`sandler-roi/2\` snapshots.
+- **Prospect CSV:** choose a row, review automatically suggested header mappings, adjust any mapping, and explicitly apply. A downloadable blank template defines canonical column names. Only mapped fields are imported, and *every unprovided financial value is missing*, not an illustrative default. The active scenarios reset to the sample assumptions to avoid borrowing a previous client's sensitivity choices.
+- **Key/value CSV:** \`field,value\` (or a workbench-exported \`Metric,Value\` CSV with \`Input <field>\` rows) is recognized; the importer never trusts computed ROI cells or evidence flags from the exported report.
+
+**CSV is not a universal Sandler standard or CRM connector.** Real CRM exports use different columns and time windows. The mapping table is the deliberate compatibility layer. Numeric fields use ROI engine validation, with \`40%\` interpreted as **40 percentage points** rather than 0.4. Maximum input size is 2 MB, 500 data rows, and 100 columns. Client records stay in-memory until the rep applies one row; any imported source labels begin **unconfirmed**, not verified.
+
+**Brand source:** Official [Sandler branding page](https://sandler.com/branding/) and [logo kit](https://sandler.com/wp-content/uploads/2023/03/Sandler-Logo-Kit-1.zip). The on-screen wordmark currently comes unchanged from \`go.nextlevel.sandler.com\` (an affiliated Sandler training center). It requires an image request to that domain; \`referrerpolicy="no-referrer"\` prevents the containing page URL from being forwarded. The four navigation line icons are original artwork following Sandler's published circular white-line icon style. The approved official kit should replace the CDN dependency once its files are available locally.
 
 ## What it models
 

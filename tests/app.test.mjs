@@ -33,10 +33,21 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
   const steps=["discover","model","compare","present"].map(key=>{
     const el=createNode("button");el.dataset.workbenchNav=key;return el;
   });
+  const discovery=["engagement","performance","pipeline","evidence"];
+  const tabs=discovery.map(key=>{
+    const el=createNode("button");el.dataset.discoverTab=key;return el;
+  });
+  const panels=discovery.map(key=>{
+    const el=createNode("section");el.dataset.discoverPanel=key;return el;
+  });
   const document={
     getElementById:id=>elements.get(id),
     createElement:createNode,
-    querySelectorAll:query=>query==="[data-scenario]"?buttons:query==="[data-workbench-nav]"?steps:[],
+    querySelectorAll:query=>query==="[data-scenario]"?buttons:
+      query==="[data-workbench-nav]"?steps:
+      query==="[data-discover-tab]"?tabs:
+      query==="[data-discover-panel]"?panels:[],
+    querySelector:query=>query===".side"?{scrollTop:0}:null,
     body:createNode("body")
   };
   for(const match of html.matchAll(/id="([^"]+)"/g)){
@@ -121,6 +132,68 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(elements.get("cost").textContent,"$79,200");
       assert.equal(elements.get("cost-basis").textContent,"Fee-only estimate");
       assert.doesNotMatch(elements.get("roi").textContent,/9999999/);
+    });
+    await t.test("Discover uses four single-panel tabs without mixing data",async()=>{
+      assert.equal(tabs.length,4);
+      assert.equal(tabs[0].attributes["aria-pressed"],"true");
+      assert.equal(panels[0].attributes["data-discover-active"],"true");
+      const baseline=elements.get("cost").textContent;
+      await tabs[2].trigger("click");
+      assert.equal(tabs[2].attributes["aria-pressed"],"true");
+      assert.equal(panels[0].attributes["data-discover-active"],"false");
+      assert.equal(panels[2].attributes["data-discover-active"],"true");
+      assert.equal(elements.get("cost").textContent,baseline);
+      await tabs[0].trigger("click");
+    });
+    await t.test("CSV mapper previews a prospect row but does not import until Apply",async()=>{
+      const original=elements.get("cost").textContent;
+      const file=elements.get("import-csv-file");
+      file.files=[{name:"prospect-data.csv",size:130,
+        text:async()=> "Company,Monthly Fee,Program Months,Win Rate\nProspect Alpha,6000,12,25%\nProspect Beta,8000,6,30%\n"}];
+      await file.trigger("change",{target:file});
+      assert.match(elements.get("csv-map-preview").textContent,/mapped values/);
+      assert.equal(elements.get("cost").textContent,original);
+      assert.equal(elements.get("csv-record").children.length,2);
+      assert.equal(elements.get("csv-apply").disabled,false);
+      await elements.get("csv-close").trigger("click");
+      assert.equal(elements.get("cost").textContent,original);
+      // Re-opening the file is required after canceling the staged mapping.
+    });
+    await t.test("CSV import applies chosen row and leaves unrelated example inputs missing",async()=>{
+      const file=elements.get("import-csv-file");
+      file.files=[{name:"prospects.csv",size:150,
+        text:async()=> "Company,Monthly Fee,Program Months,Win Rate\nAlpha,6000,12,25%\nBeta,8000,6,30%\n"}];
+      await file.trigger("change",{target:file});
+      elements.get("csv-record").value="1";
+      await elements.get("csv-record").trigger("change");
+      await elements.get("csv-apply").trigger("click");
+      assert.equal(elements.get("field-prospect").value,"Beta");
+      assert.equal(elements.get("field-monthlyFee").value,"8000");
+      assert.equal(elements.get("field-programMonths").value,"6");
+      assert.equal(elements.get("cost").textContent,"Needs input");
+      assert.equal(elements.get("roi").textContent,"Incomplete");
+      const row=elements.get("evidence-register").children
+        .find(item=>item.children[0].textContent==="Monthly program fee");
+      assert.equal(row.children[1].value,"unconfirmed");
+      assert.equal(document.body.dataset.stage,"discover");
+    });
+    await t.test("download CSV template exposes canonical field headings",async()=>{
+      await elements.get("csv-template").trigger("click");
+      const content=await downloads.at(-1).blob.text();
+      assert.match(content,/"prospect"/);
+      assert.match(content,/"monthlyFee"/);
+      assert.match(content,/"programMonths"/);
+    });
+    await t.test("reset after CSV import restores illustrative demo inputs",async()=>{
+      await elements.get("reset").trigger("click");
+      assert.equal(elements.get("cost").textContent,"$79,200");
+      assert.equal(elements.get("field-prospect").value,"Example prospect (illustrative)");
+    });
+    await t.test("present stage keeps navigation active in the workbench DOM",async()=>{
+      await steps[3].trigger("click");
+      assert.equal(steps[3].attributes["aria-current"],"step");
+      await steps[0].trigger("click");
+      assert.equal(document.body.dataset.stage,"discover");
     });
     await t.test("meeting journey starts in Discover and advances without leaving the page",async()=>{
       assert.equal(document.body.dataset.stage,"discover");

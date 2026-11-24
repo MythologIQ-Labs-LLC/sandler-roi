@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#21245c">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://go.nextlevel.sandler.com; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Sandler ROI Workbench | Illustrative Business Case</title>
   <meta name="description" content="Configurable ROI modeling workbench for consultative sales training discussions.">
   <style>
@@ -125,12 +125,14 @@
 <body data-stage="discover">
   <a class="skip-link" href="#main-workbench">Skip to workbench</a>
   <header class="top">
-    <div class="brand"><div class="brand-identity"><span class="brand-word">SANDLER<sup>®</sup></span><span class="brand-divider"></span><span class="brand-product">ROI Workbench</span></div><div class="brand-sub">A guided business-case conversation</div></div>
+    <div class="brand"><div class="brand-identity"><img class="brand-wordmark" src="https://go.nextlevel.sandler.com/hs-fs/hubfs/SANDLER-LOGO-R-1C.webp?height=38&amp;name=SANDLER-LOGO-R-1C.webp&amp;width=300" width="230" height="30" alt="Sandler" referrerpolicy="no-referrer"><span class="brand-print-name" aria-hidden="true">SANDLER®</span><span class="brand-divider"></span><span class="brand-product">ROI Workbench</span></div><div class="brand-sub">A guided business-case conversation</div></div>
     <div class="top-actions no-print">
       <button type="button" id="reset" class="btn btn-dark">Reset example</button>
       <button type="button" id="present" class="btn btn-primary" aria-pressed="false">Present case</button>
       <details class="toolbar-menu" id="file-menu"><summary class="btn btn-dark">Files &amp; export</summary><div class="toolbar-menu-content">
-        <button type="button" id="import" class="btn">Import model</button><input type="file" id="import-file" accept=".json,application/json" hidden>
+        <button type="button" id="import" class="btn">Import saved JSON</button><input type="file" id="import-file" accept=".json,application/json" hidden>
+        <button type="button" id="import-csv" class="btn">Import CSV with mapping</button><input type="file" id="import-csv-file" accept=".csv,text/csv" hidden>
+        <button type="button" id="csv-template" class="btn">Download blank CSV template</button>
         <button type="button" id="export-json" class="btn">Save JSON model</button>
         <button type="button" id="export-csv" class="btn">Export CSV</button>
         <button type="button" id="print" class="btn">Print summary</button>
@@ -149,8 +151,18 @@
     <p id="step-description">Use the conversation to define the challenge and its cost. Replace illustrative defaults with the buyer's own figures.</p>
   </div><button type="button" id="step-next" class="btn btn-primary no-print">Continue to Model</button></div>
   <div class="shell" id="main-workbench">
-    <aside class="side no-print">
-      <section class="card panel">
+    <aside class="side no-print" aria-label="Discovery workspace">
+      <div class="discover-panel-nav">
+        <div class="eyebrow">Discovery sections</div>
+        <div class="discover-switcher" role="group" aria-label="Choose discovery inputs">
+          <button type="button" data-discover-tab="engagement" aria-pressed="true"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3"/><path d="M5 20v-2.5c0-3.5 14-3.5 14 0V20"/></svg></span> Engagement</button>
+          <button type="button" data-discover-tab="performance" aria-pressed="false"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V14h3v6M10.5 20V9h3v11M17 20V4h3v16"/></svg></span> Performance</button>
+          <button type="button" data-discover-tab="pipeline" aria-pressed="false"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 4 3 7-10"/><path d="M15 6h5v5"/></svg></span> Pipeline</button>
+          <button type="button" data-discover-tab="evidence" aria-pressed="false"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.3 8.5-8 11-4.7-2.5-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></span> Evidence</button>
+        </div>
+        <p class="discover-panel-hint" id="discover-panel-hint">Define the engagement and investment.</p>
+      </div>
+      <section class="card panel" data-discover-panel="engagement">
         <div class="eyebrow">01 · The engagement</div>
         <h2>Prospect & investment</h2>
         <p class="small" style="margin:8px 0 14px">Adjust the inputs live with your prospect. All starting numbers are fictional examples.</p>
@@ -160,26 +172,26 @@
         <div class="field" id="cost-mode" style="margin:14px 0 10px"></div>
         <div class="two" id="expanded-cost-fields"></div>
       </section>
-      <section class="card panel">
+      <section class="card panel" data-discover-panel="performance">
         <div class="eyebrow">02 · Current performance</div>
         <h2>Current commercial performance</h2>
         <p class="small" style="margin:8px 0 2px">Use the categories relevant to the prospect. Disable a value driver in the results to exclude it.</p>
         <div id="baseline-fields"></div>
       </section>
-      <section class="card panel">
+      <section class="card panel" data-discover-panel="pipeline">
         <div class="eyebrow">Optional · Pipeline bridge</div>
         <h2>From pipeline to potential value</h2>
         <p class="small" style="margin:8px 0 14px">Enter your prospect's figures. This independent illustration is never added to the ROI total.</p>
         <div class="stack" id="pipeline-fields"></div>
         <p class="section-note" style="margin:10px 0 0">Uses the commercial gross-margin input above. Leave this section blank if pipeline data is unavailable.</p>
       </section>
-      <section class="card panel">
-        <div class="eyebrow">03 · Evidence &amp; confidence</div>
+      <section class="card panel" data-discover-panel="evidence">
+        <div class="eyebrow">04 · Evidence &amp; confidence</div>
         <div class="field"><label for="evidence-notes">Source notes and assumptions</label><textarea id="evidence-notes" placeholder="Where did baseline data come from? What has not been validated?"></textarea></div>
         <p class="small" id="evidence-summary" role="status">Input evidence is user-declared, not independently verified.</p>
         <details><summary>Per-input source register</summary><div class="inside" id="evidence-register"></div></details>
         <p class="section-note">Editing a numeric input resets its source classification to unconfirmed. Selecting a reviewed status does not authenticate the evidence.</p>
-        <p class="section-note" style="margin:12px 0 0">Private by design: no data sent anywhere. Use Save model to preserve your work as a local JSON file.</p>
+        <p class="section-note" style="margin:12px 0 0">Inputs stay in this browser session. Save a JSON model locally to preserve them. Source labels are user declarations, not third-party verification.</p>
       </section>
     </aside>
     <main class="main">
@@ -267,7 +279,30 @@
       </section>
     </main>
   </div>
-  <footer class="footer">Prototype sales conversation tool. Not an official Sandler ROI guarantee. Figures are hypothetical until validated by the prospect; generated estimates do not establish training causality or realized outcomes.</footer>
+
+  <dialog id="csv-map-dialog" class="csv-map-dialog" aria-labelledby="csv-map-title" aria-describedby="csv-map-description">
+    <div class="csv-modal-head">
+      <div>
+        <div class="eyebrow">Import prospect data</div>
+        <h2 id="csv-map-title">Map CSV columns to ROI inputs</h2>
+      </div>
+      <button id="csv-close" type="button" class="btn">Cancel</button>
+    </div>
+    <p id="csv-map-description" class="small">Choose a single prospect row, review the column mapping, then replace illustrative example baselines. No CSV values are applied until you confirm.</p>
+    <div class="field">
+      <label for="csv-record">Prospect row</label>
+      <select id="csv-record"></select>
+    </div>
+    <div class="csv-map-scroll">
+      <div id="csv-map-fields" class="csv-map-fields"></div>
+    </div>
+    <p class="section-note" id="csv-map-preview" role="status" aria-live="polite">No CSV selected.</p>
+    <div class="csv-map-actions">
+      <button type="button" id="csv-apply" class="btn btn-primary" disabled>Replace baselines with mapped row</button>
+    </div>
+    <p class="section-note">Only mapped columns are imported. Unmapped financial fields become missing, not fictional defaults. Imported source claims start unconfirmed. Scenario assumptions remain illustrative.</p>
+  </dialog>
+  <footer class="footer">Pilot sales conversation tool for a Sandler representative. Not an official ROI guarantee. Figures are hypothetical until validated; estimates do not establish training causality or realized outcomes. SANDLER (stylized) is a registered service mark of Sandler Systems, LLC.</footer>
   <script type="module" src="./src/app.mjs"></script>
 </body>
 </html>
