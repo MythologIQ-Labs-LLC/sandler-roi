@@ -44,16 +44,22 @@ The preview server binds to \`127.0.0.1\`. Opening \`index.html\` directly using
 
 ## Use it in a prospect meeting
 
-1. **Discover:** Ask the prospect for its commercial baseline, training investment, sales process constraints, and the figures it can confirm.
-2. **Model:** Include only relevant financial drivers, then adjust **Conservative**, **Expected**, and **Upside** hypotheses in the meeting.
-3. **Explain:** Show each modeled contribution, program cost, net value, ROI and simple payback alongside the assumptions driving them.
-4. **Present:** Select **Present** to hide the worksheet while discussing results; use **Print** for a summary. Save a model as local **JSON** or export **CSV** for follow-up.
+1. **Discover:** Establish the buyer's current win rate, deal volume, average deal, sales ramp, investment and evidence. No ROI or scenario outputs are displayed here.
+2. **Model:** Explore changes in selling behaviors. Adjust working assumptions and see operating measures evolve, not financial returns.
+3. **Compare:** Validate current-versus-hypothetical operating measures, investment scope, source confidence, pain, budget and decision process.
+4. **Present:** Reveal the current-to-possible operating difference and modeled incremental value, investment, net benefit and ROI. Only here do **Conservative**, **Expected** and **Upside** appear. Return to any earlier stage or use **Print**, local **JSON**, and **CSV** for follow-up.
 
 Every starting value is **fictional demonstration data**, not a prospect fact or a Sandler benchmark. An entered number is not automatically verified. The buyer and representative should confirm definitions, units, periods, and financial sources before circulating a business case.
 
+### Why financial outcomes appear at the end
+
+Showing the full financial payoff during baseline discovery preempted the buyer's own understanding of their current situation. The visual flow now starts with prospect-entered facts, builds and reviews hypotheses, and only then reveals potential ROI. The proposed future win rate and seller ramp use explicit, transparent arithmetic; no invented zero-revenue baseline is used to exaggerate the difference. The calculations have not been changed.
+
+This pacing draws on Sandler's public [selling system](https://sandler.com/sandler-selling-system/), which emphasizes pain, budget and decision process before presenting fulfillment. The four workbench stages are not a replacement for Sandler's seven-step selling methodology.
+
 ### Guided meeting workbench
 
-The [guided workbench implementation](src/app.mjs) introduces a **four-stage journey**: **Discover** (prospect data and sources), **Model** (financial levers and assumptions), **Compare** (three scenarios, charts and a table), and **Present** (client-facing scenario summary). The journey navigation does not certify evidence or block a conversation while figures are unknown.
+The [guided workbench implementation](src/app.mjs) uses a **progressive disclosure journey**: **Discover** shows baselines; **Model** shows working behavioral hypotheses; **Compare** reviews operational changes and sources; and **Present** shows the full financial opportunity, scenario alternatives, value-driver detail and caveats. The navigation remains freely available. This is a guided conversation, not a forced close or a claim of causation. See the [design decision](docs/design/progressive-reveal.md).
 
 The UI uses Sandler's published **Stable** (\`#21245c\`), **Fresh** (\`#00aded\`), and **Energetic** (\`#0045c2\`) palette. The header uses the authentic Sandler white wordmark with cyan UpStep from a Sandler-affiliated training-center CDN. Its source and the official [logo kit](https://sandler.com/wp-content/uploads/2023/03/Sandler-Logo-Kit-1.zip) are documented below. The logo is loaded from Sandler's affiliated domain, not copied into this repository, and that image request is the only external asset request introduced by this UI change. See [workbench user journey and branding decisions](docs/design/rep-workbench-journey.md).
 

@@ -58,6 +58,17 @@
       "approval": "unreviewed",
       "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/4",
       "notes": "Approximation for final compact-layout iteration; not a representation of conventional manual-coding hours."
+    },
+    {
+      "id": "roi-2026-11-24-progressive",
+      "date": "2026-11-24",
+      "phase": "Consultative staged financial reveal with current-versus-proposed behavior modeling",
+      "hours": 0.35,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/6",
+      "notes": "Approximate active AI-assisted product and engineering time for staged financial disclosure, operational comparisons, regression tests, user journey documentation and acceptance. CI runtime and unattended execution are excluded. Reconcile with owner before billing."
     }
   ]
 }
