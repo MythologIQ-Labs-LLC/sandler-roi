@@ -1,7 +1,9 @@
 import { DEFAULT_INPUTS, SCENARIOS, DEFAULT_ACTIVE, calculate, calculatePipelineBridge, MONEY, PERCENT } from "./roi.mjs";
+import { BASELINE_FIELDS, EVIDENCE_STATUSES, defaultEvidence, normalizeEvidence, requiredEvidenceKeys, assessEvidence } from "./evidence.mjs";
 
 const clone = object => JSON.parse(JSON.stringify(object));
 let inputs=clone(DEFAULT_INPUTS);
+let evidence=defaultEvidence(inputs);
 let scenarios=clone(SCENARIOS);
 let active=clone(DEFAULT_ACTIVE);
 let selected="expected";
@@ -14,6 +16,13 @@ const inputSpecs = {
   programMonths:["Evaluation period","number","Months; modeled benefits are prorated"],
   setupFee:["One-time implementation cost","number","USD"],
   participantCount:["People trained","number","For proposal context"],
+  trainingHoursPerPerson:["Hours of training per person","number","Total paid hours during the modeled period"],
+  participantHourlyCost:["Hourly employee cost","number","Loaded hourly rate in USD"],
+  additionalMonthlyCost:["Other recurring monthly costs","number","Additional monthly program costs in USD"],
+  travelCost:["Travel and logistics","number","USD total during modeled period"],
+  technologyCost:["Technology and licenses","number","USD total during modeled period"],
+  adminCost:["Coaching and administration","number","USD total during modeled period"],
+  otherCost:["Other implementation costs","number","USD total during modeled period"],
   discountedRevenue:["Annual discount-affected revenue","number","USD / year"],
   priceProfitFlowPct:["Incremental price contribution","number","% flowing to profit; often high, but validate"],
   annualProposals:["Annual commercial proposals","number","Proposal count per year"],
@@ -62,16 +71,72 @@ function field(key,parent,source,update,descriptor) {
   const input=document.createElement("input");input.id=id;input.type=spec[1]||"number";
   input.value=source[key]??"";
   if(input.type==="number"){input.step="any";input.min="0";}
-  input.addEventListener("input",()=>{update(key,input.value);render();});
+  input.addEventListener("input",()=>{
+    update(key,input.value);
+    if(source===inputs && Object.prototype.hasOwnProperty.call(BASELINE_FIELDS,key)){
+      evidence[key]={status:"unconfirmed",source:""};
+      renderEvidenceEditor();
+    }
+    render();
+  });
   const hint=document.createElement("div");hint.className="hint";hint.textContent=spec[2]||"";
   wrap.append(label,input,hint);parent.append(wrap);
 }
+
+function renderEvidenceEditor(){
+  const container=$("evidence-register");container.replaceChildren();
+  const keys=requiredEvidenceKeys(inputs,active);
+  const pipelineKeys=["pipelineValue","pipelinePeriodWeeks","pipelineRevenueConversionPct","pipelineAttributionPct"];
+  if(pipelineKeys.some(key=>inputs[key]!=="" && inputs[key]!==null))
+    for(const key of pipelineKeys)keys.push(key);
+  for(const key of [...new Set(keys)]){
+    const record=evidence[key]||{status:"unconfirmed",source:""};
+    const row=document.createElement("div");row.className="field evidence-entry";
+    const label=document.createElement("label");label.textContent=BASELINE_FIELDS[key]||key;
+    const select=document.createElement("select");
+    select.setAttribute("aria-label","Evidence status: "+label.textContent);
+    for(const [status,name] of Object.entries(EVIDENCE_STATUSES)){
+      const option=document.createElement("option");option.value=status;option.textContent=name;
+      select.append(option);
+    }
+    select.value=record.status;
+    const source=document.createElement("input");
+    source.type="text";source.maxLength=500;source.value=record.source||"";
+    source.placeholder="Source reference, date or owner (if any)";
+    source.setAttribute("aria-label","Source reference: "+label.textContent);
+    select.addEventListener("change",()=>{evidence[key]={...evidence[key],status:select.value};render();});
+    source.addEventListener("input",()=>{evidence[key]={...evidence[key],source:source.value};render();});
+    row.append(label,select,source);container.append(row);
+  }
+}
+function renderCostMode(){
+  const area=$("cost-mode");area.replaceChildren();
+  const label=document.createElement("label");label.htmlFor="cost-mode-select";label.textContent="Investment basis";
+  const select=document.createElement("select");select.id="cost-mode-select";
+  for(const [value,name] of [["fees","Program fees only"],["expanded","Expanded cost estimate"]]){
+    const option=document.createElement("option");option.value=value;option.textContent=name;select.append(option);
+  }
+  select.value=inputs.costMode;
+  select.addEventListener("change",()=>{inputs.costMode=select.value;renderFields();render();});
+  const note=document.createElement("div");note.className="hint";
+  note.textContent="Expanded mode requires a value or explicit zero for each category. This cannot certify every real-world cost.";
+  area.append(label,select,note);
+  const extra=$("expanded-cost-fields");extra.replaceChildren();
+  extra.classList.toggle("hidden",inputs.costMode!=="expanded");
+  if(inputs.costMode==="expanded"){
+    for(const key of ["trainingHoursPerPerson","participantHourlyCost","additionalMonthlyCost",
+      "travelCost","technologyCost","adminCost","otherCost"])
+      field(key,extra,inputs,(k,v)=>{inputs[k]=v;},inputSpecs);
+  }
+}
+
 function renderFields(){
   $("identity-fields").replaceChildren();
   $("cost-fields").replaceChildren();
   $("baseline-fields").replaceChildren();
   for(const key of ["prospect","consultant"]) field(key,$("identity-fields"),inputs,(k,v)=>{inputs[k]=v;},inputSpecs);
   for(const key of ["monthlyFee","programMonths","setupFee","participantCount"]) field(key,$("cost-fields"),inputs,(k,v)=>{inputs[k]=v;},inputSpecs);
+  renderCostMode();
   for(const group of groups){
     const det=document.createElement("details");det.open=true;
     const summary=document.createElement("summary");summary.textContent=group.title;
@@ -83,6 +148,7 @@ function renderFields(){
   for(const key of ["pipelineValue","pipelinePeriodWeeks","pipelineRevenueConversionPct","pipelineAttributionPct"])
     field(key,$("pipeline-fields"),inputs,(k,v)=>{inputs[k]=v;},inputSpecs);
   $("evidence-notes").value=inputs.notes||"";
+  renderEvidenceEditor();
 }
 function renderAssumptions(){
   const target=$("assumptions");target.replaceChildren();
@@ -96,7 +162,7 @@ function item(name,value,enabled){
   const checkWrap=document.createElement("label");checkWrap.className="toggle";
   const check=document.createElement("input");check.type="checkbox";check.checked=enabled;
   check.setAttribute("aria-label","Include "+leverSpecs[name][0]);
-  check.addEventListener("change",()=>{active[name]=check.checked;render();});
+  check.addEventListener("change",()=>{active[name]=check.checked;renderEvidenceEditor();render();});
   checkWrap.append(check);
   const description=document.createElement("div");
   const head=document.createElement("div");head.className="lever-title";head.textContent=leverSpecs[name][0];
@@ -118,6 +184,12 @@ function render(){
   put("net",result.complete?MONEY(result.net):"Incomplete");
   put("benefit",result.complete?MONEY(result.benefit):"Incomplete");
   put("cost",MONEY(result.cost));
+  put("cost-basis",result.costMode==="fees"?"Fee-only estimate":"Expanded user-declared estimate");
+  put("cost-extras",result.costMode==="fees"?"Other training costs are excluded.":
+    "Fees: "+MONEY(result.costBreakdown.feeCost)+" + other modeled costs: "+MONEY(result.costBreakdown.additionalCost)+".");
+  const proof=assessEvidence(inputs,evidence,active);
+  put("evidence-summary",proof.requiredCount+" required inputs: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
+    " unconfirmed, "+proof.missingSources.length+" citations missing a reference. Not independently verified.");
   const warning=$("warnings");
   if(result.problems.length){
     warning.classList.add("visible");
@@ -169,13 +241,14 @@ function render(){
 
   const client=inputs.prospect||"the prospect";
   put("pitch-text",result.complete
-    ? "For "+client+", the "+scenario.label.toLowerCase()+" scenario models "+MONEY(result.benefit)+" of financial value over "+inputs.programMonths+" months, against a "+MONEY(result.cost)+" program investment. That implies "+MONEY(result.net)+" in net modeled value and "+(result.roi===null?"an undefined ROI because cost is zero":PERCENT(result.roi)+" ROI")+". These are discussion assumptions, not historical performance."
+    ? "For "+client+", the "+scenario.label.toLowerCase()+" scenario models "+MONEY(result.benefit)+" of financial value over "+inputs.programMonths+" months, against a "+MONEY(result.cost)+" "+(result.costMode==="fees"?"program-fee-only":"expanded user-declared")+" investment. That implies "+MONEY(result.net)+" in net modeled value and "+(result.roi===null?"an undefined ROI because cost is zero":PERCENT(result.roi)+" ROI")+". These are discussion assumptions, not historical performance."
     : "Enter the missing financial baselines and assumptions to build a complete, prospect-specific ROI comparison. No total ROI is presented while an included driver remains unverified.");
-  put("pitch-caveat","Use prospect-confirmed baselines. Training outcomes depend on adoption and external conditions. Deduction for overlapping win-rate and major-account value: "+scenario.overlapPct+"%. Evidence notes: "+(inputs.notes||"Not provided."));
+  put("pitch-caveat","Use prospect-confirmed baselines. "+proof.illustrative.length+" inputs illustrative and "+proof.unconfirmed.length+
+    " unconfirmed. Evidence classifications are user-declared, never independently verified. Training outcomes depend on adoption and external conditions. Deduction for overlapping win-rate and major-account value: "+scenario.overlapPct+"%. Evidence notes: "+(inputs.notes||"Not provided."));
 }
 function snapshot(){
   const result=calculate(inputs,scenarios[selected],active);
-  return {schema:"sandler-roi/1",savedAt:new Date().toISOString(),selected,inputs,scenarios,active,calculated:result};
+  return {schema:"sandler-roi/2",savedAt:new Date().toISOString(),selected,inputs,scenarios,active,evidence,calculated:result};
 }
 function download(filename,content,type){
   const blob=new Blob([content],{type}),url=URL.createObjectURL(blob);
@@ -183,7 +256,12 @@ function download(filename,content,type){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function safeSlug(str){return String(str||"client").trim().toLowerCase().replace(/[^a-z0-9-]+/g,"-").slice(0,60)||"client";}
-function csvCell(value){const s=String(value??"");return '"'+s.replace(/"/g,'""')+'"';}
+function csvCell(value){
+  const raw=String(value??"");
+  // Excel/Sheets interpret certain user-provided strings as spreadsheet formulas.
+  const safe=typeof value==="string"&&/^[\s\u0000-\u001f]*[=+\-@]/.test(raw)?"'"+raw:raw;
+  return '"'+safe.replace(/"/g,'""')+'"';
+}
 $("evidence-notes").addEventListener("input",event=>{inputs.notes=event.target.value;render();});
 document.querySelectorAll("[data-scenario]").forEach(button=>button.addEventListener("click",()=>{
   selected=button.dataset.scenario;renderAssumptions();render();
@@ -191,9 +269,14 @@ document.querySelectorAll("[data-scenario]").forEach(button=>button.addEventList
 $("export-json").addEventListener("click",()=>download("sandler-roi-"+safeSlug(inputs.prospect)+".json",JSON.stringify(snapshot(),null,2),"application/json"));
 $("export-csv").addEventListener("click",()=>{
   const r=calculate(inputs,scenarios[selected],active);
-  const rows=[["Metric","Value"],["Prospect",inputs.prospect],["Representative",inputs.consultant],["Scenario",selected],["Complete",r.complete],["Program cost",r.cost],["Benefit",r.benefit],["Net benefit",r.net],["ROI percent",r.roi],["Simple payback months",r.simplePaybackMonths],["Break-even price points",r.breakEvenPricePoints],["Source notes",inputs.notes]];
+  const rows=[["Metric","Value"],["Prospect",inputs.prospect],["Representative",inputs.consultant],["Scenario",selected],["Complete",r.complete],["Cost scope",r.costMode],["Program fee cost",r.costBreakdown.feeCost],["Additional modeled costs",r.costBreakdown.additionalCost],["Program cost",r.cost],["Benefit",r.benefit],["Net benefit",r.net],["ROI percent",r.roi],["Simple payback months",r.simplePaybackMonths],["Break-even price points",r.breakEvenPricePoints],["Source notes",inputs.notes]];
   for(const [name,part] of Object.entries(r.parts))rows.push([name+" value",part.value], [name+" status",part.status]);
   for(const [name,value] of Object.entries(scenarios[selected]))rows.push(["Assumption "+name,value]);
+  for(const [name,value] of Object.entries(inputs))rows.push(["Input "+name,value]);
+  for(const [name,record] of Object.entries(evidence)){
+    rows.push(["Evidence "+name+" status",record.status],["Evidence "+name+" source",record.source]);
+  }
+  rows.push(["Evidence independently verified",false],["Model type","hypothetical projection"]);
   download("sandler-roi-"+safeSlug(inputs.prospect)+".csv",rows.map(r=>r.map(csvCell).join(",")).join("\r\n"),"text/csv");
 });
 $("present").addEventListener("click",()=>{
@@ -204,7 +287,7 @@ $("present").addEventListener("click",()=>{
 $("print").addEventListener("click",()=>window.print());
 $("reset").addEventListener("click",()=>{
   if(!window.confirm("Replace all current inputs and assumptions with the illustrative example?"))return;
-  inputs=clone(DEFAULT_INPUTS);scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
+  inputs=clone(DEFAULT_INPUTS);evidence=defaultEvidence(inputs);scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
   renderFields();renderAssumptions();render();
 });
 $("import").addEventListener("click",()=>$("import-file").click());
@@ -213,7 +296,7 @@ $("import-file").addEventListener("change",async event=>{
   if(f.size>2000000){window.alert("JSON file exceeds 2 MB.");return;}
   try {
     const data=JSON.parse(await f.text());
-    if(data.schema!=="sandler-roi/1"||!data.inputs||!data.scenarios||!data.active)throw Error("Unsupported model format");
+    if(!["sandler-roi/1","sandler-roi/2"].includes(data.schema)||!data.inputs||!data.scenarios||!data.active)throw Error("Unsupported model format");
     const cleanInputs={...clone(DEFAULT_INPUTS)};
     for(const key of Object.keys(cleanInputs))if(Object.prototype.hasOwnProperty.call(data.inputs,key))cleanInputs[key]=data.inputs[key];
     const cleanScenarios=clone(SCENARIOS);
@@ -222,6 +305,8 @@ $("import-file").addEventListener("change",async event=>{
       for(const field of Object.keys(cleanScenarios[key]))if(field!=="label"&&Object.prototype.hasOwnProperty.call(data.scenarios[key],field))cleanScenarios[key][field]=data.scenarios[key][field];
     }
     inputs=cleanInputs;scenarios=cleanScenarios;
+    if(data.schema==="sandler-roi/1")inputs.costMode="fees";
+    evidence=data.schema==="sandler-roi/2"?normalizeEvidence(data.evidence,cleanInputs):defaultEvidence(cleanInputs);
     active=Object.fromEntries(Object.keys(DEFAULT_ACTIVE).map(k=>[k,data.active[k]===false?false:true]));
     selected=Object.prototype.hasOwnProperty.call(SCENARIOS,data.selected)?data.selected:"expected";
     renderFields();renderAssumptions();render();
