@@ -7,7 +7,40 @@ let evidence=defaultEvidence(inputs);
 let scenarios=clone(SCENARIOS);
 let active=clone(DEFAULT_ACTIVE);
 let selected="expected";
+let currentStep="discover", priorStep="compare";
 const $=id=>document.getElementById(id);
+const JOURNEY={
+  discover:{label:"01 / DISCOVER",title:"Start with the prospect's numbers.",
+    description:"Define the challenge together. Replace fictional examples with the buyer's own baselines and confirm where the numbers came from.",
+    next:"Model the opportunity"},
+  model:{label:"02 / MODEL",title:"Explore what better selling could change.",
+    description:"Test pricing, win rates, major accounts and onboarding. Build assumptions with the buyer, not a standard training uplift promise.",
+    next:"Compare investment"},
+  compare:{label:"03 / COMPARE",title:"How does the opportunity compare with the investment?",
+    description:"Compare scenarios on the same horizon. Pipeline sensitivity is intentionally separate to avoid counting deals twice.",
+    next:"Present the case"},
+  present:{label:"04 / PRESENT",title:"Make the business case together.",
+    description:"Share a concise summary of projected value, investment, and assumptions. These are estimates, never guaranteed outcomes.",
+    next:"Return to modeling"}
+};
+function setStep(key){
+  if(!Object.prototype.hasOwnProperty.call(JOURNEY,key))return;
+  if(key==="present"&&currentStep!=="present")priorStep=currentStep;
+  currentStep=key;
+  document.body.dataset.stage=key;
+  const step=JOURNEY[key];
+  put("step-eyebrow",step.label);put("step-title",step.title);
+  put("step-description",step.description);put("step-next",step.next);
+  document.querySelectorAll("[data-workbench-nav]").forEach(button=>{
+    if(button.dataset.workbenchNav===key)button.setAttribute("aria-current","step");
+    else if(typeof button.removeAttribute==="function")button.removeAttribute("aria-current");
+    else button.setAttribute("aria-current","false");
+  });
+  $("present").textContent=key==="present"?"Exit presentation":"Present case";
+  $("present").setAttribute("aria-pressed",String(key==="present"));
+  render();
+}
+
 
 const inputSpecs = {
   prospect:["Prospect / client","text","Client organization"],
@@ -138,7 +171,7 @@ function renderFields(){
   for(const key of ["monthlyFee","programMonths","setupFee","participantCount"]) field(key,$("cost-fields"),inputs,(k,v)=>{inputs[k]=v;},inputSpecs);
   renderCostMode();
   for(const group of groups){
-    const det=document.createElement("details");det.open=true;
+    const det=document.createElement("details");det.open=group.title==="Pricing discipline";
     const summary=document.createElement("summary");summary.textContent=group.title;
     const inside=document.createElement("div");inside.className="inside";
     for(const key of group.keys) field(key,inside,inputs,(k,v)=>{inputs[k]=v;},inputSpecs);
@@ -190,6 +223,8 @@ function render(){
   const proof=assessEvidence(inputs,evidence,active);
   put("evidence-summary",proof.requiredCount+" required inputs: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
     " unconfirmed, "+proof.missingSources.length+" citations missing a reference. Not independently verified.");
+  put("present-evidence","Input confidence: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
+    " unconfirmed, "+proof.missingSources.length+" citations without a source reference. None independently verified.");
   const warning=$("warnings");
   if(result.problems.length){
     warning.classList.add("visible");
@@ -201,6 +236,15 @@ function render(){
   } else warning.classList.remove("visible");
   const levers=$("levers");levers.replaceChildren();
   for(const name of Object.keys(leverSpecs))levers.append(item(name,result.parts[name],active[name]));
+  const presentDrivers=$("present-driver-summary");presentDrivers.replaceChildren();
+  for(const [name,part] of Object.entries(result.parts)){
+    if(part.status==="excluded")continue;
+    const entry=document.createElement("div");entry.className="present-driver";
+    const label=document.createElement("span");label.className="name";label.textContent=leverSpecs[name][0];
+    const amount=document.createElement("strong");amount.className="amount";
+    amount.textContent=part.status==="ready"?MONEY(part.value):"Needs input";
+    entry.append(label,amount);presentDrivers.append(entry);
+  }
   const bars=$("scenario-bars");bars.replaceChildren();
   const variants=Object.entries(scenarios).map(([key,s])=>({key,label:s.label,result:calculate(inputs,s,active)}));
   const max=Math.max(result.cost??0,...variants.map(x=>x.result.benefit??0),1);
@@ -279,12 +323,15 @@ $("export-csv").addEventListener("click",()=>{
   rows.push(["Evidence independently verified",false],["Model type","hypothetical projection"]);
   download("sandler-roi-"+safeSlug(inputs.prospect)+".csv",rows.map(r=>r.map(csvCell).join(",")).join("\r\n"),"text/csv");
 });
-$("present").addEventListener("click",()=>{
-  const showing=document.body.classList.toggle("present-mode");
-  $("present").textContent=showing?"Exit presentation":"Present";
-  $("present").setAttribute("aria-pressed",String(showing));
+document.querySelectorAll("[data-workbench-nav]").forEach(button=>{
+  button.addEventListener("click",()=>setStep(button.dataset.workbenchNav));
 });
-$("print").addEventListener("click",()=>window.print());
+$("step-next").addEventListener("click",()=>{
+  const steps=["discover","model","compare","present"];
+  setStep(currentStep==="present"?"model":steps[Math.min(3,steps.indexOf(currentStep)+1)]);
+});
+$("present").addEventListener("click",()=>setStep(currentStep==="present"?priorStep:"present"));
+$("print").addEventListener("click",()=>{setStep("present");window.print();});
 $("reset").addEventListener("click",()=>{
   if(!window.confirm("Replace all current inputs and assumptions with the illustrative example?"))return;
   inputs=clone(DEFAULT_INPUTS);evidence=defaultEvidence(inputs);scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
@@ -312,4 +359,4 @@ $("import-file").addEventListener("change",async event=>{
     renderFields();renderAssumptions();render();
   }catch(err){window.alert("Could not import model: "+err.message);}
 });
-renderFields();renderAssumptions();render();
+renderFields();renderAssumptions();setStep("discover");
