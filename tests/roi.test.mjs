@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {calculate, calculatePipelineBridge, parseValue, DEFAULT_INPUTS, SCENARIOS} from "../src/roi.mjs";
+import {calculate, calculateCost, calculatePipelineBridge, parseValue, DEFAULT_INPUTS, SCENARIOS} from "../src/roi.mjs";
 
 const baseline=()=>structuredClone(DEFAULT_INPUTS);
 const expected=()=>structuredClone(SCENARIOS.expected);
@@ -135,4 +135,61 @@ test("pipeline bridge retains zero as a real value distinct from missing",()=>{
   const p=calculatePipelineBridge(i);
   assert.equal(p.complete,true);
   assert.equal(p.modeledClosedRevenue,0);
+});
+
+test("expanded investment equals fees plus time, recurring and one-time costs",()=>{
+ const i={...baseline(),costMode:"expanded",participantCount:12,
+ trainingHoursPerPerson:20,participantHourlyCost:50,additionalMonthlyCost:100,
+ travelCost:2000,technologyCost:3000,adminCost:4000,otherCost:1000};
+ const c=calculateCost(i);
+ assert.equal(c.feeCost,79200);
+ assert.equal(c.components.participantTimeCost,12000);
+ assert.equal(c.components.additionalRecurringCost,1200);
+ assert.equal(c.additionalCost,23200);
+ assert.equal(c.total,102400);
+ const r=calculate(i,expected());
+ assert.equal(r.cost,102400);
+ near(r.net,r.benefit-102400);
+});
+test("expanded costs require explicit zero, not silent missing equals zero",()=>{
+ const i={...baseline(),costMode:"expanded"};
+ const c=calculateCost(i);
+ assert.equal(c.total,null);
+ assert.ok(c.problems.some(p=>p.field==="participantHourlyCost"));
+ const r=calculate(i,expected());
+ assert.equal(r.complete,false);
+ assert.equal(r.cost,null);
+ assert.equal(r.roi,null);
+});
+test("fee-only mode ignores unknown expanded fields while retaining fee result",()=>{
+ const i={...baseline(),costMode:"fees"};
+ const a=calculate(i,expected());
+ assert.equal(a.complete,true);
+ assert.equal(a.cost,79200);
+ assert.equal(a.costMode,"fees");
+});
+test("unknown cost mode fails closed rather than reverts to fees",()=>{
+ const r=calculate({...baseline(),costMode:"fake"},expected());
+ assert.equal(r.complete,false);
+ assert.equal(r.cost,null);
+ assert.ok(r.problems.some(p=>p.field==="costMode"));
+});
+test("invalid expanded cost cannot produce finite-looking ROI",()=>{
+ const i={...baseline(),costMode:"expanded",participantCount:1e6,
+ trainingHoursPerPerson:10000,participantHourlyCost:1e6,additionalMonthlyCost:0,
+ travelCost:0,technologyCost:0,adminCost:0,otherCost:0};
+ const r=calculate(i,expected());
+ assert.equal(r.complete,false);
+ assert.equal(r.cost,null);
+ assert.equal(r.roi,null);
+ assert.ok(r.problems.some(p=>p.field==="cost"));
+});
+test("expanded 6-month investment prorates recurring but not upfront time/travel",()=>{
+ const i={...baseline(),costMode:"expanded",programMonths:6,participantCount:2,
+ trainingHoursPerPerson:10,participantHourlyCost:100,additionalMonthlyCost:100,
+ travelCost:500,technologyCost:0,adminCost:0,otherCost:0};
+ const c=calculateCost(i);
+ assert.equal(c.feeCost,39600);
+ assert.equal(c.additionalCost,3100);
+ assert.equal(c.total,42700);
 });

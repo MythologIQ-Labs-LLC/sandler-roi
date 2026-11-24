@@ -2,6 +2,9 @@
 export const DEFAULT_INPUTS = {
   prospect: "Example prospect (illustrative)", consultant: "Sandler representative",
   monthlyFee: 6600, programMonths: 12, setupFee: 0, participantCount: 12,
+  costMode: "fees",
+  trainingHoursPerPerson: "", participantHourlyCost: "", additionalMonthlyCost: "",
+  travelCost: "", technologyCost: "", adminCost: "", otherCost: "",
   discountedRevenue: 8000000, priceProfitFlowPct: 100,
   annualProposals: 250, baselineWinRatePct: 25, avgDealValue: 30000,
   grossMarginPct: 40, newAccountsAnnualValue: 300000,
@@ -17,6 +20,8 @@ export const SCENARIOS = {
 export const DEFAULT_ACTIVE = { pricing: true, wins: true, accounts: true, ramp: true };
 const BOUNDS = {
   monthlyFee:[0,1e11], programMonths:[1,60], setupFee:[0,1e11], participantCount:[1,1e6],
+  trainingHoursPerPerson:[0,10000], participantHourlyCost:[0,1e6], additionalMonthlyCost:[0,1e11],
+  travelCost:[0,1e12], technologyCost:[0,1e12], adminCost:[0,1e12], otherCost:[0,1e12],
   discountedRevenue:[0,1e14], priceProfitFlowPct:[0,100],
   annualProposals:[0,1e9], baselineWinRatePct:[0,100], avgDealValue:[0,1e12],
   grossMarginPct:[0,100], newAccountsAnnualValue:[0,1e12],
@@ -35,16 +40,65 @@ export function parseValue(raw, key) {
   if (["programMonths","participantCount","annualProposals","newHires","nationalAccounts","pipelinePeriodWeeks"].includes(key) && !Number.isInteger(value)) return { value:null, error:"Must be a whole number" };
   return { value, error:null };
 }
+/**
+ * Cost scope is explicit. Fee-only estimates retain legacy behavior.
+ * Expanded estimates require every cost component to be entered, including
+ * explicit zeroes. They are STILL user-declared, not finance-verified.
+ */
+export function calculateCost(input) {
+  const problems=[];
+  const mode=input.costMode ?? "fees";
+  if(mode!=="fees" && mode!=="expanded"){
+    return {mode,feeCost:null,additionalCost:null,total:null,components:{},
+      problems:[{field:"costMode",message:"Unknown cost scope"}]};
+  }
+  const components={};
+  function need(key) {
+    const r=parseValue(input[key],key);
+    if(r.error)problems.push({field:key,message:r.error});
+    components[key]=r.value;
+    return r.value;
+  }
+  const monthly=need("monthlyFee"), months=need("programMonths"), setup=need("setupFee");
+  const feeCost=[monthly,months,setup].includes(null)?null:monthly*months+setup;
+  let additionalCost=0;
+  if(mode==="expanded"){
+    const participants=need("participantCount");
+    const hours=need("trainingHoursPerPerson");
+    const hourly=need("participantHourlyCost");
+    const monthlyOther=need("additionalMonthlyCost");
+    const travel=need("travelCost");
+    const technology=need("technologyCost");
+    const admin=need("adminCost");
+    const other=need("otherCost");
+    const extras=[participants,hours,hourly,monthlyOther,travel,technology,admin,other,months];
+    if(extras.includes(null))additionalCost=null;
+    else {
+      const participantTime=participants*hours*hourly;
+      const recurring=monthlyOther*months;
+      components.participantTimeCost=participantTime;
+      components.additionalRecurringCost=recurring;
+      additionalCost=participantTime+recurring+travel+technology+admin+other;
+    }
+  }
+  const total=feeCost===null||additionalCost===null?null:feeCost+additionalCost;
+  if(total!==null && (!Number.isFinite(total)||total>1e15)){
+    problems.push({field:"cost",message:"Combined investment exceeds supported range"});
+    return {mode,feeCost,additionalCost:null,total:null,components,problems};
+  }
+  return {mode,feeCost,additionalCost,total,components,problems};
+}
+
 export function calculate(input, scenario, enabled=DEFAULT_ACTIVE) {
-  const problems = [];
-  const values = {};
+  const costResult=calculateCost(input);
+  const problems = [...costResult.problems];
   function need(field, source=input) {
     const v=parseValue(source[field], field);
     if (v.error) problems.push({field, message:v.error});
     return v.value;
   }
-  const fee=need("monthlyFee"), months=need("programMonths"), setup=need("setupFee");
-  const cost = fee===null || months===null || setup===null ? null : fee*months+setup;
+  const cost=costResult.total;
+  const months=parseValue(input.programMonths,"programMonths").value;
   const scale=months===null ? null : months/12;
   const parts={};
   function lever(name, inputs, assumptions, formula) {
@@ -92,7 +146,7 @@ export function calculate(input, scenario, enabled=DEFAULT_ACTIVE) {
     const others=(parts.wins.value??0)+(parts.accounts.value??0)+(parts.ramp.value??0)-deduction;
     if(denominator>0) breakEvenPricePoints=Math.max(0,(cost-others)/denominator*100);
   }
-  return {cost,parts,knownBenefit:overlap===null?null:Math.max(0,known-deduction),deduction,benefit,net,roi,multiple,simplePaybackMonths,breakEvenPricePoints,complete,problems};
+  return {cost,costMode:costResult.mode,costBreakdown:costResult,parts,knownBenefit:overlap===null?null:Math.max(0,known-deduction),deduction,benefit,net,roi,multiple,simplePaybackMonths,breakEvenPricePoints,complete,problems};
 }
 /**
  * Optional prospect-specific pipeline bridge.
