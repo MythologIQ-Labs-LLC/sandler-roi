@@ -276,3 +276,44 @@ test("feedback session refuses excess notes rather than constructing an invalid 
     assert.equal((await getManifest(f.objects.find(obj=>obj.type==="application/zip"))).notes.length,40);
   }finally{f.restore();}
 });
+
+
+test("denied microphone permission does not pin the next comment to the wrong screen",async()=>{
+  let stage="compare";
+  const f=fixture(()=>Promise.reject(Object.assign(new Error("No permission"),{name:"NotAllowedError"})));
+  try{
+    initDevelopmentFeedback(()=>({stage}));
+    f.id("feedback-toggle").fire("click");
+    await f.id("feedback-record").fire("click");
+    assert.match(f.id("feedback-status").textContent,/permission was denied/);
+    stage="present";
+    f.id("feedback-text").value="New note after permission denial";
+    f.id("feedback-text").fire("input");
+    assert.match(f.id("feedback-location").textContent,/Draft from: present/);
+    f.id("feedback-add").fire("click");
+    await f.id("feedback-export").fire("click");
+    const manifest=await getManifest(f.objects.find(x=>x.type==="application/zip"));
+    assert.equal(manifest.notes[0].context.stage,"present");
+  }finally{f.restore();}
+});
+
+test("discarded or empty audio does not strand previous screen metadata",async()=>{
+  let stage="compare";
+  const f=fixture(()=>Promise.resolve(audioStream().stream));
+  try{
+    initDevelopmentFeedback(()=>({stage}));
+    f.id("feedback-toggle").fire("click");
+    await f.id("feedback-record").fire("click");
+    const recorder=f.FakeRecorder.instances.at(-1);
+    recorder.handlers.get("dataavailable")({data:{size:15_000_001}});
+    assert.equal(recorder.state,"inactive");
+    stage="model";
+    f.id("feedback-text").value="New note after discarded audio";
+    f.id("feedback-text").fire("input");
+    assert.match(f.id("feedback-location").textContent,/Draft from: model/);
+    f.id("feedback-add").fire("click");
+    await f.id("feedback-export").fire("click");
+    const manifest=await getManifest(f.objects.find(x=>x.type==="application/zip"));
+    assert.equal(manifest.notes[0].context.stage,"model");
+  }finally{f.restore();}
+});
