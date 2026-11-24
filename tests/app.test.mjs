@@ -239,6 +239,45 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(elements.get("field-prospect").value,"Sample customer");
       assert.equal(elements.get("baseline-title").textContent,"Sample customer’s starting point");
     });
+    await t.test("confirmed Reset returns from Compare to Discover Engagement",async()=>{
+      await steps[0].trigger("click");
+      await tabs[3].trigger("click");
+      assert.equal(panels[3].hidden,false);
+      await steps[2].trigger("click");
+      const name=elements.get("field-prospect");
+      name.value="John Doe";await name.trigger("input");
+      await elements.get("reset").trigger("click");
+      assert.equal(document.body.dataset.stage,"discover");
+      assert.equal(elements.get("journey-timeline").attributes["data-current"],"discover");
+      assert.equal(steps[0].attributes["aria-current"],"step");
+      assert.deepEqual(steps.map(x=>x.attributes["data-timeline-state"]),
+        ["current","upcoming","upcoming","upcoming"]);
+      assert.equal(tabs[0].attributes["aria-selected"],"true");
+      assert.equal(panels[0].hidden,false);
+      assert.ok(panels.slice(1).every(p=>p.hidden));
+      // Reset rebuilds input nodes, so inspect the new field, not the old DOM reference.
+      assert.equal(elements.get("field-prospect").value,"Sample customer");
+      assert.equal(elements.get("cost").textContent,"$79,200");
+      assert.equal(elements.get("baseline-title").textContent,"Sample customer’s starting point");
+    });
+    await t.test("canceled Reset keeps data, stage and Discover tab unchanged",async()=>{
+      await steps[0].trigger("click");
+      await tabs[1].trigger("click");
+      await steps[1].trigger("click");
+      const name=elements.get("field-prospect");
+      name.value="Keep This Customer";await name.trigger("input");
+      const confirm=window.confirm;window.confirm=()=>false;
+      try{await elements.get("reset").trigger("click");}
+      finally{window.confirm=confirm;}
+      assert.equal(document.body.dataset.stage,"model");
+      assert.equal(elements.get("journey-timeline").attributes["data-current"],"model");
+      assert.equal(name.value,"Keep This Customer");
+      await steps[0].trigger("click");
+      assert.equal(tabs[1].attributes["aria-selected"],"true");
+      await elements.get("reset").trigger("click");
+      assert.equal(document.body.dataset.stage,"discover");
+      assert.equal(tabs[0].attributes["aria-selected"],"true");
+    });
     await t.test("present stage keeps navigation active in the workbench DOM",async()=>{
       await steps[3].trigger("click");
       assert.equal(steps[3].attributes["aria-current"],"step");
