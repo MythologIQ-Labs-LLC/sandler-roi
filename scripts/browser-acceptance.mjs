@@ -372,6 +372,8 @@ try{
  const saved=await until(async()=>evaluate('document.getElementById("customer-saved-list").options.length===1'),
    'saved customer visible in selected folder');
  assert.equal(saved,true);
+ const customerFileShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'customer-files-desktop.png'),Buffer.from(customerFileShot.data,'base64'));
  await evaluate('(()=>{const e=document.getElementById("field-prospect");e.value="Changed In Browser";'+
   'e.dispatchEvent(new Event("input",{bubbles:true}));document.getElementById("customer-open").click()})()');
  const opened=await until(async()=>evaluate('document.getElementById("field-prospect").value==="Demo Customer"'),
@@ -393,6 +395,12 @@ try{
   'document.getElementById("feedback-category").value="improvement";'+
   'document.getElementById("feedback-add").click()})()');
  assert.equal(await evaluate('document.getElementById("feedback-count").textContent'),"1 captured");
+ const feedbackGeometry=await evaluate('(()=>({panelTop:document.getElementById("feedback-panel").getBoundingClientRect().top,'+
+  'journeyBottom:document.querySelector(".journey").getBoundingClientRect().bottom}))()');
+ assert.ok(feedbackGeometry.panelTop>=feedbackGeometry.journeyBottom-2,
+  'feedback panel must not obscure stage navigation: '+JSON.stringify(feedbackGeometry));
+ const feedbackShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'development-feedback-desktop.png'),Buffer.from(feedbackShot.data,'base64'));
  // Chrome's synthetic microphone proves the opt-in recording and audio attachment path.
  await evaluate('document.getElementById("feedback-record").click()');
  const recording=await until(async()=>evaluate('!document.getElementById("feedback-stop").disabled'),
