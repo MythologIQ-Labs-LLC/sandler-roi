@@ -135,6 +135,17 @@
       "approval": "unreviewed",
       "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/tree/feat/customer-files-feedback-mode-20261124",
       "notes": "Provisional active owner-directed AI-assisted implementation and review attention, separate from CI/browser execution and waiting. This is not a timesheet, an approved billable amount, or an estimate of equivalent manual coding. Reconcile with owner."
+    },
+    {
+      "id": "roi-2026-11-24-feedback-adversarial",
+      "date": "2026-11-24",
+      "phase": "Adversarial feedback-mode privacy, recording, draft integrity and ZIP export hardening",
+      "hours": 0.2,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/tree/fix/feedback-adversarial-hardening-20261124",
+      "notes": "Small provisional AI-assisted active review and implementation estimate, not measured human labor. Tests, remote CI runtime, waiting and overlapping effort excluded; owner review required before treating as billable."
     }
   ]
 }

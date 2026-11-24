@@ -31,3 +31,13 @@ test("feedback archive refuses invalid names and oversized entry counts",()=>{
   assert.throws(()=>zipFeedback([{name:"../escape",data:"oops"}]),/filename/);
   assert.throws(()=>zipFeedback(Array.from({length:101},(_,i)=>({name:"note-"+i+".txt",data:"a"}))),/Too many/);
 });
+
+
+test("ZIP rejects duplicate names and invalid entry types before archiving",()=>{
+  assert.throws(()=>zipFeedback([
+    {name:"VOICE-01.webm",data:new Uint8Array([1])},
+    {name:"voice-01.webm",data:new Uint8Array([2])}
+  ]),/Duplicate/);
+  assert.throws(()=>zipFeedback([{name:"feedback.json",data:{text:"not serialized"}}]),/Invalid feedback archive content/);
+  assert.throws(()=>zipFeedback([{name:"voice.mp3",data:null}]),/Invalid feedback archive content/);
+});

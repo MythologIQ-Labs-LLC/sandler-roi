@@ -412,10 +412,28 @@ try{
  await evaluate('document.getElementById("feedback-toggle").click()');
  assert.equal(await evaluate('document.getElementById("feedback-panel").hidden'),false);
  await evaluate('document.querySelector("[data-workbench-nav=compare]").click()');
- await evaluate('(()=>{document.getElementById("feedback-text").value="Clarify how scenarios compare";'+
-  'document.getElementById("feedback-category").value="improvement";'+
-  'document.getElementById("feedback-add").click()})()');
+ await evaluate('(()=>{const draft=document.getElementById("feedback-text");'+
+  'draft.value="Clarify how scenarios compare";draft.dispatchEvent(new Event("input",{bubbles:true}));'+
+  'document.getElementById("feedback-category").value="improvement";})()');
+ await evaluate('document.querySelector("[data-workbench-nav=present]").click()');
+ assert.match(await evaluate('document.getElementById("feedback-location").textContent'),/Draft from: compare/,
+  'navigating mid-comment must not silently reassign note context');
+ await evaluate('document.getElementById("feedback-add").click()');
+ await evaluate('document.querySelector("[data-workbench-nav=compare]").click()');
  assert.equal(await evaluate('document.getElementById("feedback-count").textContent'),"1 captured");
+ // Adversarial geometry check with feedback open at mobile, intermediate and desktop widths.
+ for(const width of [390,851,1050,1199,1280,1440]){
+   await command('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:width<600});
+   await sleep(80);
+   const geometry=await evaluate('(()=>({viewport:document.documentElement.clientWidth,'+
+     'scroll:document.documentElement.scrollWidth,'+
+     'panelLeft:Math.round(document.getElementById("feedback-panel").getBoundingClientRect().left),'+
+     'workRight:Math.round(document.querySelector(".main").getBoundingClientRect().right)}))()');
+   assert.ok(geometry.scroll<=geometry.viewport+2,
+     'feedback causes horizontal overflow at '+width+'px: '+JSON.stringify(geometry));
+   if(width>=851)assert.ok(geometry.workRight<=geometry.panelLeft+3,
+     'feedback obscures model content at '+width+'px: '+JSON.stringify(geometry));
+ }
  const feedbackGeometry=await evaluate('(()=>({panelTop:document.getElementById("feedback-panel").getBoundingClientRect().top,'+
   'journeyBottom:document.querySelector(".journey").getBoundingClientRect().bottom}))()');
  assert.ok(feedbackGeometry.panelTop>=feedbackGeometry.journeyBottom-2,
