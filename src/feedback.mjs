@@ -8,6 +8,10 @@ const download=(name,blob)=>{
 };
 export function initDevelopmentFeedback(getContext){
   const toggle=$("feedback-toggle"),pane=$("feedback-panel"),text=$("feedback-text");
+  // A deliberate development-only link enables the UI; this is not an auth boundary.
+  const enabled=new URLSearchParams(window.location?.search||"").get("devFeedback")==="1";
+  toggle.hidden=!enabled;pane.hidden=true;
+  if(!enabled)return;
   const record=$("feedback-record"),stop=$("feedback-stop"),play=$("feedback-audio-preview");
   const removeAudio=$("feedback-clear-audio"),list=$("feedback-list");
   const exportButton=$("feedback-export"),status=$("feedback-status");
