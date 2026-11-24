@@ -289,6 +289,20 @@ function renderBehavior(id,rows){
   }
 }
 
+function simplePaybackDisplay(months,horizon,{compact=false}={}){
+  if(months===null || !Number.isFinite(months))return "N/A";
+  const suffix=Number.isFinite(Number(horizon)) && months>Number(horizon)+1e-9?"†":"";
+  return months.toFixed(1)+(compact?" mo":" months")+suffix;
+}
+function breakEvenDisplay(result){
+  if(result.breakEvenPricePoints!==null)return result.breakEvenPricePoints.toFixed(3)+" pts";
+  switch(result.breakEvenStatus){
+    case "outside-supported-range":return "Above 100 pts";
+    case "no-eligible-pricing-revenue":return "No pricing base";
+    default:return "N/A";
+  }
+}
+
 function render(){
   document.querySelectorAll("[data-scenario]").forEach(el=>el.setAttribute("aria-pressed",String(el.dataset.scenario===selected)));
   const scenario=scenarios[selected], result=calculate(inputs,scenario,active);
@@ -375,6 +389,14 @@ function render(){
     amount.textContent=part.status==="ready"?MONEY(part.value):"Needs input";
     entry.append(label,amount);presentDrivers.append(entry);
   }
+  if(result.deduction!==null && result.deduction>0){
+    const overlap=document.createElement("div");overlap.className="present-driver";
+    const title=document.createElement("span");title.className="name";
+    title.textContent="Less: overlap between win-rate and major-account benefits";
+    const amount=document.createElement("strong");amount.className="amount";
+    amount.textContent="−"+MONEY(result.deduction);
+    overlap.append(title,amount);presentDrivers.append(overlap);
+  }
   const bars=$("scenario-bars");bars.replaceChildren();
   const variants=Object.entries(scenarios).map(([key,s])=>({key,label:s.label,result:calculate(inputs,s,active)}));
   const max=Math.max(result.cost??0,...variants.map(x=>x.result.benefit??0),1);
@@ -397,7 +419,7 @@ function render(){
       entry.result.complete?MONEY(entry.result.benefit):"Incomplete",
       entry.result.complete?MONEY(entry.result.net):"Incomplete",
       entry.result.complete?(entry.result.roi===null?"N/A":PERCENT(entry.result.roi)):"Incomplete",
-      entry.result.simplePaybackMonths===null?"N/A":entry.result.simplePaybackMonths.toFixed(1)+" months"
+      simplePaybackDisplay(entry.result.simplePaybackMonths,inputs.programMonths)
     ];
     for(const [index,value] of cells.entries()){
       const cell=document.createElement(index===0?"th":"td");
@@ -412,9 +434,15 @@ function render(){
   const fill=document.createElement("div");fill.className="bar-fill";fill.style.width=(result.cost===null?0:result.cost/max*100)+"%";fill.style.background="#64758c";track.append(fill);
   const total=document.createElement("strong");total.textContent=MONEY(result.cost);
   ref.append(label,track,total);bars.append(ref);
-  put("payback",result.simplePaybackMonths===null?"N/A":result.simplePaybackMonths.toFixed(1)+" mo");
+  put("payback",simplePaybackDisplay(result.simplePaybackMonths,inputs.programMonths,{compact:true}));
+  const exceeds=variants.some(entry=>entry.result.simplePaybackMonths!==null &&
+    entry.result.simplePaybackMonths>Number(inputs.programMonths)+1e-9);
+  put("payback-horizon-note",exceeds
+    ?"† The simple extrapolated payback exceeds the "+inputs.programMonths+
+      "-month evaluation for at least one scenario. It assumes benefits continue beyond the modeled period at the same monthly rate; actual payback is not established."
+    :"Simple payback assumes uniform monthly benefits rather than actual cash-flow timing.");
   put("multiple",result.multiple===null?"N/A":result.multiple.toFixed(2)+"×");
-  put("breakeven",result.breakEvenPricePoints===null?"N/A":result.breakEvenPricePoints.toFixed(3)+" pts");
+  put("breakeven",breakEvenDisplay(result));
 
   const pipeline=calculatePipelineBridge(inputs);
   put("pipeline-revenue",pipeline.complete?MONEY(pipeline.modeledClosedRevenue):"Needs input");

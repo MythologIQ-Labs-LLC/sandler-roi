@@ -291,7 +291,13 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
     });
     await t.test("present view includes driver math, uncertainty and reversible navigation",async()=>{
       await steps[3].trigger("click");
-      assert.equal(elements.get("present-driver-summary").children.length,4);
+      const breakdown=elements.get("present-driver-summary").children;
+      assert.equal(breakdown.length,5);
+      const deduction=breakdown.at(-1);
+      assert.match(deduction.children[0].textContent,/overlap between win-rate/);
+      assert.match(deduction.children[1].textContent,/^−\$[\d,]+$/);
+      assert.ok(Number(deduction.children[1].textContent.replace(/[^\d]/g,""))>0);
+      assert.match(elements.get("payback-horizon-note").textContent,/exceeds the 12-month evaluation/);
       assert.match(elements.get("present-evidence").textContent,/None independently verified/);
       assert.equal(elements.get("present").textContent,"Exit presentation");
       await elements.get("present").trigger("click");

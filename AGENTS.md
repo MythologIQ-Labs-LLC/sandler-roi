@@ -105,3 +105,13 @@ The installed Qortara Logic Demo offers stateless read-only evaluators for **sup
 - Keep persisted `inputs.prospect` and original JSON schemas stable. New CSV labels use Customer while legacy Prospect / Input prospect aliases still import correctly.
 - The name states whose figures are being modeled. It does **not** certify the figures as verified or assert that a purchase occurred. Retain source caveats and the delayed ROI reveal.
 - Test literal-name safety, live edits, name reset, blank fallback, CSV compatibility, long-name mobile layout, and Present/print.
+
+## Independent financial math audit gate
+
+- Read [the 2026-11-24 math audit](docs/verification/financial-math-audit-2026-11-24.md) when changing the financial engine or Present labels. Recompute sample values from an independent formula implementation; do not treat copied engine code as an independent oracle.
+- Keep valid values separate from unsupported numeric-precision results; never show Infinity, NaN, unsupported break-even price points, or a precise-looking aggregate above the supported amount range.
+- When nonpricing benefits cover the cost, additional price-point break-even is zero even if the eligible pricing denominator is zero. Otherwise distinguish feasible / no eligible pricing revenue / outside-supported-range, not all as N/A.
+- Show the dollar overlap deduction so users can reconcile all driver contributions to the displayed total benefit.
+- Flag simple payback that goes beyond the modeled program term; do not conflate constant-run-rate extrapolation with actual cash-flow recovery.
+- Preserve all four formulas and the default fixture totals unless the owner approves a new, explicit multi-year cohort/attribution specification. A passed math test does not prove causal isolation, data provenance or approved production ROI.
+- Add a nonduplicated effort-ledger entry and run independent test/property suite plus full native/browser checks for substantive finance changes.

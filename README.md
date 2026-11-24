@@ -85,6 +85,12 @@ Names identify the subject of the entered numbers, **not** independent data veri
 
 **Compatibility:** The internal JSON key `inputs.prospect` remains unchanged for saved model schemas `sandler-roi/1` and `sandler-roi/2`. New CSV templates and reports use `customer` / `Customer` / `Input customer`; the importer also supports legacy `Prospect` / `Input prospect` headers. No financial calculation changes. See the [copy audit](docs/design/customer-ownership-copy-audit.md).
 
+## Independent financial math review
+
+The [independent calculation audit](docs/verification/financial-math-audit-2026-11-24.md) checks all four modeled benefit drivers, investment modes, overlap deductions, net results, ROI, benefit/cost multiples, simple payback, price break-even and the separate pipeline sensitivity calculation. An independently authored reference model tests 400 deterministic input combinations in addition to explicit sample and boundary fixtures.
+
+**Important:** This verifies the computation under the *stated* assumptions, not real customer outcomes or Sandler training attribution. The 12-month conservative example does not achieve payback during its evaluated term; the new Present presentation labels any extrapolated payback. Fee-only costs must never be described as fully loaded costs. Multi-year account and hiring assumptions need a separate business definition before a production financial claim.
+
 ## What it models
 
 The current version includes four independently enabled financial drivers:
