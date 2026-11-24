@@ -124,6 +124,17 @@
       "approval": "unreviewed",
       "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/11",
       "notes": "Small, provisional AI-assisted change to restore the initial UI stage and Engagement tab on confirmed reset; tests and visual validation. Excludes CI and waiting. No stopwatch measurement."
+    },
+    {
+      "id": "roi-2026-11-24-customer-files-feedback",
+      "date": "2026-11-24",
+      "phase": "Customer folder save/load, grouped work/data controls, opt-in contextual text and audio feedback",
+      "hours": 0.35,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/tree/feat/customer-files-feedback-mode-20261124",
+      "notes": "Provisional active owner-directed AI-assisted implementation and review attention, separate from CI/browser execution and waiting. This is not a timesheet, an approved billable amount, or an estimate of equivalent manual coding. Reconcile with owner."
     }
   ]
 }

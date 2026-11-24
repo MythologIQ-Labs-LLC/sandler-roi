@@ -3,6 +3,8 @@ import { BASELINE_FIELDS, EVIDENCE_STATUSES, defaultEvidence, normalizeEvidence,
 import { CSV_FIELDS, CSV_LABELS, CSV_TEMPLATE_HEADERS, prepareCSV, suggestMapping, mappedCSVPreview, buildCSVImport } from "./csv-import.mjs";
 import {behaviorJourney} from "./story.mjs";
 import {customerCopy} from "./customer-copy.mjs";
+import {initCustomerFiles} from "./customer-files.mjs";
+import {initDevelopmentFeedback} from "./feedback.mjs";
 
 const clone = object => JSON.parse(JSON.stringify(object));
 let inputs=clone(DEFAULT_INPUTS);
@@ -642,25 +644,52 @@ $("import-csv-file").addEventListener("change",async event=>{
   }catch(err){pendingCSV=null;window.alert("CSV could not be read: "+err.message);}
 });
 
+function loadSavedCustomer(data){
+  if(!data||!["sandler-roi/1","sandler-roi/2"].includes(data.schema)||
+      !data.inputs||typeof data.inputs!=="object"||Array.isArray(data.inputs)||
+      !data.scenarios||typeof data.scenarios!=="object"||Array.isArray(data.scenarios)||
+      !data.active||typeof data.active!=="object"||Array.isArray(data.active))
+    throw Error("Unsupported model format");
+  // Validate and construct the new state before replacing the current customer.
+  const cleanInputs=clone(DEFAULT_INPUTS);
+  for(const key of Object.keys(cleanInputs))
+    if(Object.prototype.hasOwnProperty.call(data.inputs,key))cleanInputs[key]=data.inputs[key];
+  const cleanScenarios=clone(SCENARIOS);
+  for(const key of Object.keys(cleanScenarios)){
+    if(!data.scenarios[key]||typeof data.scenarios[key]!=="object"||Array.isArray(data.scenarios[key]))continue;
+    for(const field of Object.keys(cleanScenarios[key]))
+      if(field!=="label"&&Object.prototype.hasOwnProperty.call(data.scenarios[key],field))
+        cleanScenarios[key][field]=data.scenarios[key][field];
+  }
+  if(data.schema==="sandler-roi/1")cleanInputs.costMode="fees";
+  const cleanEvidence=data.schema==="sandler-roi/2"?
+    normalizeEvidence(data.evidence,cleanInputs):defaultEvidence(cleanInputs);
+  const cleanActive=Object.fromEntries(
+    Object.keys(DEFAULT_ACTIVE).map(key=>[key,data.active[key]===false?false:true]));
+  const cleanSelected=Object.prototype.hasOwnProperty.call(SCENARIOS,data.selected)?data.selected:"expected";
+  inputs=cleanInputs;scenarios=cleanScenarios;evidence=cleanEvidence;
+  active=cleanActive;selected=cleanSelected;
+  // Start at the customer's baseline, not a previous customer's financial reveal.
+  presentationSeen=false;priorStep="compare";
+  renderFields();renderAssumptions();setDiscoverPanel("engagement");setStep("discover");
+}
 $("import-file").addEventListener("change",async event=>{
-  const f=event.target.files?.[0];event.target.value="";if(!f)return;
-  if(f.size>2000000){window.alert("JSON file exceeds 2 MB.");return;}
-  try {
-    const data=JSON.parse(await f.text());
-    if(!["sandler-roi/1","sandler-roi/2"].includes(data.schema)||!data.inputs||!data.scenarios||!data.active)throw Error("Unsupported model format");
-    const cleanInputs={...clone(DEFAULT_INPUTS)};
-    for(const key of Object.keys(cleanInputs))if(Object.prototype.hasOwnProperty.call(data.inputs,key))cleanInputs[key]=data.inputs[key];
-    const cleanScenarios=clone(SCENARIOS);
-    for(const key of Object.keys(cleanScenarios)){
-      if(!data.scenarios[key]||typeof data.scenarios[key]!=="object")continue;
-      for(const field of Object.keys(cleanScenarios[key]))if(field!=="label"&&Object.prototype.hasOwnProperty.call(data.scenarios[key],field))cleanScenarios[key][field]=data.scenarios[key][field];
-    }
-    inputs=cleanInputs;scenarios=cleanScenarios;
-    if(data.schema==="sandler-roi/1")inputs.costMode="fees";
-    evidence=data.schema==="sandler-roi/2"?normalizeEvidence(data.evidence,cleanInputs):defaultEvidence(cleanInputs);
-    active=Object.fromEntries(Object.keys(DEFAULT_ACTIVE).map(k=>[k,data.active[k]===false?false:true]));
-    selected=Object.prototype.hasOwnProperty.call(SCENARIOS,data.selected)?data.selected:"expected";
-    renderFields();renderAssumptions();render();
-  }catch(err){window.alert("Could not import model: "+err.message);}
+  const file=event.target.files?.[0];event.target.value="";if(!file)return;
+  if(file.size>2_000_000){window.alert("JSON file exceeds 2 MB.");return;}
+  if(!window.confirm("Open this saved customer? Unsaved changes to the current workbench will be lost."))return;
+  try{loadSavedCustomer(JSON.parse(await file.text()));}
+  catch(err){window.alert("Could not open customer file: "+err.message);}
 });
+initCustomerFiles({
+  makeSnapshot:snapshot,
+  loadSnapshot:loadSavedCustomer,
+  downloadBackup:()=>download("sandler-roi-"+safeSlug(inputs.prospect)+".json",
+    JSON.stringify(snapshot(),null,2),"application/json")
+});
+initDevelopmentFeedback(()=>({
+  stage:currentStep,
+  panel:currentStep==="discover"?discoveryPanel:null,
+  scenario:currentStep==="present"?selected:null
+}));
+
 renderFields();renderAssumptions();setDiscoverPanel("engagement");setStep("discover");

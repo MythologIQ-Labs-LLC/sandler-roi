@@ -48,6 +48,20 @@ npm start
 
 The preview server binds to \`127.0.0.1\`. Opening \`index.html\` directly using \`file://\` is not supported because the browser restricts JavaScript modules loaded from local files. The first-use path is **source-inspected** and its user interactions were simulated offline. An actual Chromium/Edge browser acceptance run is still pending.
 
+## Saved customer work and development feedback
+
+The **Work & reports** menu separates three tasks:
+
+- **Saved customer work:** **Customer files** lets the representative choose an existing local folder, save the current customer model, and reopen a selected customer from a list. Browser folder access requires user permission and works in supported secure-context browsers (typically current Chrome/Edge); the app never silently scans the disk or saves changes in the background. Reconnect to the folder when returning in a new browser session. Files use the existing versioned JSON snapshot schema. Explicit overwrite/delete confirmations protect earlier work.
+- **Backup and recovery:** **Download JSON backup** and **Open JSON backup** remain available when folder access is unsupported and when moving work between devices. These backups preserve the editable model; they are not a centralized CRM or encrypted customer vault.
+- **Data exchange and reports:** CSV mapping, the blank CSV template, CSV export, and print stay separate from saved customer work.
+
+**Privacy:** Client JSON files are plain text on the representative's own computer. Use organization-approved storage for confidential material. Files are not automatically saved, synchronized, uploaded, encrypted, or recoverable after accidental deletion. The public Pages prototype is not an approved secure customer record system.
+
+A deliberate development link (**add `?devFeedback=1` to the workbench URL**) exposes **Feedback mode** without cluttering the default customer-facing interface. This URL switch is **not authentication**. The mode offers stage-aware written suggestions and optional microphone voice notes while the user continues navigating the application. Notes contain the current stage, optional Discover panel and selected Present scenario, but **not financial input values or customer names**. Recording starts only after an explicit microphone action and permission, and stops when the user chooses Stop. A single local ZIP package contains `feedback.json` and any voice clips for deliberate review and sharing. The app does not transmit feedback, run transcription, start screen recording, or generate issues automatically. Closing the tab before export can lose feedback.
+
+The customer-file folder and feedback workflows are presentation/UI features and do not modify `src/roi.mjs` or existing financial formulas.
+
 ## Use it in a customer conversation
 
 1. **Discover:** Establish the customer's current win rate, deal volume, average deal, sales ramp, investment and evidence. No ROI or scenario outputs are displayed here.
