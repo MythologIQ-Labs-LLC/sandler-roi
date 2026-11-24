@@ -1,0 +1,47 @@
+name: ROI Workbench validation
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'server.mjs'
+      - 'scripts/**'
+      - '.nojekyll'
+      - '.github/workflows/test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: roi-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Node version
+        run: node --version
+      - name: Test calculation engine
+        run: npm test
+      - name: Validate static GitHub Pages payload
+        run: npm run check:pages
+      - name: Smoke test local preview server
+        run: |
+          node server.mjs &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:4173/ -o /tmp/sandler-roi.html; then break; fi
+            sleep 1
+          done
+          grep -q 'Sandler ROI Workbench' /tmp/sandler-roi.html
+          curl -fsS http://127.0.0.1:4173/src/roi.mjs -o /dev/null
+          curl -fsS http://127.0.0.1:4173/src/evidence.mjs -o /dev/null
+          curl -fsS http://127.0.0.1:4173/src/workbench.css -o /dev/null
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4173/secrets)" = 404
