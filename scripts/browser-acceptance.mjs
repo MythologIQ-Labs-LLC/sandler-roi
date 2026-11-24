@@ -434,6 +434,11 @@ try{
    'voice file must be listed in the exported archive');
  assert.doesNotMatch(JSON.stringify(manifest),/Demo Customer|79200/,'feedback must not capture customer data');
  await evaluate('document.getElementById("feedback-exit").click()');
+ // The normal customer URL must not expose development feedback controls.
+ await command('Page.navigate',{url:'http://127.0.0.1:4174/'});
+ const hiddenByDefault=await until(async()=>evaluate('document.readyState==="complete"&&'+
+   'document.getElementById("feedback-toggle")?.hidden===true'),"feedback hidden without development URL");
+ assert.equal(hiddenByDefault,true);
  assert.deepEqual(exceptions,[],'Unexpected browser JavaScript exceptions');
  console.log('REAL BROWSER ACCEPTANCE PASS: Chromium rendered geometry, 4 tabs, desktop scroll budget, mobile overflow, Present nav.');
 }finally{
