@@ -15,6 +15,8 @@ export function initDevelopmentFeedback(getContext){
   let recorder=null,stream=null,chunks=[],pendingAudio=null,previewUrl=null,exported=false;
   const setStatus=message=>{status.textContent=message;};
   function show(active){
+    // Closing feedback mode must never leave an invisible microphone recording.
+    if(!active&&recorder?.state==="recording")recorder.stop();
     pane.hidden=!active;
     toggle.setAttribute("aria-pressed",String(active));
     document.body.classList.toggle("feedback-mode",active);
@@ -140,7 +142,7 @@ export function initDevelopmentFeedback(getContext){
   });
   if(typeof window.addEventListener==="function"){
     window.addEventListener("beforeunload",event=>{
-      if(notes.length&&!exported){event.preventDefault();event.returnValue="";}
+      if((notes.length||pendingAudio||recorder)&&!exported){event.preventDefault();event.returnValue="";}
     });
     window.addEventListener("pagehide",()=>{if(recorder?.state==="recording")recorder.stop();closeStream();});
   }
