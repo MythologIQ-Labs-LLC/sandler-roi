@@ -9,7 +9,7 @@
   ],
   "allowed_badge_targets": [
     "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1",
-    "https://github.com/MythologIQ-Labs-LLC/sandler-roi/blob/feat/sandler-roi-workbench-mvp/package.json"
+    "https://github.com/MythologIQ-Labs-LLC/sandler-roi/blob/feat/roi-evidence-cost-hardening/package.json"
   ],
   "journey_mode": "execute",
   "exceptions": [],
