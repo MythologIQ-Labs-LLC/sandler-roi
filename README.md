@@ -22,6 +22,12 @@
 - [Architecture and tests](#architecture-and-tests)
 - [Current limits](#current-limits)
 
+## Compact four-point workbench stage timeline
+
+The horizontal **Discover → Model → Compare → Present** navigation is a thin 2px line with four small diamond markers rather than four large, numbered cards. The active point is Sandler energetic blue, earlier-position points are teal, and upcoming points are outlined. Stage labels remain below each point; the clickable area remains the full native button. Keyboard arrows, Home and End move focus and navigate stages. This is a position indicator only, not a claim that earlier stages were completed or verified.
+
+The line and progress segment are CSS-generated, and the existing stage-state code remains the authority. The timeline remains visible on Present and is hidden in print. The top header is slightly slimmer. The customer data, financial calculations, staged reveal and JSON/CSV compatibility are unchanged.
+
 ## Project development effort
 
 Approximate build and refinement effort is tracked in the [public project effort ledger](docs/engagement/effort-ledger.md), with an auditable entry for each work phase. Run `npm run effort` to see the current calculated total. The entries are provisional until reviewed; they are **not** an invoice or an assertion of approved billable hours. Hourly rates and commercial terms are deliberately excluded from this public repository.
