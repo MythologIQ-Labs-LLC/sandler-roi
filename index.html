@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#21245c">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://go.nextlevel.sandler.com; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Sandler ROI Workbench | Illustrative Business Case</title>
   <meta name="description" content="Configurable ROI modeling workbench for consultative sales training discussions.">
   <style>
@@ -125,7 +125,7 @@
 <body data-stage="discover">
   <a class="skip-link" href="#main-workbench">Skip to workbench</a>
   <header class="top">
-    <div class="brand"><div class="brand-identity"><span class="brand-word">SANDLER<sup>®</sup></span><span class="brand-divider"></span><span class="brand-product">ROI Workbench</span></div><div class="brand-sub">A guided business-case conversation</div></div>
+    <div class="brand"><div class="brand-identity"><img class="brand-wordmark" src="https://go.nextlevel.sandler.com/hs-fs/hubfs/SANDLER-LOGO-R-1C.webp?height=38&amp;name=SANDLER-LOGO-R-1C.webp&amp;width=300" width="230" height="30" alt="Sandler" referrerpolicy="no-referrer"><span class="brand-divider"></span><span class="brand-product">ROI Workbench</span></div><div class="brand-sub">A guided business-case conversation</div></div>
     <div class="top-actions no-print">
       <button type="button" id="reset" class="btn btn-dark">Reset example</button>
       <button type="button" id="present" class="btn btn-primary" aria-pressed="false">Present case</button>
@@ -155,10 +155,10 @@
       <div class="discover-panel-nav">
         <div class="eyebrow">Discovery sections</div>
         <div class="discover-switcher" role="group" aria-label="Choose discovery inputs">
-          <button type="button" data-discover-tab="engagement" aria-pressed="true"><span class="mini-circle">01</span> Engagement</button>
-          <button type="button" data-discover-tab="performance" aria-pressed="false"><span class="mini-circle">02</span> Performance</button>
-          <button type="button" data-discover-tab="pipeline" aria-pressed="false"><span class="mini-circle">03</span> Pipeline</button>
-          <button type="button" data-discover-tab="evidence" aria-pressed="false"><span class="mini-circle">04</span> Evidence</button>
+          <button type="button" data-discover-tab="engagement" aria-pressed="true"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3"/><path d="M5 20v-2.5c0-3.5 14-3.5 14 0V20"/></svg></span> Engagement</button>
+          <button type="button" data-discover-tab="performance" aria-pressed="false"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V14h3v6M10.5 20V9h3v11M17 20V4h3v16"/></svg></span> Performance</button>
+          <button type="button" data-discover-tab="pipeline" aria-pressed="false"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 4 3 7-10"/><path d="M15 6h5v5"/></svg></span> Pipeline</button>
+          <button type="button" data-discover-tab="evidence" aria-pressed="false"><span class="mini-circle"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.3 8.5-8 11-4.7-2.5-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></span> Evidence</button>
         </div>
         <p class="discover-panel-hint" id="discover-panel-hint">Define the engagement and investment.</p>
       </div>
@@ -302,7 +302,7 @@
     </div>
     <p class="section-note">Only mapped columns are imported. Unmapped financial fields become missing, not fictional defaults. Imported source claims start unconfirmed. Scenario assumptions remain illustrative.</p>
   </dialog>
-  <footer class="footer">Prototype sales conversation tool. Not an official Sandler ROI guarantee. Figures are hypothetical until validated by the prospect; generated estimates do not establish training causality or realized outcomes.</footer>
+  <footer class="footer">Pilot sales conversation tool for a Sandler representative. Not an official ROI guarantee. Figures are hypothetical until validated; estimates do not establish training causality or realized outcomes. SANDLER (stylized) is a registered service mark of Sandler Systems, LLC.</footer>
   <script type="module" src="./src/app.mjs"></script>
 </body>
 </html>

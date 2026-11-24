@@ -242,3 +242,11 @@ body[data-stage="model"] .journey,body[data-stage="compare"] .journey{
 @media print{
   .csv-map-dialog,.discover-panel-nav{display:none!important}
 }
+
+/* Original uniform line icons follow Sandler icon style #1. */
+.mini-circle{background:var(--stable)!important;color:#fff!important;width:28px;height:28px}
+.mini-circle svg{display:block;width:17px;height:17px;flex-shrink:0}
+.discover-switcher button[aria-pressed="true"] .mini-circle{background:var(--energetic)!important}
+.brand-wordmark{width:clamp(175px,17vw,230px);height:auto;object-fit:contain;display:block}
+.brand-identity{gap:14px}
+@media(max-width:600px){.brand-wordmark{width:180px}}
