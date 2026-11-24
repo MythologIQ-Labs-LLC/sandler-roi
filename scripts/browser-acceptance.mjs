@@ -106,6 +106,15 @@ try{
   'mainCards:[...document.querySelector(".main").children].map(el=>({stage:el.dataset.workbenchStep||"",h:Math.round(el.getBoundingClientRect().height),display:getComputedStyle(el).display})),'+
   'header:Math.round(document.querySelector(".top").getBoundingClientRect().height),'+
   'journeyHeight:Math.round(document.querySelector(".journey").getBoundingClientRect().height),'+
+  'timeline:(()=>{const root=document.getElementById("journey-timeline");'+
+  'const outer=root.getBoundingClientRect();const line=getComputedStyle(root,"::before");'+
+  'return {stage:root.dataset.current,connectorPx:parseFloat(line.height),'+
+  'lineStart:outer.left+parseFloat(line.left),lineEnd:outer.left+parseFloat(line.left)+parseFloat(line.width),'+
+  'points:[...root.querySelectorAll(".journey-step")].map(el=>{'+
+  'const node=el.querySelector(".journey-node").getBoundingClientRect();const hit=el.getBoundingClientRect();'+
+  'return {key:el.dataset.workbenchNav,state:el.dataset.timelineState,'+
+  'center:node.left+node.width/2,y:node.top+node.height/2,'+
+  'hitHeight:Math.round(hit.height),current:el.getAttribute("aria-current")};})};})(),'+
   'introHeight:Math.round(document.querySelector(".stage-intro").getBoundingClientRect().height),'+
   'tabbarHeight:Math.round(document.querySelector(".discover-tabbar").getBoundingClientRect().height),'+
   'navVisible:getComputedStyle(document.querySelector(".journey")).display!=="none"};})()');
@@ -130,7 +139,18 @@ try{
  assert.ok(measurements.editorTop<=370,'Editable prospect input still pushed down the screen: '+measurements.editorTop);
  assert.ok(measurements.sideWidth>measurements.mainWidth,'Editing surface must be wider than KPI summary');
  assert.ok(measurements.header<=68,'Header is still too tall: '+measurements.header);
- assert.ok(measurements.journeyHeight<=58,'Journey timeline is still too tall: '+measurements.journeyHeight);
+ assert.ok(measurements.journeyHeight<=46,'Four-point timeline is too tall: '+measurements.journeyHeight);
+ assert.equal(measurements.timeline.connectorPx,2,'Timeline connector must be a thin line');
+ assert.equal(measurements.timeline.points.length,4);
+ assert.equal(measurements.timeline.stage,"discover");
+ assert.deepEqual(measurements.timeline.points.map(p=>p.state),
+   ["current","upcoming","upcoming","upcoming"]);
+ assert.ok(measurements.timeline.points.every(p=>p.hitHeight>=40),
+   'Small markers still require full-size interaction hit targets');
+ assert.ok(measurements.timeline.points.every(p=>Math.abs(p.y-(measurements.timeline.points[0].y))<=1),
+   'Four stage markers must align on one literal timeline');
+ for(let i=1;i<4;i++)assert.ok(measurements.timeline.points[i].center>measurements.timeline.points[i-1].center,
+   'Stage markers must progress left to right');
  assert.equal(measurements.hiddenPanels,3,'Three tabs must be hidden in DOM');
  assert.equal(measurements.tabColumns,4,'Four Discover tabs must form a single row');
  assert.ok(measurements.docHeight<=measurements.viewport+180,
@@ -178,6 +198,10 @@ try{
  await evaluate('(()=>{const input=document.getElementById("field-prospect");'+
   'input.value="John Doe";input.dispatchEvent(new Event("input",{bubbles:true}));})()');
  await evaluate('document.querySelector("[data-workbench-nav=model]").click()');
+ let lineState=await sample();
+ assert.equal(lineState.timeline.stage,"model");
+ assert.deepEqual(lineState.timeline.points.map(p=>p.state),
+   ["previous","current","upcoming","upcoming"]);
  let phase=await visibleStage();
  assert.equal(phase.modelBehavior,true,'Model must show operating hypotheses');
  owned=await customerLabels();
@@ -190,6 +214,9 @@ try{
   assert.equal(phase[key],false,'Model disclosed financial return too early: '+key);
  }
  await evaluate('document.querySelector("[data-workbench-nav=compare]").click()');
+ lineState=await sample();
+ assert.deepEqual(lineState.timeline.points.map(p=>p.state),
+   ["previous","previous","current","upcoming"]);
  phase=await visibleStage();
  assert.equal(phase.review,true,'Compare must show customer validation');
  owned=await customerLabels();
@@ -202,6 +229,8 @@ try{
  await writeFile(join(output,'review-desktop.png'),Buffer.from(reviewImage.data,'base64'));
  await evaluate('document.querySelector("[data-workbench-nav=present]").click()');
  const present=await sample();assert.equal(present.stage,'present');
+ assert.deepEqual(present.timeline.points.map(p=>p.state),
+   ["previous","previous","previous","current"]);
  assert.equal(present.navVisible,true,'Timeline must remain visible in Present');
  owned=await customerLabels();
  assert.equal(owned.reveal,"Where John Doe stands. What could change.");
@@ -241,6 +270,9 @@ try{
  assert.deepEqual(mobile.visiblePanels,['engagement']);
  assert.equal(mobile.tabColumns,2,'Mobile tabs need two readable columns');
  assert.ok(mobile.docWidth<=mobile.width+2,'Mobile horizontal overflow: '+JSON.stringify(mobile));
+ assert.ok(mobile.journeyHeight<=46,'Timeline grew into big cards on mobile');
+ assert.equal(mobile.timeline.points.length,4);
+ assert.ok(mobile.timeline.points.every(p=>p.hitHeight>=40),'Mobile timeline targets are too small');
  await evaluate('(()=>{const input=document.getElementById("field-prospect");'+
   'input.value="North Atlantic Regional Commercial Development and Training Partners International";'+
   'input.dispatchEvent(new Event("input",{bubbles:true}));})()');
