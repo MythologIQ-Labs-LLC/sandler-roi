@@ -152,8 +152,8 @@
       background:#fff;border:1px solid #dee6f1;border-radius:14px;
       padding:13px 16px 11px;position:static!important
     }
-    .discover-switcher{
-      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    body[data-stage="discover"] .discover-switcher{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr))!important;
       gap:8px;margin:8px 0
     }
     .discover-switcher [role="tab"]{
