@@ -176,3 +176,31 @@ It accepts prospect-specific qualified pipeline value, its observed time period 
 - Separate prospect-defined sensitivity with clear source references, independent validity and no additive ROI contribution gives the rep a useful illustration without inflating financial results. **Accepted for the MVP.**
 
 Pipeline is a leading indicator, not revenue. Revenue is not gross profit. Higher AI roleplay scores are a skills measure, not a direct financial benefit. The reported case study does not provide total training cost, verified attributable incremental profit or defensible ROI.
+
+
+## 10. Cost-scope and source-declaration boundary
+
+**Development status:** Implemented on \`feat/roi-evidence-cost-hardening\`, an independent feature branch based on MVP PR #1. Not merged, not production-certified.
+
+### Investment modes
+
+- **Fee-only** (default, backwards compatible): \`monthlyFee × programMonths + setupFee\`. The UI labels this fee-only and warns that additional costs are excluded.
+- **Expanded cost estimate** (explicitly selected): fee cost plus \`participantCount × trainingHoursPerPerson × participantHourlyCost\`, \`additionalMonthlyCost × programMonths\`, and period totals for travel, technology, administration, and other costs.
+- Expanded inputs start **blank**, not zero; explicit zero is allowed and missing amounts block cost, net value and ROI.
+- Entered expanded costs remain **user-declared**, not independently audited. Time and one-time cost categories must be scoped by the representative to the stated evaluation period.
+
+### Source declarations
+
+The standalone \`src/evidence.mjs\` records a source status and optional reference per baseline input: illustrative, unconfirmed, prospect-reported, document-cited or finance-reviewed (user-declared). The last two require a source label to avoid being presented as supported citations without a reference. **No status independently verifies the source.**
+
+Arithmetic completeness is separate from evidence validity. Editing a numeric input resets its classification to unconfirmed; importing old version-1 JSON defaults to legacy fee-only and unverified declarations; version-2 JSON carries source declarations but does not import a trusted audit status. Exported CSV includes inputs, costs, evidence statuses and an explicit hypothetical-projection label.
+
+### Adversarial decision record
+
+1. Defaulting unexplored indirect cost categories to zero **rejected**: gives artificially favorable return. Blanks block expanded totals.
+2. Automatically treating a \`finance-reviewed\` dropdown choice as independent confirmation **rejected**: this is merely the representative's assertion.
+3. Breaking existing fee-only scenarios **rejected**: retain legacy arithmetic and expose its cost limitation clearly.
+4. Accepting \`calculated\` values or trust flags from imported JSON **rejected**: the engine always recalculates.
+5. Starting GitHub Actions while user funding is exhausted **rejected**: commit on a fresh branch without a PR, do not modify workflow or branch requirements.
+
+**Not yet implemented:** independent evidence signing, actual outcomes ledger, complete overlap attribution, monthly cash flow, and fully audited training cost assurance.

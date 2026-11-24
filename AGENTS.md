@@ -52,3 +52,11 @@ Build and maintain a transparent, configurable tool that lets a **Sandler sales 
 ## Qortara-hosted evaluator limitations
 
 The installed Qortara Logic Demo offers stateless read-only evaluators for **supplied** documents and policy inputs. It cannot initialize or read this repo, execute tests, or record gates. Use the host's GitHub tools for repository work and label unvalidated governance inputs as proposals. If an organization governance manifest becomes available, resolve actual precedence and applicability before claiming compliance.
+
+
+## Follow-on cost and evidence invariants
+
+- Do not label fee-only investment fully loaded; do not silently replace missing expanded costs with zero.
+- Source status is caller-reported metadata, never independent attestation, even for “finance-reviewed.”
+- Demote a source claim when the underlying numeric baseline is edited, and never trust precomputed results in imported JSON.
+- Keep the follow-on development branch separate from open PR #1 while GitHub Actions budget is unavailable. Do not bypass existing required checks or trigger workflows just to prove progress.

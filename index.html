@@ -43,10 +43,13 @@
     .stack {display:grid;gap:12px}
     label {font-size:12px;font-weight:700;color:#2c3a50;display:block}
     .field {display:grid;gap:5px;min-width:0}
-    .field input,.field textarea {width:100%;border:1px solid #cfd6e2;border-radius:9px;padding:10px;color:#1c2e4d;background:#fff;min-width:0}
+    .field input,.field textarea,.field select {width:100%;border:1px solid #cfd6e2;border-radius:9px;padding:10px;color:#1c2e4d;background:#fff;min-width:0}
     .field input:focus,.field textarea:focus {border-color:#b57a46}
     .field .hint {font-size:10px;color:#7d899b}
     .field textarea {min-height:72px;resize:vertical}
+    .evidence-entry {border-top:1px solid #e9edf4;padding:9px 0}
+    .evidence-entry:first-child {border-top:0}
+    .evidence-entry label {font-size:11px}
     .two {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
     details {border-bottom:1px solid #e8ecf3;padding:13px 0}
     details:last-child {border:0}
@@ -139,6 +142,8 @@
         <div class="stack" id="identity-fields"></div>
         <div class="divider"></div>
         <div class="two" id="cost-fields"></div>
+        <div class="field" id="cost-mode" style="margin:14px 0 10px"></div>
+        <div class="two" id="expanded-cost-fields"></div>
       </section>
       <section class="card panel">
         <div class="eyebrow">2 · Define baseline</div>
@@ -156,6 +161,9 @@
       <section class="card panel">
         <div class="eyebrow">3 · Validate</div>
         <div class="field"><label for="evidence-notes">Source notes and assumptions</label><textarea id="evidence-notes" placeholder="Where did baseline data come from? What has not been validated?"></textarea></div>
+        <p class="small" id="evidence-summary" role="status">Input evidence is user-declared, not independently verified.</p>
+        <details><summary>Per-input source register</summary><div class="inside" id="evidence-register"></div></details>
+        <p class="section-note">Editing a numeric input resets its source classification to unconfirmed. Selecting a reviewed status does not authenticate the evidence.</p>
         <p class="section-note" style="margin:12px 0 0">Private by design: no data sent anywhere. Use Save model to preserve your work as a local JSON file.</p>
       </section>
     </aside>
@@ -179,8 +187,9 @@
           <div class="stat feature"><div class="k">Modeled ROI</div><div class="v" id="roi">—</div><div class="note">Net modeled benefit ÷ program cost</div></div>
           <div class="stat"><div class="k">Net value</div><div class="v" id="net">—</div><div class="note">After training investment</div></div>
           <div class="stat"><div class="k">Gross benefit</div><div class="v" id="benefit">—</div><div class="note">After attribution adjustments</div></div>
-          <div class="stat"><div class="k">Total program cost</div><div class="v" id="cost">—</div><div class="note">Training fees for selected period</div></div>
+          <div class="stat"><div class="k">Modeled investment</div><div class="v" id="cost">—</div><div class="note" id="cost-basis">Fee-only estimate</div></div>
         </div>
+        <p class="small" id="cost-extras" style="margin:12px 0 3px">Other training costs are excluded.</p>
         <div id="warnings" class="warnings" role="status" aria-live="polite"></div>
       </section>
       <section class="card panel">

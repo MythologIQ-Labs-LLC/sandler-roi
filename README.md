@@ -138,3 +138,10 @@ This invokes the repository's Node.js test suite. It does not run a browser usab
 - Verified realized ROI, CRM/SPE integration, authenticated user accounts, formal data provenance and production deployment are outside this version.
 
 **Licensing:** No standalone software license was found in the inspected repository root; do not assume public redistribution or reuse rights. Sandler and associated names are used to describe the intended sales workflow, not to claim official ownership or sponsorship. See [Sandler](https://sandler.com/) for its published training materials.
+
+
+## Continued development without GitHub Actions
+
+The separate [cost and evidence hardening branch](https://github.com/MythologIQ-Labs-LLC/sandler-roi/tree/feat/roi-evidence-cost-hardening) introduces **fee-only versus expanded cost estimates** and **per-input source declarations**. Expanded cost inputs account for paid training time, monthly support, travel, technology, administration and other relevant expenses. Expanded inputs must be explicitly entered, including zero when appropriate. Source classifications remain self-declared and cannot certify realized ROI.
+
+The branch deliberately has no open PR and does not modify existing CI requirements; code changes should be tested locally while the GitHub Actions budget is exhausted. The original MVP PR remains separately unmerged.
