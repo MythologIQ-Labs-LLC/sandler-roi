@@ -43,5 +43,6 @@ jobs:
           grep -q 'Sandler ROI Workbench' /tmp/sandler-roi.html
           curl -fsS http://127.0.0.1:4173/src/roi.mjs -o /dev/null
           curl -fsS http://127.0.0.1:4173/src/evidence.mjs -o /dev/null
+          curl -fsS http://127.0.0.1:4173/src/csv-import.mjs -o /dev/null
           curl -fsS http://127.0.0.1:4173/src/workbench.css -o /dev/null
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4173/secrets)" = 404
