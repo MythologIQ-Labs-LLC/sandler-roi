@@ -1,0 +1,148 @@
+/* Rep-led Sandler ROI Workbench. Brand colors from Sandler public guidelines (v2.0.0).
+   The "SANDLER" heading is text, not an official or reconstructed logo asset. */
+:root{
+  --stable:#21245c; --fresh:#00aded; --energetic:#0045c2;
+  --ink:#252c4b; --muted:#66708b; --paper:#f5f7fc;
+  --hairline:#e0e5f0; --fresh-ink:#00779f;
+  color:var(--ink); background:var(--paper);
+}
+body{background:var(--paper);color:var(--ink)}
+.top{
+  background:var(--stable);padding:20px max(24px,calc((100% - 1450px)/2));
+  box-shadow:0 8px 25px rgba(33,36,92,.08);gap:20px
+}
+.brand{display:block}
+.brand-identity{display:flex;align-items:center;gap:15px}
+.brand-word{font-size:22px;font-weight:850;letter-spacing:.16em;color:#fff;line-height:1.1}
+.brand-word sup{font-size:9px;letter-spacing:0;vertical-align:super}
+.brand-divider{width:2px;height:27px;background:var(--fresh)}
+.brand-product{font-size:19px;font-weight:650;letter-spacing:-.02em;color:#f7f8fd}
+.brand-sub{margin-top:5px;font-size:12px;color:#c3c9e7}
+.btn{transition:background .15s,border-color .15s}
+.btn-primary{background:var(--fresh);border-color:var(--fresh);color:#14244e;font-weight:800}
+.btn-primary:hover{background:#3ac9f3;border-color:#3ac9f3}
+.btn-dark{background:#30346e;border-color:#4e538e;color:#fff}
+.btn-dark:hover{background:#454a88}
+:focus-visible{outline:3px solid var(--fresh);outline-offset:3px}
+.skip-link{position:absolute;z-index:100;top:-70px;left:16px;padding:12px;background:#fff;color:var(--stable)}
+.skip-link:focus{top:10px}
+.toolbar-menu{position:relative;border:0;padding:0}
+.toolbar-menu summary{list-style:none;display:block;padding:10px 14px}
+.toolbar-menu summary::-webkit-details-marker{display:none}
+.toolbar-menu summary::after{content:" ▾";font-size:12px}
+.toolbar-menu[open] summary::after{content:" ▴"}
+.toolbar-menu-content{
+  position:absolute;z-index:50;right:0;top:calc(100% + 10px);width:196px;
+  background:#fff;padding:9px;border-radius:12px;border:1px solid var(--hairline);
+  box-shadow:0 12px 32px rgba(29,36,72,.16);display:grid;gap:6px
+}
+.toolbar-menu-content .btn{width:100%;text-align:left;color:var(--stable);border-color:#e5eaf1}
+.toolbar-menu-content .btn:hover{background:#f0f3fc}
+.journey{background:#fff;border-bottom:1px solid var(--hairline)}
+.journey-inner{max-width:1450px;margin:auto;padding:10px 24px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.journey-step{
+  background:transparent;border:1px solid transparent;border-radius:12px;padding:12px 14px;
+  display:flex;align-items:center;text-align:left;gap:11px;color:#56617d;cursor:pointer
+}
+.journey-step:hover{background:#f3f7fd}
+.journey-step[aria-current="step"]{background:#eff8fd;color:var(--stable);border-color:#bfeaf9}
+.journey-step .journey-number{border-radius:50%;border:1px solid #cfd8e8;width:33px;height:33px;display:grid;place-items:center;font-size:11px;font-weight:800;flex-shrink:0}
+.journey-step[aria-current="step"] .journey-number{background:var(--fresh);color:var(--stable);border-color:var(--fresh)}
+.journey-step strong{display:block;font-size:13px}
+.journey-step small{display:block;font-size:11px;font-weight:500;margin-top:1px}
+.stage-intro{
+  max-width:1450px;margin:0 auto;padding:28px 24px 4px;display:flex;gap:24px;
+  align-items:center;justify-content:space-between
+}
+.stage-intro-copy{max-width:770px}
+.stage-intro h1{font-size:30px;letter-spacing:-.9px;margin:0 0 8px;color:var(--stable);line-height:1.12}
+.stage-intro p{color:var(--muted);max-width:70ch;font-size:13px;line-height:1.55;margin:0}
+.stage-intro .eyebrow{color:var(--fresh-ink)}
+.stage-intro .btn{white-space:nowrap;flex-shrink:0}
+.shell{max-width:1450px;padding-top:22px;grid-template-columns:minmax(340px,420px) minmax(0,1fr)}
+.card{border:1px solid var(--hairline);box-shadow:0 7px 26px rgba(27,38,79,.045)}
+.panel{padding:23px}
+.eyebrow{color:var(--fresh-ink);font-size:10px;letter-spacing:1.5px}
+h1,h2,h3{color:var(--stable)}
+.prospect-headline{font-size:23px;line-height:1.15;letter-spacing:-.55px;margin:0 0 10px}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--fresh-ink)}
+.field input,.field textarea,.field select{border-color:#cfd8e7;border-radius:10px}
+.pill{background:#edf9fe;border-color:#bbebfa;color:#00688c}
+.scenario[aria-pressed=true]{background:var(--stable);border-color:var(--stable)}
+.stat{background:#f9fafe}
+.stat.feature{background:var(--stable);border-color:var(--stable);color:#fff}
+.stat.feature .v{color:#fff}
+.stat .v{color:var(--stable)}
+.stat .note{line-height:1.35}
+.bar-row.active .bar-fill{background:var(--fresh)}
+.bar-row.active strong{color:var(--stable)}
+.bar-fill{background:#5477b5}
+.toggle input{accent-color:var(--energetic)}
+.pitch{background:linear-gradient(140deg,#f0f7fd,#f7f8fc);border-color:#cfe7f3;border-left-color:var(--fresh)}
+.warnings{border-color:#f0d8a4}
+.footer{max-width:1450px}
+body[data-stage="discover"] [data-workbench-step]:not([data-workbench-step~="discover"]),
+body[data-stage="model"] [data-workbench-step]:not([data-workbench-step~="model"]),
+body[data-stage="compare"] [data-workbench-step]:not([data-workbench-step~="compare"]),
+body[data-stage="present"] [data-workbench-step]:not([data-workbench-step~="present"]){display:none!important}
+body[data-stage="model"] .side,body[data-stage="compare"] .side,
+body[data-stage="present"] .side{display:none!important}
+body:not([data-stage="discover"]) .shell{grid-template-columns:minmax(0,1fr)}
+body:not([data-stage="discover"]) .main{max-width:1260px;width:100%;margin:auto}
+body[data-stage="present"] .journey{display:none}
+body[data-stage="present"] .shell{max-width:1160px}
+body[data-stage="present"] .main{max-width:1060px}
+body[data-stage="present"] .dashboard-card .results{margin-top:8px}
+body[data-stage="present"] .stat .v{font-size:clamp(25px,3vw,35px)}
+.present-drivers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
+.present-driver{
+  display:flex;gap:10px;justify-content:space-between;align-items:center;
+  background:#f7f9fd;border:1px solid var(--hairline);border-radius:10px;padding:12px
+}
+.present-driver .name{font-size:12px;font-weight:750;color:var(--stable)}
+.present-driver .amount{font-weight:850;color:var(--stable);font-size:15px;white-space:nowrap}
+.model-stage{max-width:1260px}
+.model-stage .two{grid-template-columns:repeat(5,minmax(0,1fr))}
+.model-stage .field .hint{font-size:11px}
+.model-stage #levers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px}
+.model-stage .lever{grid-template-columns:auto 1fr auto}
+body[data-stage="discover"] .dashboard-card{position:sticky;top:18px}
+body[data-stage="discover"] .dashboard-card .results{grid-template-columns:repeat(2,minmax(0,1fr))}
+body[data-stage="discover"] .dashboard-card .v{font-size:24px}
+body[data-stage="discover"] .side{min-width:0}
+body[data-stage="discover"] .side details:not(.toolbar-menu) .inside{gap:10px}
+@media(max-width:1100px){
+  .model-stage .two{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:850px){
+  .top{padding:17px 16px}
+  .journey-inner{padding:8px 14px;gap:4px}
+  .journey-step{padding:9px 5px;gap:5px}
+  .journey-step small{display:none}
+  .stage-intro{padding:22px 16px 2px}
+  .stage-intro h1{font-size:25px}
+  .shell{padding:16px;display:grid;grid-template-columns:1fr}
+  body[data-stage="discover"] .dashboard-card{position:static}
+  .model-stage #levers{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .brand-word{font-size:17px}
+  .brand-product{font-size:16px}
+  .brand-divider{height:22px}
+  .top-actions{width:100%;justify-content:space-between}
+  .journey-step .journey-number{width:26px;height:26px;font-size:10px}
+  .journey-step strong{font-size:11px}
+  .stage-intro{display:grid;gap:15px}
+  .stage-intro .btn{justify-self:start}
+  .present-drivers{grid-template-columns:1fr}
+  .model-stage .two{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .toolbar-menu-content{right:0}
+}
+@media print{
+  .journey,.stage-intro .btn,.toolbar-menu,.top-actions{display:none!important}
+  .stage-intro{padding:14px 0}
+  .stage-intro h1{font-size:24px}
+  .shell{padding:14px 0}
+  .present-driver{background:#fff}
+  .present-drivers{display:grid;grid-template-columns:1fr 1fr}
+}
