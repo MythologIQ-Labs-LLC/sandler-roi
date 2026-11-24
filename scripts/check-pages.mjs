@@ -4,7 +4,7 @@ import {dirname,join,resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),"..");
-const assets=[".nojekyll","index.html","src/app.mjs","src/roi.mjs","src/evidence.mjs","src/csv-import.mjs","src/story.mjs","src/workbench.css"];
+const assets=[".nojekyll","index.html","src/app.mjs","src/roi.mjs","src/evidence.mjs","src/csv-import.mjs","src/story.mjs","src/customer-copy.mjs","src/workbench.css"];
 for(const name of assets){
   const info=await stat(join(root,name));
   assert.ok(info.isFile(),"Pages asset must exist: "+name);
@@ -23,6 +23,7 @@ assert.match(app,/from "\.\/roi\.mjs"/,"Missing relative ROI engine import");
 assert.match(app,/from "\.\/evidence\.mjs"/,"Missing relative evidence import");
 assert.match(app,/from "\.\/csv-import\.mjs"/,"Missing relative CSV import module");
 assert.match(app,/from "\.\/story\.mjs"/,"Missing relative story module");
+assert.match(app,/from "\.\/customer-copy\.mjs"/,"Missing relative customer copy module");
 for(const asset of ["src/app.mjs","src/workbench.css"]){
   assert.ok(!html.includes('src="/'+asset+'"')&&!html.includes('href="/'+asset+'"'),
     "Absolute root URL would break Pages subpath: "+asset);
