@@ -204,3 +204,11 @@ Arithmetic completeness is separate from evidence validity. Editing a numeric in
 5. Starting GitHub Actions while user funding is exhausted **rejected**: commit on a fresh branch without a PR, do not modify workflow or branch requirements.
 
 **Not yet implemented:** independent evidence signing, actual outcomes ledger, complete overlap attribution, monthly cash flow, and fully audited training cost assurance.
+
+## 11. Independent financial-math audit and qualification (2026-11-24)
+
+The early status statements in this document refer to the initial 2026-11-23 MVP/PR #1 and are historical. For the current implementation and review of the deployed formula contract, see [the independent math audit](verification/financial-math-audit-2026-11-24.md).
+
+The audit confirms the arithmetic of the fixed default scenarios against separately computed reference values, and adds an independent 400-case deterministic property comparison. It hardens unsafe aggregate precision, infeasible price-break-even projections and the out-of-horizon payback/overlap presentation.
+
+The existing annual-factor and cross-driver attribution limitations listed in §3 remain unresolved modeling decisions, not solved by passing unit tests. Mathematical correctness of hypothetical scenarios is not real-world financial validation or proof of Sandler causality.

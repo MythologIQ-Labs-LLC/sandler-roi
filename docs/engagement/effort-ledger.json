@@ -80,6 +80,17 @@
       "approval": "unreviewed",
       "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/7",
       "notes": "Provisional AI-assisted active attention estimate for copy audit, entered-name personalization, CSV/export compatibility, and real-browser validation. No measured time claim; excludes CI/wait time. Requires owner review before billing."
+    },
+    {
+      "id": "roi-2026-11-24-finance-audit",
+      "date": "2026-11-24",
+      "phase": "Independent financial formula audit, precision and break-even hardening",
+      "hours": 0.45,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/8",
+      "notes": "Provisional human-directed AI-assisted analysis, separate manual arithmetic, independent reference/property tests, extreme-boundary remediation and presentation review. No stopwatch measurement; excludes Actions, model execution and waiting. Owner must reconcile before billing."
     }
   ]
 }
