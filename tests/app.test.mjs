@@ -255,7 +255,8 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(tabs[0].attributes["aria-selected"],"true");
       assert.equal(panels[0].hidden,false);
       assert.ok(panels.slice(1).every(p=>p.hidden));
-      assert.equal(name.value,"Sample customer");
+      // Reset rebuilds input nodes, so inspect the new field, not the old DOM reference.
+      assert.equal(elements.get("field-prospect").value,"Sample customer");
       assert.equal(elements.get("cost").textContent,"$79,200");
       assert.equal(elements.get("baseline-title").textContent,"Sample customer’s starting point");
     });
