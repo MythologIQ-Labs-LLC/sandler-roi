@@ -22,12 +22,20 @@ function concat(chunks){
 export function zipFeedback(entries){
   if(!Array.isArray(entries)||entries.length>100)throw Error("Too many feedback attachments");
   const locals=[],central=[];
-  let cursor=0;
+  let cursor=0,totalBytes=0;
+  const filenames=new Set();
   for(const entry of entries){
     if(!entry||typeof entry.name!=="string"||!/^[a-zA-Z0-9._-]+$/.test(entry.name))
       throw Error("Invalid feedback archive filename");
+    const lowerName=entry.name.toLowerCase();
+    if(filenames.has(lowerName))throw Error("Duplicate feedback archive filename");
+    filenames.add(lowerName);
+    if(typeof entry.data!=="string"&&!(entry.data instanceof Uint8Array))
+      throw Error("Invalid feedback archive content");
     const name=encoder.encode(entry.name);
     const data=asBytes(entry.data);
+    totalBytes+=data.byteLength;
+    if(totalBytes>50_000_000)throw Error("Feedback archive exceeds the 50 MB total limit");
     if(name.byteLength>255||data.byteLength>20_000_000)throw Error("Feedback item exceeds archive limit");
     const crc=crc32(data),size=data.byteLength;
     const local=new Uint8Array(30+name.length);
