@@ -51,7 +51,7 @@ Sandler's **Brand Guidelines v2.0.0** and published digital color card identify 
 
 Sources: https://sandler.com/branding/ ; https://sandler.com/wp-content/uploads/2023/03/One-Sandler-Brand-Guidelines-2.0.0.pdf ; https://sandler.com/wp-content/uploads/2023/03/Sandler-Digital-Color-Card.pdf.
 
-**Brand-rights boundary:** The current app header uses **text "SANDLER®"** and branded colors, **not the stylized corporate logo**. Sandler's published brand guidelines require that the official logo remain unaltered, preserve clear space and display the registered mark notice; the website's published terms reserve trademark use. The user has requested a Sandler-branded workbench, but no approved logo file or proof of logo-use permission is present in this repository. **Do not scrape, alter, redraw or ship corporate logo assets by approximation.** Replace the text identity with the supplied, approved two-color or white logo asset after asset ownership/usage approval and a real visual review.
+**Authorized brand implementation:** The representative sponsor confirmed permitted Sandler identity use. The on-screen header uses an unchanged Sandler-affiliated one-color wordmark served from a Sandler training-center CDN. Print uses a textual brand fallback because the white wordmark becomes invisible on white paper. The official two-color and white kit is preferred for self-hosted production assets. Logo geometry is never recreated, and the registered-mark notice remains visible.
 
 The typography and navigation design are original implementation, not a copy of Sandler's website CSS or logo geometry. This is still a **prototype** until corporate branding and prospect-facing claims are reviewed.
 
@@ -74,7 +74,7 @@ The typography and navigation design are original implementation, not a copy of 
 | Auto-complete a wizard only after all required values are entered | Prevents reps from exploring unknowns with a prospect | **Reject**; permit navigation with visible incomplete state |
 | Make scenario edits only through a forecast form | Encourages black-box numbers | **Reject**; make each financial lever and sensitivity editable |
 | Treat numeric chart as more authoritative because it looks polished | Strong design masks weak evidence | **Mitigate**; always label source and projection caveats |
-| Insert the corporate logo by tracing the image | Trademark/brand fidelity problem | **Reject**; approved logo asset is an explicit follow-on dependency |
+| Recreate the corporate logo by tracing it | Trademark/brand fidelity problem | **Reject**; use unchanged authorized wordmark assets only |
 | Auto-create or rerun Actions to get visual confidence | CI budget unavailable and tests may fail before execution | **Reject**; source and local/offline tests; preserve required future gates |
 | Mix potential pipeline value into ROI cards | Double counting and inflated financial claims | **Reject**; retain non-additive pipeline analysis |
 
@@ -84,7 +84,7 @@ The typography and navigation design are original implementation, not a copy of 
 
 **Simulated behavior observed:** stage navigation, model grouping, three-row comparison table, reversible presentation, print routing, and recalculation after a financial edit passed isolated JavaScript/DOM smoke tests. These are not real user studies or actual browser rendering.
 
-**Pending:** real Chrome/Edge visual/keyboard and narrow viewport review, print-to-PDF screenshot, native \`npm test\` on developer machine, approved logo asset usage, and independent representative review of the meeting narrative and financial assertions.
+**Pending:** real browser usability and viewport review, print-to-PDF acceptance, retained official Sandler logo kit assets, and independent representative review of financial assertions. Native Node tests are now part of the GitHub Actions PR gate.
 
 These are named acceptance gates, not reasons to stop source development.
 

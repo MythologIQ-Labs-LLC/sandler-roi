@@ -250,3 +250,9 @@ body[data-stage="model"] .journey,body[data-stage="compare"] .journey{
 .brand-wordmark{width:clamp(175px,17vw,230px);height:auto;object-fit:contain;display:block}
 .brand-identity{gap:14px}
 @media(max-width:600px){.brand-wordmark{width:180px}}
+
+.brand-print-name{display:none}
+@media print{
+  .brand-wordmark{display:none!important}
+  .brand-print-name{display:inline!important;font-size:21px;font-weight:800;letter-spacing:.14em;color:#21245c}
+}
