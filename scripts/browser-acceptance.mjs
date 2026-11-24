@@ -67,6 +67,9 @@ try{
   'modelText:document.querySelector("#model-behavior")?.textContent||"",'+
   'winReveal:document.querySelector("#present-behavior")?.textContent||"",'+
   'gross:document.querySelector("#benefit")?.textContent||"",'+
+  'paybackNote:document.querySelector("#payback-horizon-note")?.textContent||"",'+
+  'overlap:document.querySelector("#present-driver-summary")?.textContent||"",'+
+  'paybackRows:[...document.querySelectorAll("#scenario-table tr")].map(r=>r.lastElementChild?.textContent||""),'+
   'rows:document.querySelectorAll("#scenario-table tr").length,'+
   'firstMainVisible:[...document.querySelector(".main").children].find(el=>el.getClientRects().length>0)?.className||"",'+
   'revealTop:Math.round(document.querySelector(".reveal-stage").getBoundingClientRect().top),'+
@@ -212,6 +215,11 @@ try{
  assert.match(phase.winReveal,/26\.4%/);
  assert.match(phase.gross,/\$/);
  assert.equal(phase.rows,3,'Present must include all three scenario rows');
+ assert.match(phase.overlap,/Less: overlap between win-rate and major-account benefits/);
+ assert.match(phase.overlap,/\$12,600/,'Expected scenario must show the dollar overlap deduction');
+ assert.match(phase.paybackNote,/exceeds the 12-month evaluation/);
+ assert.ok(phase.paybackRows.some(x=>x.includes('†')),
+   'Conservative scenario extrapolates beyond the model term; visually flag it');
  assert.match(phase.firstMainVisible,/reveal-stage/,'Reveal must be the first visible Present panel');
  assert.ok(phase.revealTop<=320,'Main business case is below the fold: '+phase.revealTop);
  assert.equal(phase.pipelineExpanded,false,'Optional sensitivity should not preempt the reveal');
