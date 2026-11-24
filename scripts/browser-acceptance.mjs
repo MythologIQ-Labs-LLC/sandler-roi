@@ -111,6 +111,7 @@ try{
  await sleep(150);
  const mobile=await sample();console.log('Mobile Discover:',JSON.stringify(mobile));
  assert.deepEqual(mobile.visiblePanels,['engagement']);
+ assert.equal(mobile.tabColumns,2,'Mobile tabs need two readable columns');
  assert.ok(mobile.docWidth<=mobile.width+2,'Mobile horizontal overflow: '+JSON.stringify(mobile));
  const mobileShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'discover-mobile.png'),Buffer.from(mobileShot.data,'base64'));
