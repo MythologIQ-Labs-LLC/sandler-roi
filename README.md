@@ -46,6 +46,12 @@ The preview server binds to \`127.0.0.1\`. Opening \`index.html\` directly using
 
 Every starting value is **fictional demonstration data**, not a prospect fact or a Sandler benchmark. An entered number is not automatically verified. The buyer and representative should confirm definitions, units, periods, and financial sources before circulating a business case.
 
+### Guided meeting workbench
+
+The current [visual development branch](https://github.com/MythologIQ-Labs-LLC/sandler-roi/tree/feat/roi-evidence-cost-hardening) introduces a **four-stage journey**: **Discover** (prospect data and sources), **Model** (financial levers and assumptions), **Compare** (three scenarios, charts and a table), and **Present** (client-facing scenario summary). The journey navigation does not certify evidence or block a conversation while figures are unknown.
+
+The UI uses Sandler's published **Stable** (\`#21245c\`), **Fresh** (\`#00aded\`), and **Energetic** (\`#0045c2\`) palette. The header is a **text-only prototype brand treatment**, not Sandler's stylized corporate logo. Official asset rights and final marketing approval remain open. See [workbench user journey and branding decisions](docs/design/rep-workbench-journey.md).
+
 ## What it models
 
 The current version includes four independently enabled financial drivers:

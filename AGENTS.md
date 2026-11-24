@@ -60,3 +60,9 @@ The installed Qortara Logic Demo offers stateless read-only evaluators for **sup
 - Source status is caller-reported metadata, never independent attestation, even for “finance-reviewed.”
 - Demote a source claim when the underlying numeric baseline is edited, and never trust precomputed results in imported JSON.
 - Keep the follow-on development branch separate from open PR #1 while GitHub Actions budget is unavailable. Do not bypass existing required checks or trigger workflows just to prove progress.
+
+## Rep workbench identity and journey
+
+- Maintain the Discover → Model → Compare → Present journey without manufacturing evidence certainty.
+- Use public Sandler palette tokens recorded in `docs/design/rep-workbench-journey.md`; approved logo assets require authorization, unmodified placement and accessibility review.
+- Do not run GitHub Actions while the account has no budget; keep source and local/offline tests distinct from real rendered-browser acceptance.
