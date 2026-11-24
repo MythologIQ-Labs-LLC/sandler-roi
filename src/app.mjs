@@ -1,6 +1,7 @@
 import { DEFAULT_INPUTS, SCENARIOS, DEFAULT_ACTIVE, calculate, calculatePipelineBridge, MONEY, PERCENT } from "./roi.mjs";
 import { BASELINE_FIELDS, EVIDENCE_STATUSES, defaultEvidence, normalizeEvidence, requiredEvidenceKeys, assessEvidence } from "./evidence.mjs";
 import { CSV_FIELDS, CSV_LABELS, CSV_TEMPLATE_HEADERS, prepareCSV, suggestMapping, mappedCSVPreview, buildCSVImport } from "./csv-import.mjs";
+import {behaviorJourney} from "./story.mjs";
 
 const clone = object => JSON.parse(JSON.stringify(object));
 let inputs=clone(DEFAULT_INPUTS);
@@ -8,7 +9,7 @@ let evidence=defaultEvidence(inputs);
 let scenarios=clone(SCENARIOS);
 let active=clone(DEFAULT_ACTIVE);
 let selected="expected";
-let currentStep="discover", priorStep="compare";
+let currentStep="discover", priorStep="compare", presentationSeen=false;
 let discoveryPanel="engagement";
 let pendingCSV=null, csvMapping={};
 const $=id=>document.getElementById(id);
@@ -16,14 +17,14 @@ const JOURNEY={
   discover:{label:"01 / DISCOVER",title:"Start with the prospect's numbers.",
     description:"Define the challenge together. Replace fictional examples with the buyer's own baselines and confirm where the numbers came from.",
     next:"Model the opportunity"},
-  model:{label:"02 / MODEL",title:"Explore what better selling could change.",
-    description:"Test pricing, win rates, major accounts and onboarding. Build assumptions with the buyer, not a standard training uplift promise.",
-    next:"Compare investment"},
-  compare:{label:"03 / COMPARE",title:"How does the opportunity compare with the investment?",
-    description:"Compare scenarios on the same horizon. Pipeline sensitivity is intentionally separate to avoid counting deals twice.",
-    next:"Present the case"},
-  present:{label:"04 / PRESENT",title:"Make the business case together.",
-    description:"Share a concise summary of projected value, investment, and assumptions. These are estimates, never guaranteed outcomes.",
+  model:{label:"02 / MODEL",title:"Explore changes in selling behavior.",
+    description:"Test realistic changes to win rates, pricing discipline, accounts, and onboarding. The financial outcome comes at the end.",
+    next:"Review the assumptions"},
+  compare:{label:"03 / REVIEW",title:"Do the inputs and proposed changes make sense?",
+    description:"Review baseline figures, source evidence, potential behavior changes, and investment before presenting the case.",
+    next:"Reveal the business case"},
+  present:{label:"04 / PRESENT",title:"Show the difference the changes could make.",
+    description:"Connect current performance to modeled operating changes and the potential investment case. Nothing here is guaranteed.",
     next:"Return to modeling"}
 };
 
@@ -61,6 +62,7 @@ function setStep(key){
   if(!Object.prototype.hasOwnProperty.call(JOURNEY,key))return;
   if(key==="present"&&currentStep!=="present")priorStep=currentStep;
   currentStep=key;
+  if(key==="present")presentationSeen=true;
   document.body.dataset.stage=key;
   const step=JOURNEY[key];
   put("step-eyebrow",step.label);put("step-title",step.title);
@@ -248,27 +250,71 @@ function item(name,value,enabled){
   const sub=document.createElement("div");sub.className="lever-sub";sub.textContent=leverSpecs[name][1];
   description.append(head,sub);
   const amount=document.createElement("div");amount.style.textAlign="right";
-  const m=document.createElement("div");m.className="money";m.textContent=!enabled?"Excluded":value.status==="ready"?MONEY(value.value):"Needs input";
+  const m=document.createElement("div");m.className="money";m.textContent=!enabled?"Excluded":value.status==="ready"?"Hypothesis ready":"Needs input";
   const state=document.createElement("div");state.className="status";
   if(value.status==="needs-input"||value.status==="invalid")state.textContent="Check assumptions and inputs";
   amount.append(m,state);row.append(checkWrap,description,amount);return row;
 }
 function put(id,text){$(id).textContent=text;}
+const baselineText=(key,format=value=>String(value))=>{
+  const raw=inputs[key],numeric=Number(raw);
+  return raw===null||raw===undefined||raw===""||!Number.isFinite(numeric)||numeric<0
+    ?"Needs input":format(numeric);
+};
+function renderBehavior(id,rows){
+  const container=$(id);container.replaceChildren();
+  if(!rows.length){
+    const note=document.createElement("p");note.className="section-note";
+    note.textContent="No operational behavior drivers selected. You can still model pricing and account hypotheses.";
+    container.append(note);return;
+  }
+  for(const item of rows){
+    const card=document.createElement("div");card.className="behavior-item";
+    const title=document.createElement("h3");title.textContent=item.label;
+    const flow=document.createElement("div");flow.className="behavior-flow";
+    const before=document.createElement("div");before.className="behavior-state";
+    const previousLabel=document.createElement("span");previousLabel.textContent="Current baseline";
+    const previous=document.createElement("strong");previous.textContent=item.current;
+    before.append(previousLabel,previous);
+    const arrow=document.createElement("span");arrow.className="behavior-arrow";
+    arrow.textContent="→";arrow.setAttribute("aria-hidden","true");
+    const future=document.createElement("div");future.className="behavior-state future";
+    const futureLabel=document.createElement("span");futureLabel.textContent="If assumptions hold";
+    const outcome=document.createElement("strong");outcome.textContent=item.possible;
+    future.append(futureLabel,outcome);
+    flow.append(before,arrow,future);
+    const delta=document.createElement("p");delta.className="behavior-delta";
+    delta.textContent=item.complete?item.change:"Missing or invalid input; no change assumed.";
+    card.append(title,flow,delta);container.append(card);
+  }
+}
+
 function render(){
   document.querySelectorAll("[data-scenario]").forEach(el=>el.setAttribute("aria-pressed",String(el.dataset.scenario===selected)));
   const scenario=scenarios[selected], result=calculate(inputs,scenario,active);
-  put("prospect-title",(inputs.prospect||"Prospect")+" | Value opportunity");
+  put("prospect-title",(inputs.prospect||"Prospect")+" · figures under review");
+  put("baseline-win",baselineText("baselineWinRatePct",v=>v.toFixed(1)+"%"));
+  put("baseline-proposals",baselineText("annualProposals",v=>new Intl.NumberFormat("en-US").format(v)));
+  put("baseline-deal",baselineText("avgDealValue",MONEY));
+  put("baseline-ramp",baselineText("rampMonths",v=>v.toFixed(1)+" months"));
   put("print-scenario",scenario.label);
   put("roi",result.complete?(result.roi===null?"N/A":PERCENT(result.roi)):"Incomplete");
   put("net",result.complete?MONEY(result.net):"Incomplete");
   put("benefit",result.complete?MONEY(result.benefit):"Incomplete");
   put("cost",MONEY(result.cost));
+  put("compare-cost",MONEY(result.cost));
+  put("present-cost",MONEY(result.cost));
   put("cost-basis",result.costMode==="fees"?"Fee-only estimate":"Expanded user-declared estimate");
+  put("compare-cost-basis",result.costMode==="fees"?"Fee-only cost; other training expenses excluded.":"Expanded user-declared cost; confirm sources.");
+  put("present-cost-basis",result.costMode==="fees"?"Fee-only investment; other training expenses excluded.":"Expanded user-declared investment; not independently verified.");
   put("cost-extras",result.costMode==="fees"?"Other training costs are excluded.":
     "Fees: "+MONEY(result.costBreakdown.feeCost)+" + other modeled costs: "+MONEY(result.costBreakdown.additionalCost)+".");
   const proof=assessEvidence(inputs,evidence,active);
   put("evidence-summary",proof.requiredCount+" required inputs: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
     " unconfirmed, "+proof.missingSources.length+" citations missing a reference. Not independently verified.");
+  put("baseline-confidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+" unconfirmed. Review with the prospect.");
+  put("compare-evidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
+    " unconfirmed, "+proof.missingSources.length+" missing references. Status is user-declared.");
   put("present-evidence","Input confidence: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
     " unconfirmed, "+proof.missingSources.length+" citations without a source reference. None independently verified.");
   const warning=$("warnings");
@@ -280,6 +326,21 @@ function render(){
     }))];
     warning.textContent="Missing or invalid inputs. Results are partial until corrected: "+names.join("; ");
   } else warning.classList.remove("visible");
+  const issueLabels=[...new Set(result.problems.map(p=>
+    (inputSpecs[p.field]?.[0]||assumptionSpecs[p.field]?.[0]||p.field)+": "+p.message))];
+  put("compare-warning",issueLabels.length
+    ?"Before presenting, review missing or invalid fields: "+issueLabels.join("; ")
+    :"Inputs passed arithmetic checks. Confirm evidence, budget and decision process before presenting.");
+  put("reveal-warning",issueLabels.length
+    ?"Financial outcome incomplete: "+issueLabels.join("; ")
+    :"Scenario outputs are illustrative. Review the underlying sources and assumptions before making claims.");
+  const behavioralChanges=behaviorJourney(inputs,scenario,active);
+  renderBehavior("model-behavior",behavioralChanges);
+  renderBehavior("compare-behavior",behavioralChanges);
+  renderBehavior("present-behavior",behavioralChanges);
+  put("model-scenario-note",presentationSeen
+    ?"Editing "+scenario.label.toLowerCase()+" scenario assumptions"
+    :"Editable working hypothesis; alternatives appear in Present");
   const levers=$("levers");levers.replaceChildren();
   for(const name of Object.keys(leverSpecs))levers.append(item(name,result.parts[name],active[name]));
   const presentDrivers=$("present-driver-summary");presentDrivers.replaceChildren();
