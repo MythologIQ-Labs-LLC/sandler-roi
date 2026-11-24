@@ -292,7 +292,7 @@ try{
  assert.equal(jsonData.selected,'expected','Saved JSON must match the currently selected presentation scenario');
  assert.match(csvData,/"Customer","John Doe"/,'CSV must contain the customer name');
  assert.match(csvData,/"Scenario","expected"/,'CSV must contain the current scenario');
- assert.match(csvData,/"Program cost",79200/,'CSV must contain the computed investment');
+ assert.match(csvData,/"Program cost","79200"/,'CSV must contain the computed investment');
  await evaluate('document.querySelector("#file-menu > summary").click()');
  await command('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
  await sleep(100);
