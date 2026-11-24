@@ -121,22 +121,35 @@
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-workbench">Skip to workbench</a>
   <header class="top">
-    <div class="brand"><div class="brand-symbol" aria-hidden="true">S</div><div><div class="brand-title">Sandler ROI Workbench</div><div class="brand-sub">A consultative value conversation, supported by transparent math</div></div></div>
+    <div class="brand"><div class="brand-identity"><span class="brand-word">SANDLER<sup>®</sup></span><span class="brand-divider"></span><span class="brand-product">ROI Workbench</span></div><div class="brand-sub">A guided business-case conversation</div></div>
     <div class="top-actions no-print">
       <button type="button" id="reset" class="btn btn-dark">Reset example</button>
-      <button type="button" id="import" class="btn btn-dark">Import JSON</button>
-      <input type="file" id="import-file" accept=".json,application/json" hidden>
-      <button type="button" id="export-json" class="btn btn-dark">Save model</button>
-      <button type="button" id="export-csv" class="btn btn-dark">CSV</button>
-      <button type="button" id="present" class="btn btn-primary" aria-pressed="false">Present</button>
-      <button type="button" id="print" class="btn btn-dark">Print</button>
+      <button type="button" id="present" class="btn btn-primary" aria-pressed="false">Present case</button>
+      <details class="toolbar-menu" id="file-menu"><summary class="btn btn-dark">Files &amp; export</summary><div class="toolbar-menu-content">
+        <button type="button" id="import" class="btn">Import model</button><input type="file" id="import-file" accept=".json,application/json" hidden>
+        <button type="button" id="export-json" class="btn">Save JSON model</button>
+        <button type="button" id="export-csv" class="btn">Export CSV</button>
+        <button type="button" id="print" class="btn">Print summary</button>
+      </div></details>
     </div>
   </header>
-  <div class="shell">
+  <nav class="journey no-print" aria-label="Workbench steps"><div class="journey-inner">
+    <button class="journey-step" type="button" data-workbench-nav="discover" aria-current="step"><span class="journey-number">01</span><span><strong>Discover</strong><small>Prospect &amp; baseline</small></span></button>
+    <button class="journey-step" type="button" data-workbench-nav="model"><span class="journey-number">02</span><span><strong>Model</strong><small>Explore improvements</small></span></button>
+    <button class="journey-step" type="button" data-workbench-nav="compare"><span class="journey-number">03</span><span><strong>Compare</strong><small>Test the investment</small></span></button>
+    <button class="journey-step" type="button" data-workbench-nav="present"><span class="journey-number">04</span><span><strong>Present</strong><small>Explain the case</small></span></button>
+  </div></nav>
+  <div class="stage-intro"><div class="stage-intro-copy">
+    <div class="eyebrow" id="step-eyebrow">01 / DISCOVER THE BASELINE</div>
+    <h1 id="step-title">Start with the prospect's numbers.</h1>
+    <p id="step-description">Use the conversation to define the challenge and its cost. Replace illustrative defaults with the buyer's own figures.</p>
+  </div><button type="button" id="step-next" class="btn btn-primary no-print">Continue to Model</button></div>
+  <div class="shell" id="main-workbench">
     <aside class="side no-print">
       <section class="card panel">
-        <div class="eyebrow">1 · Discover</div>
+        <div class="eyebrow">01 · The engagement</div>
         <h2>Prospect & investment</h2>
         <p class="small" style="margin:8px 0 14px">Adjust the inputs live with your prospect. All starting numbers are fictional examples.</p>
         <div class="stack" id="identity-fields"></div>
@@ -146,7 +159,7 @@
         <div class="two" id="expanded-cost-fields"></div>
       </section>
       <section class="card panel">
-        <div class="eyebrow">2 · Define baseline</div>
+        <div class="eyebrow">02 · Current performance</div>
         <h2>Current commercial performance</h2>
         <p class="small" style="margin:8px 0 2px">Use the categories relevant to the prospect. Disable a value driver in the results to exclude it.</p>
         <div id="baseline-fields"></div>
@@ -159,7 +172,7 @@
         <p class="section-note" style="margin:10px 0 0">Uses the commercial gross-margin input above. Leave this section blank if pipeline data is unavailable.</p>
       </section>
       <section class="card panel">
-        <div class="eyebrow">3 · Validate</div>
+        <div class="eyebrow">03 · Evidence &amp; confidence</div>
         <div class="field"><label for="evidence-notes">Source notes and assumptions</label><textarea id="evidence-notes" placeholder="Where did baseline data come from? What has not been validated?"></textarea></div>
         <p class="small" id="evidence-summary" role="status">Input evidence is user-declared, not independently verified.</p>
         <details><summary>Per-input source register</summary><div class="inside" id="evidence-register"></div></details>
@@ -168,11 +181,11 @@
       </section>
     </aside>
     <main class="main">
-      <section class="card panel">
+      <section class="card panel dashboard-card" data-workbench-step="discover model compare present">
         <div class="headline">
           <div>
-            <div class="eyebrow">4 · Explore scenarios</div>
-            <h1 id="prospect-title">Illustrative value opportunity</h1>
+            <div class="eyebrow">Live financial perspective</div>
+            <h2 id="prospect-title" class="prospect-headline">Illustrative value opportunity</h2>
             <p class="layout-description">What would modest improvements in sales execution be worth? Change the assumptions and test the answer together.</p>
           </div>
           <span class="pill">Projection, not a promise</span>
@@ -192,9 +205,9 @@
         <p class="small" id="cost-extras" style="margin:12px 0 3px">Other training costs are excluded.</p>
         <div id="warnings" class="warnings" role="status" aria-live="polite"></div>
       </section>
-      <section class="card panel">
+      <section class="card panel model-stage" data-workbench-step="model">
         <div class="flex-heading">
-          <div><div class="eyebrow">5 · Test value drivers</div><h2>Where additional value could come from</h2></div>
+          <div><div class="eyebrow">Your improvement hypotheses</div><h2>Where additional value could come from</h2></div>
           <span class="small">Switch off any irrelevant driver</span>
         </div>
         <div id="levers"></div>
@@ -202,9 +215,9 @@
         <div class="flex-heading"><h2>Scenario assumptions</h2><span class="small">Editable for selected scenario</span></div>
         <div id="assumptions" class="two"></div>
       </section>
-      <section class="card panel">
+      <section class="card panel compare-stage" data-workbench-step="compare">
         <div class="flex-heading">
-          <div><div class="eyebrow">6 · Present the business case</div><h2>Side-by-side investment comparison</h2></div>
+          <div><div class="eyebrow">Scenarios side by side</div><h2>Side-by-side investment comparison</h2></div>
           <span class="small">Benefits after overlap adjustment</span>
         </div>
         <div id="scenario-bars"></div>
@@ -215,7 +228,7 @@
         </div>
         <p class="section-note" style="margin:15px 0 0">* Simple uniform run-rate estimate, not cash-flow timing. ** Additional price improvement needed after other modeled drivers; zero if those drivers already cover the cost.</p>
       </section>
-      <section class="card panel" aria-labelledby="pipeline-heading">
+      <section class="card panel" data-workbench-step="compare" aria-labelledby="pipeline-heading">
         <div class="eyebrow">Optional analysis · Excluded from ROI</div>
         <div class="flex-heading"><h2 id="pipeline-heading">Pipeline-to-value bridge</h2><span class="pill">Not additive</span></div>
         <div class="results">
@@ -233,7 +246,12 @@
           </div>
         </details>
       </section>
-      <section class="pitch">
+      <section class="card panel" data-workbench-step="present" aria-labelledby="present-driver-heading">
+        <div class="eyebrow">Show the math</div><h2 id="present-driver-heading">What creates the modeled value?</h2>
+        <div id="present-driver-summary" class="present-drivers"></div>
+        <p id="present-evidence" class="section-note">Source status will appear here.</p>
+      </section>
+      <section class="pitch" data-workbench-step="present">
         <div class="eyebrow">Executive conversation summary</div>
         <h2 style="margin-bottom:10px">The case for improvement</h2>
         <p id="pitch-text" style="margin-bottom:12px"></p>
