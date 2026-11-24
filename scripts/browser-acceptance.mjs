@@ -118,6 +118,15 @@ try{
  console.log('REAL BROWSER ACCEPTANCE PASS: Chromium rendered geometry, 4 tabs, desktop scroll budget, mobile overflow, Present nav.');
 }finally{
  if(ws&&ws.readyState===WebSocket.OPEN)ws.close();
- server.kill('SIGTERM');browser.kill('SIGTERM');
- await rm(profile,{recursive:true,force:true});
+ server.kill('SIGTERM');
+ browser.kill('SIGTERM');
+ // Chrome still writes its user profile while closing; await termination
+ // before removal, with bounded retries for asynchronous filesystem cleanup.
+ if(browser.exitCode===null&&browser.signalCode===null){
+  await Promise.race([
+   new Promise(resolve=>browser.once('exit',resolve)),
+   sleep(2000)
+  ]);
+ }
+ await rm(profile,{recursive:true,force:true,maxRetries:12,retryDelay:100});
 }
