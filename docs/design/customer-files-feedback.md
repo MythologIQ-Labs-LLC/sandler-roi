@@ -12,7 +12,7 @@ John needs a nontechnical **save/open customer** flow and a development-only way
 - The UI is honest when the browser does not support folder access: manual JSON download/open remain usable. No invisible database, auto-save, cloud account, or promised recovery.
 
 ## Feedback mode
-- A persistent toggle opens a lightweight drawer without changing ROI inputs or navigation.
+- A deliberate `?devFeedback=1` URL enables the toggle. Ordinary customer-facing visits do not show it. The URL parameter is a UI gate, **not authorization or confidential access**. The toggle opens a lightweight drawer without changing ROI inputs or navigation.
 - Categories: improvement, working well, issue/confusion. Notes are explicitly added, editable only by removal/reentry in this iteration.
 - Attach only explicit context: workflow stage, Discover subtab, or Present scenario. Do not scrape form content, customer names, URL parameters, or sensitive financial results.
 - Voice recording requires explicit `getUserMedia` permission and `MediaRecorder`. Local audio playback uses `media-src 'self' blob:` while `connect-src 'none'` remains.
