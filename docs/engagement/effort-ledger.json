@@ -102,6 +102,17 @@
       "approval": "unreviewed",
       "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/9",
       "notes": "Estimated active AI-assisted time for replacing bulky stage cards with connected timeline nodes, state semantics, keyboard navigation, responsive visual regression checks and deployment review. CI waiting excluded; owner confirmation needed before billing."
+    },
+    {
+      "id": "roi-2026-11-24-present-export",
+      "date": "2026-11-24",
+      "phase": "Restore final-stage files, export and print access",
+      "hours": 0.1,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/10",
+      "notes": "Approximate AI-assisted active effort to remove outdated Present-only export hiding, visually prioritize final-stage handoff and verify actual JSON/CSV downloads in Chromium. CI execution and waiting excluded; owner confirmation required before billing."
     }
   ]
 }
