@@ -3,11 +3,11 @@
 ![Sandler ROI Workbench banner showing four financial value drivers converging toward a projected outcome](assets/roi-workbench-banner.svg)
 
 [![Prototype](https://img.shields.io/badge/status-unreleased_prototype-b07937)](https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1)
-[![Node 20+](https://img.shields.io/badge/Node.js-20%2B-3e885b)](https://github.com/MythologIQ-Labs-LLC/sandler-roi/blob/feat/sandler-roi-workbench-mvp/package.json)
+[![Node 20+](https://img.shields.io/badge/Node.js-20%2B-3e885b)](https://github.com/MythologIQ-Labs-LLC/sandler-roi/blob/feat/roi-evidence-cost-hardening/package.json)
 
 **A buyer-led financial conversation, not a promise of ROI.** When a prospect asks whether sales training could pay for itself, a Sandler representative can use this browser-based tool to test the economics with the prospect's own numbers. Enter a few baselines, explore different improvements, and explain how the modeled benefits compare with the program's cost.
 
-**Status:** Unreleased internal prototype on [PR #1](https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1), not a deployed Sandler product or an independently verified financial forecast. The project-specific illustration is original to this repository; it is not Sandler corporate branding or evidence of endorsement.
+**Status:** Unreleased internal prototype. MVP is in [PR #1](https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/1); the latest guided workbench and validation improvements are on the separate [development branch](https://github.com/MythologIQ-Labs-LLC/sandler-roi/tree/feat/roi-evidence-cost-hardening). Neither is deployed or independently financially verified. The project-specific illustration is original to this repository; it is not Sandler corporate branding or evidence of endorsement.
 
 ## On this page
 
@@ -29,13 +29,13 @@ From a shell with access to the repository:
 \`\`\`bash
 git clone https://github.com/MythologIQ-Labs-LLC/sandler-roi.git
 cd sandler-roi
-git switch feat/sandler-roi-workbench-mvp
+git switch feat/roi-evidence-cost-hardening
 npm start
 \`\`\`
 
 **Expected first result:** The local server prints \`Sandler ROI Workbench: http://127.0.0.1:4173\`. Open [http://127.0.0.1:4173](http://127.0.0.1:4173) in a modern browser. You should see an **Example prospect (illustrative)**, a **$79,200 program cost** based on fictional starting inputs, scenario controls, and financial result cards. Change the monthly fee or select a different scenario to see the results recalculate.
 
-The preview server binds to \`127.0.0.1\`. Opening \`index.html\` directly using \`file://\` is not supported because the browser restricts JavaScript modules loaded from local files. The first-use path and visible result are **source-inspected**, not independently browser-verified in this README review.
+The preview server binds to \`127.0.0.1\`. Opening \`index.html\` directly using \`file://\` is not supported because the browser restricts JavaScript modules loaded from local files. The first-use path is **source-inspected** and its user interactions were simulated offline. An actual Chromium/Edge browser acceptance run is still pending.
 
 ## Use it in a prospect meeting
 
