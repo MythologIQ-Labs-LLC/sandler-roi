@@ -346,3 +346,100 @@ body[data-stage="present"] .journey{display:block}
   .top{padding:13px 0;background:#fff}
   .brand-wordmark{display:none!important}
 }
+
+
+/* Progressive selling journey: baseline and behavior before financial reveal.
+ * Rep can always navigate freely. This is presentation pacing, not an access control.
+ */
+.baseline-stage,.validation-stage,.reveal-stage{min-width:0}
+.baseline-stage h2,.validation-stage h2,.reveal-stage h2{font-size:20px;margin:3px 0 8px;color:var(--stable)}
+.baseline-stage .layout-description,.validation-stage .layout-description,.reveal-stage .layout-description{font-size:12px}
+.baseline-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
+.baseline-point{
+  background:#f6f8fc;border:1px solid #e2e8f2;border-radius:11px;padding:13px;
+  display:flex;flex-direction:column;gap:7px
+}
+.baseline-point span{font-size:11px;color:var(--muted)}
+.baseline-point strong{font-size:20px;font-variant-numeric:tabular-nums;color:var(--stable)}
+.baseline-investment{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:13px 0;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)
+}
+.baseline-investment h3{margin:0 0 3px}
+.baseline-investment .eyebrow{margin-bottom:3px}
+.baseline-investment strong{font-size:23px;color:var(--stable);font-variant-numeric:tabular-nums}
+.behavior-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
+.behavior-item{
+  border:1px solid #dae3f0;background:#fafcff;padding:15px;
+  border-radius:12px;min-width:0
+}
+.behavior-item h3{color:var(--stable);margin-bottom:10px;font-size:13px}
+.behavior-flow{
+  display:grid;grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr);
+  align-items:center;gap:6px
+}
+.behavior-state{display:flex;flex-direction:column;gap:5px;min-width:0}
+.behavior-state span{font-size:10px;color:#65718a}
+.behavior-state strong{
+  font-size:19px;color:#435171;font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+.behavior-state.future strong{color:var(--energetic)}
+.behavior-arrow{text-align:center;color:var(--fresh);font-size:20px}
+.behavior-delta{font-size:11px;font-weight:700;color:#285783;margin:10px 0 0}
+.model-stage .behavior-preview{margin-top:8px;margin-bottom:22px}
+.model-stage .behavior-item{background:#f4f8fc}
+.model-stage .lever .money{font-size:12px;line-height:1.25}
+.validation-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;margin-top:18px}
+.validation-box{
+  border:1px solid #e2e8f2;border-radius:12px;background:#fafbfe;
+  padding:16px;min-width:0
+}
+.validation-box .behavior-strip{grid-template-columns:1fr;gap:9px}
+.validation-box p{font-size:12px;line-height:1.4}
+.reveal-stage{border:1px solid #b2d7f0;box-shadow:0 12px 32px rgba(18,40,84,.06)}
+.reveal-stage h2{font-size:26px}
+.reveal-stage .behavior-reveal{margin:20px 0 14px}
+.reveal-stage .behavior-item{
+  background:linear-gradient(105deg,#f4f7fc,#ecfaff);padding:18px
+}
+.reveal-select-heading{margin-top:16px;margin-bottom:2px}
+.reveal-stage .selects{margin:8px 0 18px}
+.reveal-financials{
+  display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;
+  gap:10px;margin:13px 0
+}
+.reveal-primary,.reveal-submetric{
+  border-radius:13px;padding:15px;display:flex;flex-direction:column;
+  justify-content:center;gap:10px;min-width:0
+}
+.reveal-primary{background:var(--stable);color:#fff}
+.reveal-primary span{font-size:11px;font-weight:750;color:#ccdefa}
+.reveal-primary strong{
+  font-size:clamp(22px,3vw,36px);line-height:1.05;overflow-wrap:anywhere
+}
+.reveal-primary small{color:#d0ddf0;font-size:10px}
+.reveal-submetric{border:1px solid #dde6f1;background:#f7f9fd}
+.reveal-submetric span{font-size:11px;color:#526484}
+.reveal-submetric strong{
+  font-size:clamp(20px,2vw,28px);color:var(--stable);
+  font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+@media(max-width:1100px){
+  .reveal-financials{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .validation-grid{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  .behavior-strip,.baseline-grid{grid-template-columns:1fr}
+  .reveal-stage h2{font-size:22px}
+  .reveal-financials{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .reveal-primary{grid-column:span 2}
+  .reveal-submetric{padding:12px}
+}
+@media print{
+  .reveal-stage,.validation-stage{break-inside:avoid}
+  .reveal-financials{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .reveal-primary{
+    background:#fff!important;color:#21245c!important;border:2px solid #21245c
+  }
+  .reveal-primary span,.reveal-primary small{color:#21245c!important}
+}
