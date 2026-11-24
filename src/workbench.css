@@ -554,8 +554,12 @@ body[data-stage="present"] .journey{display:block}
   .customer-files-dialog{padding:16px}
   .feedback-panel{top:0;right:0;width:100vw;max-height:100dvh;height:100dvh;border-radius:0}
 }
-/* On wide screens, keep the sales conversation usable beside the feedback drawer. */
-@media(min-width:1050px){
+/* Dock feedback beside the workbench without two-column minimums causing overflow. */
+@media(min-width:851px) and (max-width:1279px){
+  body.feedback-mode .shell{grid-template-columns:minmax(0,1fr);padding-right:400px}
+  body.feedback-mode .stage-intro{padding-right:400px}
+}
+@media(min-width:1280px){
   body.feedback-mode .shell{padding-right:400px}
   body.feedback-mode .stage-intro{padding-right:400px}
 }
