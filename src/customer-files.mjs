@@ -125,7 +125,10 @@ export function initCustomerFiles({makeSnapshot,loadSnapshot,downloadBackup}){
     catch(err){status("Could not delete customer: "+err.message);}
   });
   $("customer-download-backup").addEventListener("click",downloadBackup);
-  $("customer-open-backup").addEventListener("click",()=>{$("import-file").click();});
+  $("customer-open-backup").addEventListener("click",()=>{
+    // File input lives outside this modal; close first so the browser does not treat it as inert.
+    hide();$("import-file").click();
+  });
   if(typeof window.showDirectoryPicker!=="function"){
     connect.disabled=true;
     hint.textContent="Direct folder access requires a supported secure browser. JSON backup remains available.";
