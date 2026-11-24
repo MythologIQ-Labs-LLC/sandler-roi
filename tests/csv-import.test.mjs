@@ -48,14 +48,14 @@ test("CSV blocks malformed, ambiguous or oversized input",()=>{
  assert.throws(()=>parseCSV("a,b\n1,2,3"),/inconsistent/);
  assert.throws(()=>prepareCSV("Monthly Fee,monthly_fee\n100,200"),/duplicate/i);
  assert.throws(()=>parseCSV("a,b\n1,"+"x".repeat(2_000_001)),/2 MB/);
- assert.throws(()=>prepareCSV("a,b\n"),/no prospect/i);
+ assert.throws(()=>prepareCSV("a,b\n"),/no customer/i);
 });
 test("CSV refuses invalid numeric cells, negative values and duplicate mapping targets",()=>{
  const p=prepareCSV("Monthly fee,Program Months\n-1,12\n");
  assert.throws(()=>mappedCSVPreview(p,0,suggestMapping(p.headers)),/Invalid/);
  const other=prepareCSV("Monthly fee,Program Months\n6000,12\n");
  assert.throws(()=>mappedCSVPreview(other,0,{monthlyFee:0,programMonths:0}),/multiple inputs/);
- assert.throws(()=>mappedCSVPreview(other,5,suggestMapping(other.headers)),/Choose a prospect row/);
+ assert.throws(()=>mappedCSVPreview(other,5,suggestMapping(other.headers)),/Choose a customer record/);
 });
 test("CSV preserves percentage point units and rejects formula-like numerics",()=>{
  const p=prepareCSV('Win Rate,Monthly fee\n"32%","$7,100"\n');
@@ -66,8 +66,27 @@ test("CSV preserves percentage point units and rejects formula-like numerics",()
  assert.throws(()=>mappedCSVPreview(bad,0,suggestMapping(bad.headers)),/Invalid number/);
 });
 test("CSV schema has required baseline columns and no secret fields",()=>{
- assert.ok(CSV_TEMPLATE_HEADERS.includes("prospect"));
+ assert.ok(CSV_TEMPLATE_HEADERS.includes("customer"));
+ assert.ok(!CSV_TEMPLATE_HEADERS.includes("prospect"));
  assert.ok(CSV_TEMPLATE_HEADERS.includes("monthlyFee"));
  assert.ok(CSV_TEMPLATE_HEADERS.includes("programMonths"));
  assert.ok(!CSV_TEMPLATE_HEADERS.includes("roi"));
+});
+
+test("customer-named CSV headers and legacy prospect headers map to same stable internal field",()=>{
+  const current=prepareCSV("Customer,Monthly Fee\nJohn Doe,6600\n");
+  const legacy=prepareCSV("Prospect,Monthly Fee\nAcme,6600\n");
+  for(const record of [current,legacy]){
+    const map=suggestMapping(record.headers);
+    assert.equal(map.prospect,0);
+    const imported=buildCSVImport(mappedCSVPreview(record,0,map));
+    assert.equal(imported.inputs.prospect,record.rows[0][0]);
+  }
+});
+test("CSV report Input customer and legacy Input prospect both round trip",()=>{
+  for(const header of ["Input customer","Input prospect"]){
+    const p=prepareCSV('Metric,Value\n"'+header+'","John Doe"\n"Input monthlyFee","6600"\n');
+    const mapped=mappedCSVPreview(p,0,suggestMapping(p.headers));
+    assert.equal(buildCSVImport(mapped).inputs.prospect,"John Doe");
+  }
 });
