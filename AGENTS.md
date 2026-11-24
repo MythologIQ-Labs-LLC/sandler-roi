@@ -73,3 +73,10 @@ The installed Qortara Logic Demo offers stateless read-only evaluators for **sup
 - Use project-relative module/style paths so GitHub Pages works under `/sandler-roi/`.
 - Validate via `npm test`, `npm run check:pages` and existing PR Actions, then confirm Pages build/deploy at the merged exact commit. Do not bypass required checks or claim successful deployment before GitHub reports it.
 - Pages is publicly accessible without authentication. The workbench processes inputs in the browser, but representatives must not treat the public demo as approved for sensitive financial client data or as officially Sandler-branded without authorization.
+
+## Discover and import invariants
+
+- Only one Discover panel displays at a time; the data remains mounted. Preserve a visible four-stage navigator in Present (except in print).
+- CSV input is staged until explicit Apply. Auto-map from known labels, allow manual mapping, and prohibit duplicate target column reuse.
+- Reject malformed CSV, invalid numeric units, out-of-range values and silent filling of missing fields. Treat all imported sources as unconfirmed.
+- Do not claim there is an official Sandler-wide CSV standard, or automatically import a computed ROI from spreadsheet exports.
