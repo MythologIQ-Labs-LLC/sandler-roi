@@ -121,7 +121,7 @@ try{
   'navVisible:getComputedStyle(document.querySelector(".journey")).display!=="none"};})()');
  await command('Page.enable');await command('Runtime.enable');
  await command('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
- await command('Page.navigate',{url:'http://127.0.0.1:4174/'});
+ await command('Page.navigate',{url:'http://127.0.0.1:4174/?devFeedback=1'});
  await until(async()=>await evaluate('document.body.dataset.stage==="discover"&&document.getElementById("cost")?.textContent==="$79,200"')===true,
   'ROI Workbench app initialization');
  let measurements=await sample();
