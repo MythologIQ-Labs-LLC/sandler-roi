@@ -72,6 +72,11 @@ try{
   'docWidth:document.documentElement.scrollWidth,'+
   'shellHeight:Math.round(shell.getBoundingClientRect().height),'+
   'panelHeight:Math.round(document.querySelector(".side").getBoundingClientRect().height),'+
+  'mainCards:[...document.querySelector(".main").children].map(el=>({stage:el.dataset.workbenchStep||"",h:Math.round(el.getBoundingClientRect().height),display:getComputedStyle(el).display})),'+
+  'header:Math.round(document.querySelector(".top").getBoundingClientRect().height),'+
+  'journeyHeight:Math.round(document.querySelector(".journey").getBoundingClientRect().height),'+
+  'introHeight:Math.round(document.querySelector(".stage-intro").getBoundingClientRect().height),'+
+  'tabbarHeight:Math.round(document.querySelector(".discover-tabbar").getBoundingClientRect().height),'+
   'navVisible:getComputedStyle(document.querySelector(".journey")).display!=="none"};})()');
  await command('Page.enable');await command('Runtime.enable');
  await command('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
@@ -80,6 +85,8 @@ try{
   'ROI Workbench app initialization');
  let measurements=await sample();
  console.log('Desktop Discover initial:',JSON.stringify(measurements));
+ const initialShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'discover-desktop.png'),Buffer.from(initialShot.data,'base64'));
  assert.deepEqual(measurements.visiblePanels,['engagement'],'Only Engagement may occupy layout space');
  assert.equal(measurements.hiddenPanels,3,'Three tabs must be hidden in DOM');
  assert.equal(measurements.tabColumns,4,'Four Discover tabs must form a single row');
