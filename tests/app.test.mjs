@@ -224,6 +224,28 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(document.body.dataset.stage,"present");
       assert.equal(steps[3].attributes["aria-current"],"step");
     });
+    await t.test("the working hypothesis describes behavioral change without dollar payouts",async()=>{
+      await steps[1].trigger("click");
+      const hypothesis=elements.get("model-behavior").children;
+      assert.ok(hypothesis.length>=2);
+      const wins=hypothesis.find(x=>x.children[0].textContent==="Proposal win rate");
+      assert.ok(wins);
+      assert.equal(wins.children[1].children[0].children[1].textContent,"25.0%");
+      assert.equal(wins.children[1].children[2].children[1].textContent,"26.4%");
+      const levers=elements.get("levers").children;
+      assert.ok(levers.every(x=>!x.children[2].children[0].textContent.includes("$")));
+    });
+    await t.test("present disclosure switches financial outcomes without changing real baseline",async()=>{
+      await steps[3].trigger("click");
+      const previous=elements.get("benefit").textContent;
+      await buttons[2].trigger("click");
+      assert.notEqual(elements.get("benefit").textContent,previous);
+      assert.equal(elements.get("baseline-win").textContent,"25.0%");
+      assert.match(elements.get("present-behavior").children[0].children[2].textContent,/percentage points/);
+      assert.equal(elements.get("present").attributes["aria-pressed"],"true");
+      await steps[0].trigger("click");
+      assert.equal(document.body.dataset.stage,"discover");
+    });
     await t.test("model assumptions are organized by sales value driver",async()=>{
       await steps[1].trigger("click");
       const groups=elements.get("assumptions").children;

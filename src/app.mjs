@@ -1,4 +1,4 @@
-import { DEFAULT_INPUTS, SCENARIOS, DEFAULT_ACTIVE, calculate, calculatePipelineBridge, MONEY, PERCENT } from "./roi.mjs";
+import { DEFAULT_INPUTS, SCENARIOS, DEFAULT_ACTIVE, calculate, calculatePipelineBridge, parseValue, MONEY, PERCENT } from "./roi.mjs";
 import { BASELINE_FIELDS, EVIDENCE_STATUSES, defaultEvidence, normalizeEvidence, requiredEvidenceKeys, assessEvidence } from "./evidence.mjs";
 import { CSV_FIELDS, CSV_LABELS, CSV_TEMPLATE_HEADERS, prepareCSV, suggestMapping, mappedCSVPreview, buildCSVImport } from "./csv-import.mjs";
 import {behaviorJourney} from "./story.mjs";
@@ -257,9 +257,8 @@ function item(name,value,enabled){
 }
 function put(id,text){$(id).textContent=text;}
 const baselineText=(key,format=value=>String(value))=>{
-  const raw=inputs[key],numeric=Number(raw);
-  return raw===null||raw===undefined||raw===""||!Number.isFinite(numeric)||numeric<0
-    ?"Needs input":format(numeric);
+  const checked=parseValue(inputs[key],key);
+  return checked.error?"Needs input":format(checked.value);
 };
 function renderBehavior(id,rows){
   const container=$(id);container.replaceChildren();
