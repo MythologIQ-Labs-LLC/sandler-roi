@@ -27,7 +27,7 @@ const server=createServer(async(req,res)=>{
   if(!mapped){res.writeHead(404,{"Content-Type":"text/plain; charset=utf-8","X-Content-Type-Options":"nosniff"});res.end("Not found");return;}
   try{
     const data=await readFile(join(root,mapped));
-    res.writeHead(200,{"Content-Type":types[mapped.slice(mapped.lastIndexOf("."))]??"application/octet-stream","Content-Security-Policy":"default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://go.nextlevel.sandler.com; connect-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'","X-Content-Type-Options":"nosniff","Cache-Control":"no-store"});
+    res.writeHead(200,{"Content-Type":types[mapped.slice(mapped.lastIndexOf("."))]??"application/octet-stream","Content-Security-Policy":"default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://go.nextlevel.sandler.com; connect-src 'none'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'","X-Content-Type-Options":"nosniff","Cache-Control":"no-store"});
     res.end(req.method==="HEAD"?undefined:data);
   }catch{res.writeHead(500,{"Content-Type":"text/plain; charset=utf-8"});res.end("Unable to serve application");}
 });
