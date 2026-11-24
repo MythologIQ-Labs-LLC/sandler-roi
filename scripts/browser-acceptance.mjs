@@ -72,6 +72,11 @@ try{
   'docWidth:document.documentElement.scrollWidth,'+
   'shellHeight:Math.round(shell.getBoundingClientRect().height),'+
   'panelHeight:Math.round(document.querySelector(".side").getBoundingClientRect().height),'+
+  'tabbarInsideEditor:document.querySelector(".side").contains(document.querySelector(".discover-tabbar")),'+
+  'panelNeedsScroll:(()=>{const p=document.querySelector("[data-discover-panel]:not([hidden])");return p.scrollHeight>p.clientHeight+2})(),'+
+  'editorTop:Math.round(document.getElementById("field-prospect").getBoundingClientRect().top),'+
+  'sideWidth:Math.round(document.querySelector(".side").getBoundingClientRect().width),'+
+  'mainWidth:Math.round(document.querySelector(".main").getBoundingClientRect().width),'+
   'mainCards:[...document.querySelector(".main").children].map(el=>({stage:el.dataset.workbenchStep||"",h:Math.round(el.getBoundingClientRect().height),display:getComputedStyle(el).display})),'+
   'header:Math.round(document.querySelector(".top").getBoundingClientRect().height),'+
   'journeyHeight:Math.round(document.querySelector(".journey").getBoundingClientRect().height),'+
@@ -88,11 +93,26 @@ try{
  const initialShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'discover-desktop.png'),Buffer.from(initialShot.data,'base64'));
  assert.deepEqual(measurements.visiblePanels,['engagement'],'Only Engagement may occupy layout space');
+ assert.equal(measurements.tabbarInsideEditor,true,'Discover tabs must sit inside the editable pane');
+ assert.equal(measurements.panelNeedsScroll,false,'Engagement panel should not scroll on 1440x900 desktop');
+ assert.ok(measurements.editorTop<=370,'Editable prospect input still pushed down the screen: '+measurements.editorTop);
+ assert.ok(measurements.sideWidth>measurements.mainWidth,'Editing surface must be wider than KPI summary');
+ assert.ok(measurements.header<=68,'Header is still too tall: '+measurements.header);
+ assert.ok(measurements.journeyHeight<=58,'Journey timeline is still too tall: '+measurements.journeyHeight);
  assert.equal(measurements.hiddenPanels,3,'Three tabs must be hidden in DOM');
  assert.equal(measurements.tabColumns,4,'Four Discover tabs must form a single row');
  assert.ok(measurements.docHeight<=measurements.viewport+180,
   'Desktop Discover is still a long document: '+JSON.stringify(measurements));
  const desktopHeight=measurements.docHeight;
+ await command('Emulation.setDeviceMetricsOverride',{width:1698,height:900,deviceScaleFactor:1,mobile:false});
+ await sleep(80);
+ const wide=await sample();console.log('Wide desktop Discover:',JSON.stringify(wide));
+ assert.equal(wide.tabbarInsideEditor,true);
+ assert.equal(wide.panelNeedsScroll,false,'Engagement should not scroll at the supplied screenshot width');
+ assert.ok(wide.editorTop<=370,'Editor too low on wide desktop');
+ assert.ok(wide.docHeight<=wide.viewport+10,'Wide desktop should have no full-page scroll');
+ await command('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
+ await sleep(50);
  for(const tab of ['performance','pipeline','evidence','engagement']){
   await evaluate('document.querySelector('+JSON.stringify('[data-discover-tab="'+tab+'"]')+').click()');
   measurements=await sample();
