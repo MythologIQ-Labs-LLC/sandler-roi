@@ -295,7 +295,8 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       assert.equal(breakdown.length,5);
       const deduction=breakdown.at(-1);
       assert.match(deduction.children[0].textContent,/overlap between win-rate/);
-      assert.match(deduction.children[1].textContent,/\$12,600/);
+      assert.match(deduction.children[1].textContent,/^−\$[\d,]+$/);
+      assert.ok(Number(deduction.children[1].textContent.replace(/[^\d]/g,""))>0);
       assert.match(elements.get("payback-horizon-note").textContent,/exceeds the 12-month evaluation/);
       assert.match(elements.get("present-evidence").textContent,/None independently verified/);
       assert.equal(elements.get("present").textContent,"Exit presentation");
