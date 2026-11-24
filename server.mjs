@@ -11,6 +11,9 @@ const files={
   "/src/csv-import.mjs":"src/csv-import.mjs",
   "/src/story.mjs":"src/story.mjs",
   "/src/customer-copy.mjs":"src/customer-copy.mjs",
+  "/src/customer-files.mjs":"src/customer-files.mjs",
+  "/src/feedback.mjs":"src/feedback.mjs",
+  "/src/feedback-archive.mjs":"src/feedback-archive.mjs",
   "/src/workbench.css":"src/workbench.css"
 };
 const types={".html":"text/html; charset=utf-8",".mjs":"text/javascript; charset=utf-8",".css":"text/css; charset=utf-8"};
