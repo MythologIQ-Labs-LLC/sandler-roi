@@ -115,3 +115,10 @@ The installed Qortara Logic Demo offers stateless read-only evaluators for **sup
 - Flag simple payback that goes beyond the modeled program term; do not conflate constant-run-rate extrapolation with actual cash-flow recovery.
 - Preserve all four formulas and the default fixture totals unless the owner approves a new, explicit multi-year cohort/attribution specification. A passed math test does not prove causal isolation, data provenance or approved production ROI.
 - Add a nonduplicated effort-ledger entry and run independent test/property suite plus full native/browser checks for substantive finance changes.
+
+## Timeline navigation pattern
+
+- The Discover → Model → Compare → Present navigator is a **single thin connected timeline** with four small stage nodes and compact labels. Do not restore large step cards or subheadings that push customer editing below the fold.
+- Keep the **entire stage cell** as a native button (adequate click/keyboard target), with current blue, earlier-position teal and later muted. 'Previous' is purely position, not attestation of a completed step.
+- Maintain direct stage navigation and keyboard ArrowLeft/ArrowRight/Home/End. The timeline remains visible in Present and hidden for print. Stage transition must not alter the staged financial disclosure logic.
+- Real browser acceptance must measure timeline height, actual one-line connector, stage node positions and narrow viewport overflow. Record nonduplicated estimated effort.

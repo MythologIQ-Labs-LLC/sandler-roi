@@ -245,6 +245,38 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
       await steps[0].trigger("click");
       assert.equal(document.body.dataset.stage,"discover");
     });
+    await t.test("timeline tracks current, earlier, and later stages without asserting actual completion",async()=>{
+      await steps[0].trigger("click");
+      assert.equal(elements.get("journey-timeline").attributes["data-current"],"discover");
+      assert.deepEqual(steps.map(x=>x.attributes["data-timeline-state"]),
+        ["current","upcoming","upcoming","upcoming"]);
+      await steps[2].trigger("click");
+      assert.deepEqual(steps.map(x=>x.attributes["data-timeline-state"]),
+        ["previous","previous","current","upcoming"]);
+      assert.equal(steps[2].attributes["aria-current"],"step");
+      await steps[0].trigger("click");
+      assert.deepEqual(steps.map(x=>x.attributes["data-timeline-state"]),
+        ["current","upcoming","upcoming","upcoming"]);
+    });
+    await t.test("timeline keyboard arrows and Home/End navigate native buttons",async()=>{
+      let prevented=0;
+      await steps[0].trigger("keydown",{key:"ArrowRight",preventDefault:()=>prevented++});
+      assert.equal(document.body.dataset.stage,"model");
+      assert.equal(steps[1].focused,true);
+      await steps[1].trigger("keydown",{key:"End",preventDefault:()=>prevented++});
+      assert.equal(document.body.dataset.stage,"present");
+      await steps[3].trigger("keydown",{key:"Home",preventDefault:()=>prevented++});
+      assert.equal(document.body.dataset.stage,"discover");
+      await steps[0].trigger("keydown",{key:"ArrowLeft",preventDefault:()=>prevented++});
+      assert.equal(document.body.dataset.stage,"present");
+      assert.equal(prevented,4);
+      await steps[0].trigger("click");
+    });
+    await t.test("timeline markup has exactly four compact stages, no large-card descriptions",()=>{
+      assert.equal((html.match(/class="journey-node"/g)||[]).length,4);
+      assert.equal((html.match(/class="journey-label"/g)||[]).length,4);
+      assert.ok(!html.includes('class="journey-number"'));
+    });
     await t.test("meeting journey starts in Discover and advances without leaving the page",async()=>{
       assert.equal(document.body.dataset.stage,"discover");
       await elements.get("step-next").trigger("click");

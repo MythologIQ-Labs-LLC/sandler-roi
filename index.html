@@ -151,12 +151,26 @@
       </div></details>
     </div>
   </header>
-  <nav class="journey no-print" aria-label="Workbench steps"><div class="journey-inner">
-    <button class="journey-step" type="button" data-workbench-nav="discover" aria-current="step"><span class="journey-number">01</span><span><strong>Discover</strong><small>Customer &amp; baseline</small></span></button>
-    <button class="journey-step" type="button" data-workbench-nav="model"><span class="journey-number">02</span><span><strong>Model</strong><small>Explore improvements</small></span></button>
-    <button class="journey-step" type="button" data-workbench-nav="compare"><span class="journey-number">03</span><span><strong>Compare</strong><small>Test the investment</small></span></button>
-    <button class="journey-step" type="button" data-workbench-nav="present"><span class="journey-number">04</span><span><strong>Present</strong><small>Explain the case</small></span></button>
-  </div></nav>
+  <nav class="journey no-print" aria-label="Workbench stages">
+    <div class="journey-inner" id="journey-timeline" data-current="discover">
+      <button type="button" class="journey-step" data-workbench-nav="discover" data-timeline-state="current" aria-current="step">
+        <span class="journey-node" aria-hidden="true"></span>
+        <span class="journey-label">Discover</span>
+      </button>
+      <button type="button" class="journey-step" data-workbench-nav="model" data-timeline-state="upcoming">
+        <span class="journey-node" aria-hidden="true"></span>
+        <span class="journey-label">Model</span>
+      </button>
+      <button type="button" class="journey-step" data-workbench-nav="compare" data-timeline-state="upcoming">
+        <span class="journey-node" aria-hidden="true"></span>
+        <span class="journey-label">Compare</span>
+      </button>
+      <button type="button" class="journey-step" data-workbench-nav="present" data-timeline-state="upcoming">
+        <span class="journey-node" aria-hidden="true"></span>
+        <span class="journey-label">Present</span>
+      </button>
+    </div>
+  </nav>
   <div class="stage-intro"><div class="stage-intro-copy">
     <div class="eyebrow" id="step-eyebrow">01 / DISCOVER THE BASELINE</div>
     <h1 id="step-title">Start with the customer's numbers.</h1>

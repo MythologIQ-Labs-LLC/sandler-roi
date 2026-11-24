@@ -91,6 +91,17 @@
       "approval": "unreviewed",
       "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/8",
       "notes": "Provisional human-directed AI-assisted analysis, separate manual arithmetic, independent reference/property tests, extreme-boundary remediation and presentation review. No stopwatch measurement; excludes Actions, model execution and waiting. Owner must reconcile before billing."
+    },
+    {
+      "id": "roi-2026-11-24-timeline",
+      "date": "2026-11-24",
+      "phase": "Compact four-point stage timeline and accessible keyboard navigation",
+      "hours": 0.2,
+      "method": "retrospective-active-attention-estimate",
+      "confidence": "low",
+      "approval": "unreviewed",
+      "reference": "https://github.com/MythologIQ-Labs-LLC/sandler-roi/pull/9",
+      "notes": "Estimated active AI-assisted time for replacing bulky stage cards with connected timeline nodes, state semantics, keyboard navigation, responsive visual regression checks and deployment review. CI waiting excluded; owner confirmation needed before billing."
     }
   ]
 }

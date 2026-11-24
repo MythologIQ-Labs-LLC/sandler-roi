@@ -68,8 +68,13 @@ function setStep(key){
   const step=JOURNEY[key];
   put("step-eyebrow",step.label);put("step-title",step.title);
   put("step-description",step.description);put("step-next",step.next);
+  const stages=Object.keys(JOURNEY),currentIndex=stages.indexOf(key);
+  $("journey-timeline").setAttribute("data-current",key);
   document.querySelectorAll("[data-workbench-nav]").forEach(button=>{
-    if(button.dataset.workbenchNav===key)button.setAttribute("aria-current","step");
+    const index=stages.indexOf(button.dataset.workbenchNav);
+    button.setAttribute("data-timeline-state",index===currentIndex?"current":
+      index<currentIndex?"previous":"upcoming");
+    if(index===currentIndex)button.setAttribute("aria-current","step");
     else if(typeof button.removeAttribute==="function")button.removeAttribute("aria-current");
     else button.setAttribute("aria-current","false");
   });
@@ -559,6 +564,20 @@ $("export-csv").addEventListener("click",()=>{
 });
 document.querySelectorAll("[data-workbench-nav]").forEach(button=>{
   button.addEventListener("click",()=>setStep(button.dataset.workbenchNav));
+  button.addEventListener("keydown",event=>{
+    const keys=Object.keys(JOURNEY),index=keys.indexOf(button.dataset.workbenchNav);
+    let next;
+    if(event.key==="ArrowRight")next=keys[(index+1)%keys.length];
+    else if(event.key==="ArrowLeft")next=keys[(index+keys.length-1)%keys.length];
+    else if(event.key==="Home")next=keys[0];
+    else if(event.key==="End")next=keys[keys.length-1];
+    if(next){
+      event.preventDefault();
+      setStep(next);
+      Array.from(document.querySelectorAll("[data-workbench-nav]"))
+        .find(target=>target.dataset.workbenchNav===next)?.focus();
+    }
+  });
 });
 document.querySelectorAll("[data-discover-tab]").forEach(button=>{
   button.addEventListener("click",()=>setDiscoverPanel(button.dataset.discoverTab));
