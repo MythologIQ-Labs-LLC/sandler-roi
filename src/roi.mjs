@@ -1,6 +1,6 @@
 /* Sandler ROI Workbench calculation engine. No network, dependencies, or hidden business rules. */
 export const DEFAULT_INPUTS = {
-  prospect: "Example prospect (illustrative)", consultant: "Sandler representative",
+  prospect: "Sample customer", consultant: "Sandler representative",
   monthlyFee: 6600, programMonths: 12, setupFee: 0, participantCount: 12,
   costMode: "fees",
   trainingHoursPerPerson: "", participantHourlyCost: "", additionalMonthlyCost: "",
@@ -10,7 +10,7 @@ export const DEFAULT_INPUTS = {
   grossMarginPct: 40, newAccountsAnnualValue: 300000,
   newHires: 4, rampMonths: 6, annualSellerRevenue: 750000,
   pipelineValue: "", pipelinePeriodWeeks: "", pipelineRevenueConversionPct: "", pipelineAttributionPct: "",
-  notes: "Illustrative values only. Replace all assumptions with prospect-specific data."
+  notes: "Illustrative values only. Replace all assumptions with customer-specific data."
 };
 export const SCENARIOS = {
   conservative: { label: "Conservative", pricePoints: 0.25, priceCapturePct: 60, winPoints: 1, winCapturePct: 60, nationalAccounts: 0, accountFirstYearPct: 40, accountCapturePct: 60, rampMonthsSaved: 1, rampCapturePct: 30, overlapPct: 10 },
@@ -149,7 +149,7 @@ export function calculate(input, scenario, enabled=DEFAULT_ACTIVE) {
   return {cost,costMode:costResult.mode,costBreakdown:costResult,parts,knownBenefit:overlap===null?null:Math.max(0,known-deduction),deduction,benefit,net,roi,multiple,simplePaybackMonths,breakEvenPricePoints,complete,problems};
 }
 /**
- * Optional prospect-specific pipeline bridge.
+ * Optional customer-specific pipeline bridge.
  * Pipeline is NOT booked revenue or ROI; deliberately excluded from calculate().
  * The period in weeks labels the observation but is never silently annualized.
  */
