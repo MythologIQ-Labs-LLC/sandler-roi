@@ -182,6 +182,13 @@
     @media(max-width:520px){
       body[data-stage="discover"] .side{height:min(62dvh,590px);max-height:min(62dvh,590px)}
       .discover-panel-nav{padding:10px}
+      body[data-stage="discover"] .discover-switcher{
+        grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      }
+      body[data-stage="discover"] .discover-switcher [role="tab"]{
+        min-height:39px!important;flex-direction:row!important;
+        gap:8px!important;font-size:12px!important;
+      }
       .discover-switcher .mini-circle{width:24px;height:24px}
     }
     @media print{.discover-tabbar{display:none!important}}
