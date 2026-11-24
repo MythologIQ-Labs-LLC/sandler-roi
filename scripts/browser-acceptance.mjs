@@ -14,6 +14,7 @@ const profile=await mkdtemp(join(tmpdir(),'sandler-browser-'));
 const server=spawn(process.execPath,['server.mjs'],{cwd:root,env:{...process.env,PORT:'4174'},stdio:'ignore'});
 const browser=spawn(chrome,['--headless=new','--no-sandbox','--disable-dev-shm-usage',
  '--disable-gpu','--no-first-run','--no-default-browser-check',
+ '--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream',
  '--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:'ignore'});
 let ws;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -392,6 +393,19 @@ try{
   'document.getElementById("feedback-category").value="improvement";'+
   'document.getElementById("feedback-add").click()})()');
  assert.equal(await evaluate('document.getElementById("feedback-count").textContent'),"1 captured");
+ // Chrome's synthetic microphone proves the opt-in recording and audio attachment path.
+ await evaluate('document.getElementById("feedback-record").click()');
+ const recording=await until(async()=>evaluate('!document.getElementById("feedback-stop").disabled'),
+  'microphone started with explicit user action');
+ assert.equal(recording,true);
+ await sleep(650);
+ await evaluate('document.getElementById("feedback-stop").click()');
+ const audioReady=await until(async()=>evaluate('!document.getElementById("feedback-clear-audio").disabled'),
+  'microphone stopped and audio blob available');
+ assert.equal(audioReady,true);
+ await evaluate('(()=>{document.getElementById("feedback-text").value="Voice comments work too";'+
+  'document.getElementById("feedback-add").click()})()');
+ assert.equal(await evaluate('document.getElementById("feedback-count").textContent'),"2 captured");
  await evaluate('document.getElementById("feedback-export").click()');
  const archiveName=await until(async()=>{
    const entries=await readdir(downloadDir);
@@ -403,9 +417,13 @@ try{
  assert.equal(archive.subarray(30,30+firstNameLength).toString(),"feedback.json");
  const manifestLength=archive.readUInt32LE(18);
  const manifest=JSON.parse(archive.subarray(30+firstNameLength,30+firstNameLength+manifestLength).toString());
- assert.equal(manifest.notes.length,1);
+ assert.equal(manifest.notes.length,2);
  assert.equal(manifest.notes[0].text,"Clarify how scenarios compare");
  assert.equal(manifest.notes[0].context.stage,"compare");
+ assert.equal(manifest.notes[1].text,"Voice comments work too");
+ assert.match(manifest.notes[1].recording,/^voice-02\.(webm|m4a|ogg)$/);
+ assert.ok(archive.includes(Buffer.from(manifest.notes[1].recording)),
+   'voice file must be listed in the exported archive');
  assert.doesNotMatch(JSON.stringify(manifest),/Demo Customer|79200/,'feedback must not capture customer data');
  await evaluate('document.getElementById("feedback-exit").click()');
  assert.deepEqual(exceptions,[],'Unexpected browser JavaScript exceptions');
