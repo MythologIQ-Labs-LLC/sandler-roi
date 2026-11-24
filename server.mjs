@@ -7,9 +7,10 @@ const root=dirname(fileURLToPath(import.meta.url));
 const files={
   "/":"index.html", "/index.html":"index.html",
   "/src/app.mjs":"src/app.mjs", "/src/roi.mjs":"src/roi.mjs",
-  "/src/evidence.mjs":"src/evidence.mjs"
+  "/src/evidence.mjs":"src/evidence.mjs",
+  "/src/workbench.css":"src/workbench.css"
 };
-const types={".html":"text/html; charset=utf-8",".mjs":"text/javascript; charset=utf-8"};
+const types={".html":"text/html; charset=utf-8",".mjs":"text/javascript; charset=utf-8",".css":"text/css; charset=utf-8"};
 const host="127.0.0.1";
 const port=Number(process.env.PORT??4173);
 if(!Number.isInteger(port)||port<1||port>65535)throw Error("PORT must be an integer from 1 to 65535");
