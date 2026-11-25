@@ -579,3 +579,5 @@ body[data-stage="present"] .journey{display:block}
 .baseline-point .edit-baseline:hover{background:#e3eef9}
 #intake-import-dialog #intake-preview{max-height:310px;overflow:auto;padding:10px 0}
 #intake-import-dialog #intake-preview p{margin:6px 0;overflow-wrap:anywhere}
+
+.baseline-point .baseline-source{display:block;color:#64788f;font-size:10px;line-height:1.25;margin-top:5px;overflow-wrap:anywhere}
