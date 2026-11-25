@@ -25,7 +25,7 @@ function questionNode(field){
  const input=fieldElement(field.kind==="text"?"text":"number",field.key,answer.value,{
    integer:field.kind==="integer",max:field.kind==="percent"?100:undefined
  });
- input.maxLength=field.kind==="text"?180:undefined;
+ if(field.kind==="text")input.maxLength=180;
  const select=document.createElement("select");select.setAttribute("aria-label","Answer source for "+field.label);
  for(const [value,title] of [["unknown","I don't know"],["provided","Customer-reported"],["reference","Published reference"]]){
   const option=document.createElement("option");option.value=value;option.textContent=title;select.append(option);
