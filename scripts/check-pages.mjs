@@ -4,7 +4,7 @@ import {dirname,join,resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),"..");
-const assets=[".nojekyll","index.html","src/app.mjs","src/roi.mjs","src/evidence.mjs","src/csv-import.mjs","src/story.mjs","src/customer-copy.mjs","src/customer-files.mjs","src/feedback.mjs","src/feedback-archive.mjs","src/workbench.css","src/intake-contract.mjs","src/intake-bridge.mjs","survey/index.html","survey/survey.css","survey/survey.mjs"];
+const assets=[".nojekyll","index.html","src/app.mjs","src/roi.mjs","src/evidence.mjs","src/csv-import.mjs","src/story.mjs","src/customer-copy.mjs","src/customer-files.mjs","src/feedback.mjs","src/feedback-archive.mjs","src/workbench.css","src/intake-contract.mjs","src/intake-bridge.mjs","src/intake-handoff.mjs","tools/index.html","tools/tools.css","survey/index.html","survey/survey.css","survey/survey.mjs"];
 for(const name of assets){
   const info=await stat(join(root,name));
   assert.ok(info.isFile(),"Pages asset must exist: "+name);
