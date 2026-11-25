@@ -344,6 +344,21 @@ function render(){
   put("baseline-proposals",baselineText("annualProposals",v=>new Intl.NumberFormat("en-US").format(v)));
   put("baseline-deal",baselineText("avgDealValue",MONEY));
   put("baseline-ramp",baselineText("rampMonths",v=>v.toFixed(1)+" months"));
+  const provenanceLabel=key=>{
+    const record=evidence[key]||{};
+    switch(record.status){
+      case "external-reference":return "Published reference · inspect source in Evidence";
+      case "prospect-reported":return "Customer-reported · not independently verified";
+      case "finance-reviewed":return "Finance-reviewed (user-declared)";
+      case "document-cited":return "Document cited (user-declared)";
+      case "illustrative":return "Illustrative example";
+      default:return "Unconfirmed";
+    }
+  };
+  put("baseline-source-win",provenanceLabel("baselineWinRatePct"));
+  put("baseline-source-proposals",provenanceLabel("annualProposals"));
+  put("baseline-source-deal",provenanceLabel("avgDealValue"));
+  put("baseline-source-ramp",provenanceLabel("rampMonths"));
   put("print-scenario",scenario.label);
   put("roi",result.complete?(result.roi===null?"N/A":PERCENT(result.roi)):"Incomplete");
   put("net",result.complete?MONEY(result.net):"Incomplete");
@@ -357,11 +372,12 @@ function render(){
   put("cost-extras",result.costMode==="fees"?"Other training costs are excluded.":
     "Fees: "+MONEY(result.costBreakdown.feeCost)+" + other modeled costs: "+MONEY(result.costBreakdown.additionalCost)+".");
   const proof=assessEvidence(inputs,evidence,active);
+  const publishedReferenceCount=Object.values(evidence).filter(record=>record.status==="external-reference").length;
   put("evidence-summary",proof.requiredCount+" required inputs: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
     " unconfirmed, "+proof.missingSources.length+" citations missing a reference. Not independently verified.");
-  put("baseline-confidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+" unconfirmed. Review with the customer.");
+  put("baseline-confidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+" unconfirmed, "+publishedReferenceCount+" published references (not customer facts). Review with the customer.");
   put("compare-evidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
-    " unconfirmed, "+proof.missingSources.length+" missing references. Status is user-declared.");
+    " unconfirmed, "+proof.missingSources.length+" missing references, "+publishedReferenceCount+" published references (not customer facts). Status is user-declared.");
   put("present-evidence","Input confidence: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
     " unconfirmed, "+proof.missingSources.length+" citations without a source reference. None independently verified.");
   const warning=$("warnings");
