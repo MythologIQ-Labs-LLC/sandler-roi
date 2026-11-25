@@ -335,7 +335,11 @@ function render(){
   put("review-title","Review "+customer.possessive+" figures and assumptions");
   put("review-description","Confirm the current figures, proposed improvements and investment with the customer before reviewing modeled financial results.");
   put("reveal-heading","Where "+customer.subject+" stands. What could change.");
-  put("reveal-description","Current values are customer-entered; possible future results are modeled hypotheses, not achieved outcomes.");
+  const requiredReferenceKeys=requiredEvidenceKeys(inputs,active).filter(key=>evidence[key]?.status==="external-reference");
+  const referenceCount=requiredReferenceKeys.length;
+  put("reveal-description",referenceCount
+    ? "Some baselines use published references, not this customer's measured results. Modeled future outcomes are hypotheses, not achieved results."
+    : "Current values are customer-entered or explicitly illustrative; possible future results are modeled hypotheses, not achieved outcomes.");
   put("scenario-owner-heading",customer.leadPossessive+" modeled financial outcomes");
   put("present-driver-heading","What could create value for "+customer.subject+"?");
   put("pitch-title",customer.leadPossessive+" potential business case");
@@ -380,7 +384,12 @@ function render(){
   put("compare-evidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
     " unconfirmed, "+proof.missingSources.length+" missing references, "+publishedReferenceCount+" published references (not customer facts). Status is user-declared.");
   put("present-evidence","Input confidence: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
-    " unconfirmed, "+proof.missingSources.length+" citations without a source reference. None independently verified.");
+    " unconfirmed, "+proof.missingSources.length+" citations without a source reference, "+referenceCount+
+    " published references (not customer facts). None independently verified.");
+  put("present-reference-sources",referenceCount
+    ? "Published references used in this scenario (not measured customer outcomes): "+requiredReferenceKeys.map(key=>
+        (BASELINE_FIELDS[key]||key)+" — "+(evidence[key].source||"Source not supplied")).join(" | ")
+    : "");
   const warning=$("warnings");
   if(result.problems.length){
     warning.classList.add("visible");
