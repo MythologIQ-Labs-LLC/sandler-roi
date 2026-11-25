@@ -7,6 +7,7 @@ import {initCustomerFiles} from "./customer-files.mjs";
 import {initDevelopmentFeedback} from "./feedback.mjs";
 import {validateIntake} from "./intake-contract.mjs";
 import {buildWorkbenchFromIntake} from "./intake-bridge.mjs";
+import {consumeIntakeHandoff} from "./intake-handoff.mjs";
 
 const clone = object => JSON.parse(JSON.stringify(object));
 let inputs=clone(DEFAULT_INPUTS);
@@ -710,11 +711,9 @@ function closeIntakeDialog(){
 $("import-intake").addEventListener("click",()=>{$("import-intake-file").click();});
 $("intake-close").addEventListener("click",closeIntakeDialog);
 $("intake-cancel").addEventListener("click",closeIntakeDialog);
-$("import-intake-file").addEventListener("change",async event=>{
- const file=event.target.files?.[0];event.target.value="";if(!file)return;
- if(file.size>500_000){window.alert("Discovery intake exceeds 500 KB.");return;}
+function openIntakePreview(candidate){
  try{
-  pendingIntake=validateIntake(JSON.parse(await file.text()));
+  pendingIntake=validateIntake(candidate);
   const plan=buildWorkbenchFromIntake(pendingIntake);
   const area=$("intake-preview");area.replaceChildren();
   const summary=document.createElement("p");summary.className="small";
@@ -737,7 +736,28 @@ $("import-intake-file").addEventListener("change",async event=>{
   if(typeof dialog.showModal==="function")dialog.showModal();
   else dialog.setAttribute("open","");
  }catch(err){pendingIntake=null;window.alert("Invalid discovery intake: "+err.message);}
+}
+$("import-intake-file").addEventListener("change",async event=>{
+ const file=event.target.files?.[0];event.target.value="";if(!file)return;
+ if(file.size>500_000){window.alert("Discovery intake exceeds 500 KB.");return;}
+ try{openIntakePreview(JSON.parse(await file.text()));}
+ catch(err){pendingIntake=null;window.alert("Could not open discovery intake: "+err.message);}
 });
+// Explicit one-time handoff is only read from the same-origin browser session.
+// Unlike JSON file selection, this opens the review dialog automatically, never applies values.
+if(new URLSearchParams(window.location?.search||"").get("intakeHandoff")==="1"){
+ try{openIntakePreview(consumeIntakeHandoff(window.sessionStorage));}
+ catch(err){window.alert("Survey transfer unavailable: "+err.message);}
+ finally{
+  // Remove the launch marker so refresh never replays an expired transfer.
+  if(window.history?.replaceState&&window.location?.href){
+   const url=new URL(window.location.href);
+   url.searchParams.delete("intakeHandoff");
+   window.history.replaceState(null,"",url.pathname+url.search+url.hash);
+  }
+ }
+}
+
 $("intake-apply").addEventListener("click",()=>{
  if(!pendingIntake)return;
  if(!window.confirm("Create a new customer model from this intake? Current unsaved work will be replaced."))return;
