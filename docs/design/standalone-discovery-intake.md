@@ -4,6 +4,17 @@
 **Decision:** Treat the survey as a separate customer-facing product, not a tab inside the ROI Workbench.
 **Source:** "Dollarizing Pain: Sales Rep Script for Dollarizing Pain" supplied by the owner, specifically the six sequential question groups from pp. 1–5. The source contains example formulas and illustrative dollar totals, not verified industry-average customer outcomes.
 
+## Tool selection and direct handoff
+
+**Entry point:** `/tools/` offers Sales Growth Discovery (`/survey/`) and the ROI Workbench (`/`). The existing root Workbench URL remains supported for bookmarks.
+
+**Survey review screen choices:**
+1. **Open in ROI Workbench:** validates the canonical intake, puts it into same-origin browser `sessionStorage` once, and navigates in the same tab. The Workbench immediately consumes/deletes it and opens the normal import preview. Nothing replaces the customer model without John's explicit confirmation. Transfer expires after 15 minutes, has a size bound, and puts no customer values in URL parameters.
+2. **Download intake JSON for later:** saves the same canonical `sandler-discovery-intake/1` data, including unknowns and citations, as a plain file. It can be reopened in either survey or Workbench later.
+
+**Failure fallback:** Unsupported, blocked, expired or invalid session storage never silently imports data. Use the downloadable JSON file. Browser session storage is not a secure, durable vault.
+
+**Present/print:** Published references being used are identified as non-customer figures, including their user-supplied citations. No independent evidence verification is implied.
 ## Product division
 
 | | Sales Growth Discovery | ROI Workbench |
@@ -13,11 +24,11 @@
 | Workflow | Six steps and review | Discover, Model, Compare, Present |
 | Output | Versioned \`sandler-discovery-intake/1\` JSON | Versioned \`sandler-roi/3\` model, optional nested canonical intake |
 | Math | No ROI, training-return promises or summed cost of inaction | Single authoritative \`src/roi.mjs\` engine |
-| Data sharing | Explicit local file handoff | Explicit local import and review, JSON/CSV exports |
+| Data sharing | One-click time-limited browser handoff **or** JSON template | Review-confirmed import, JSON/CSV exports |
 | Persistence | In-memory; downloadable JSON and reopen | In-memory; explicit local customer folder / backup |
 | Runtime | \`/survey/\` independently navigable Pages entrypoint | \`/\` original workbench entrypoint |
 
-The survey imports only \`src/intake-contract.mjs\`, which has no dependency on ROI math, browser objects or user interfaces. For now they share one hosting repository and one pure schema module; they can split repositories once distribution/branding requirements warrant it. Do not claim these are separate deployed services or private sites.
+The survey imports the pure versioned intake contract and a small browser handoff helper, neither dependent on ROI calculations. Both sites currently share one repository but remain separate application entry points.
 
 ## Six steps
 1. Business basics: team size, deals per rep, average deal value, annual client value, incremental gross margin.
