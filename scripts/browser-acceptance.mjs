@@ -478,6 +478,76 @@ try{
  const hiddenByDefault=await until(async()=>evaluate('document.readyState==="complete"&&'+
    'document.getElementById("feedback-toggle")?.hidden===true'),"feedback hidden without development URL");
  assert.equal(hiddenByDefault,true);
+
+ // Standalone product: launch a separate survey document and export canonical intake.
+ await command('Page.navigate',{url:'http://127.0.0.1:4174/survey/'});
+ const surveyLoaded=await until(async()=>evaluate('document.getElementById("step-title")?.textContent==="Business basics"'),
+  'standalone survey entry point loaded');
+ assert.equal(surveyLoaded,true);
+ await evaluate('(()=>{const set=(id,value)=>{const el=document.getElementById("intake-"+id);'+
+  'const select=el.closest(".field").querySelector("select");select.value="provided";'+
+  'select.dispatchEvent(new Event("change",{bubbles:true}));el.value=String(value);'+
+  'el.dispatchEvent(new Event("input",{bubbles:true}));};'+
+  'set("customerName","Example customer");set("averageDealValue",14000);set("grossMarginPct",35);})()');
+ await evaluate('document.getElementById("next").click()');
+ assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Prospecting");
+ await evaluate('document.getElementById("next").click()');
+ await evaluate('(()=>{const set=(id,value)=>{const el=document.getElementById("intake-"+id);'+
+  'const select=el.closest(".field").querySelector("select");select.value="provided";'+
+  'select.dispatchEvent(new Event("change",{bubbles:true}));el.value=String(value);'+
+  'el.dispatchEvent(new Event("input",{bubbles:true}));};'+
+  'set("annualProposals",120);set("proposalWinRatePct",25);set("meetingCloseRatePct",20);})()');
+ for(let n=0;n<4;n++)await evaluate('document.getElementById("next").click()');
+ assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Review your discovery");
+ await evaluate('document.getElementById("download-intake").click()');
+ const surveyFileName="sales-growth-intake-example-customer.json";
+ const surveyExported=await until(async()=> (await readdir(downloadDir)).includes(surveyFileName),
+  'standalone survey JSON downloaded');
+ assert.equal(surveyExported,true);
+ const surveyJson=await readFile(join(downloadDir,surveyFileName),'utf8');
+ const surveyRecord=JSON.parse(surveyJson);
+ assert.equal(surveyRecord.schema,"sandler-discovery-intake/1");
+ assert.equal(surveyRecord.responses.meetingCloseRatePct.value,20);
+ assert.equal(surveyRecord.responses.annualProposals.value,120);
+ assert.equal(surveyRecord.responses.salespeople.status,"unknown");
+ // Independent workbench import must not conflate the meeting-based ratio and proposal-win ratio.
+ await command('Page.navigate',{url:'http://127.0.0.1:4174/'});
+ const workbenchReady=await until(async()=>evaluate('!!document.getElementById("import-intake-file")&&!!document.getElementById("field-prospect")'),
+   'workbench ready for survey handoff');
+ assert.equal(workbenchReady,true);
+ const fileExpression='(()=>{const json='+JSON.stringify(surveyJson)+';'+
+  'const file=new File([json],"customer-intake.json",{type:"application/json"});'+
+  'const transfer=new DataTransfer();transfer.items.add(file);'+
+  'const input=document.getElementById("import-intake-file");input.files=transfer.files;'+
+  'input.dispatchEvent(new Event("change",{bubbles:true}));})()';
+ await evaluate(fileExpression);
+ const intakeDialogReady=await until(async()=>evaluate('document.getElementById("intake-import-dialog")?.open===true'),
+   'canonical import review dialog');
+ assert.equal(intakeDialogReady,true);
+ assert.match(await evaluate('document.getElementById("intake-preview").textContent'),/meetingCloseRatePct/);
+ await evaluate('(()=>{window.confirm=()=>true;document.getElementById("intake-apply").click()})()');
+ const importedReady=await until(async()=>evaluate('document.getElementById("field-prospect")?.value==="Example customer"'),
+  'imported survey customer');
+ assert.equal(importedReady,true);
+ assert.equal(await evaluate('document.getElementById("field-avgDealValue").value'),"14000");
+ assert.equal(await evaluate('document.getElementById("field-annualProposals").value'),"120");
+ assert.equal(await evaluate('document.getElementById("field-baselineWinRatePct").value'),"25");
+ assert.equal(await evaluate('document.getElementById("field-monthlyFee").value'),"",
+  'fictional monthly fee must never become a customer fact');
+ assert.equal(await evaluate('document.getElementById("cost").textContent'),"Needs input");
+ assert.equal(await evaluate('document.body.dataset.stage'),"discover");
+ await evaluate('document.querySelector("[data-edit-baseline=avgDealValue]").click()');
+ assert.equal(await evaluate('document.getElementById("tab-performance").getAttribute("aria-selected")'),"true");
+ assert.equal(await evaluate('document.activeElement.id'),"field-avgDealValue");
+ await evaluate('document.getElementById("export-json").click()');
+ const modelFile="sandler-roi-example-customer.json";
+ assert.equal(await until(async()=>(await readdir(downloadDir)).includes(modelFile),
+   'workbench canonical v3 JSON export'),true);
+ const savedModel=JSON.parse(await readFile(join(downloadDir,modelFile),'utf8'));
+ assert.equal(savedModel.schema,"sandler-roi/3");
+ assert.equal(savedModel.intake.responses.meetingCloseRatePct.value,20);
+ assert.equal(savedModel.intake.responses.proposalWinRatePct.value,25);
+ assert.equal(savedModel.inputs.monthlyFee,"");
  assert.deepEqual(exceptions,[],'Unexpected browser JavaScript exceptions');
  console.log('REAL BROWSER ACCEPTANCE PASS: Chromium rendered geometry, 4 tabs, desktop scroll budget, mobile overflow, Present nav.');
 }finally{
