@@ -479,6 +479,13 @@ try{
    'document.getElementById("feedback-toggle")?.hidden===true'),"feedback hidden without development URL");
  assert.equal(hiddenByDefault,true);
 
+ // Toolkit selector is its own static entry point; legacy workbench bookmarks still work.
+ await command('Page.navigate',{url:'http://127.0.0.1:4174/tools/'});
+ const toolsReady=await until(async()=>evaluate('document.querySelectorAll(".tool").length===2'),
+   'tool selector loaded');
+ assert.equal(toolsReady,true);
+ assert.equal(await evaluate('document.querySelector("a[href=\"../survey/\"]")!==null'),true);
+ assert.equal(await evaluate('document.querySelector("a[href=\"../\"]")!==null'),true);
  // Standalone product: launch a separate survey document and export canonical intake.
  await command('Page.navigate',{url:'http://127.0.0.1:4174/survey/'});
  const surveyLoaded=await until(async()=>evaluate('document.getElementById("step-title")?.textContent==="Business basics"'),
@@ -506,8 +513,15 @@ try{
   'const select=el.closest(".field").querySelector("select");select.value="provided";'+
   'select.dispatchEvent(new Event("change",{bubbles:true}));el.value=String(value);'+
   'el.dispatchEvent(new Event("input",{bubbles:true}));};'+
-  'set("annualProposals",120);set("proposalWinRatePct",25);set("meetingCloseRatePct",20);})()');
- for(let n=0;n<3;n++)await evaluate('document.getElementById("next").click()');
+  'set("annualProposals",120);set("proposalWinRatePct",25);set("meetingCloseRatePct",20);'+
+  'const input=document.getElementById("intake-proposalWinRatePct");'+
+  'const row=input.closest(".field");const sel=row.querySelector("select");'+
+  'sel.value="reference";sel.dispatchEvent(new Event("change",{bubbles:true}));'+
+  'for(const [name,value] of [["title","Example published research"],'+
+  '["url","https://example.org/research"],["population","Comparable proposal-stage sales"]]){'+
+  'const x=document.getElementById("intake-proposalWinRatePct-"+name);x.value=value;'+
+  'x.dispatchEvent(new Event("input",{bubbles:true}));}})()');
+ for(let n=0;n<3;n++await evaluate('document.getElementById("next").click()');
  assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Sales turnover");
  await evaluate('(()=>{const input=document.getElementById("intake-rampMonths");'+
    'const select=input.closest(".field").querySelector("select");select.value="provided";'+
@@ -536,7 +550,32 @@ try{
  assert.equal(surveyRecord.responses.meetingCloseRatePct.value,20);
  assert.equal(surveyRecord.responses.annualProposals.value,120);
  assert.equal(surveyRecord.responses.salespeople.status,"unknown");
- // Independent workbench import must not conflate the meeting-based ratio and proposal-win ratio.
+ assert.equal(surveyRecord.responses.proposalWinRatePct.status,"reference");
+ // One-click same-origin handoff must open review, not silently replace inputs.
+ await evaluate('document.getElementById("open-in-workbench").click()');
+ const handoffReady=await until(async()=>evaluate('document.getElementById("intake-import-dialog")?.open===true'),
+   'one-click Workbench import review');
+ assert.equal(handoffReady,true);
+ assert.equal(await evaluate('document.getElementById("cost").textContent'),"$79,200",
+   'direct handoff must not overwrite demo model before confirmation');
+ assert.equal(await evaluate('window.sessionStorage.getItem("sandler-discovery-handoff/1")'),null,
+   'direct survey transfer must be consumed once');
+ assert.equal(await evaluate('new URLSearchParams(location.search).has("intakeHandoff")'),false,
+   'launch marker must be removed from URL');
+ await evaluate('(()=>{window.confirm=()=>true;document.getElementById("intake-apply").click()})()');
+ const directlyImported=await until(async()=>evaluate('document.getElementById("field-prospect")?.value==="Example customer"'),
+  'one-click survey import applied');
+ assert.equal(directlyImported,true);
+ assert.equal(await evaluate('document.getElementById("field-monthlyFee").value'),"",
+  'direct import must not inherit sample budget');
+ assert.equal(await evaluate('document.getElementById("field-baselineWinRatePct").value'),"25");
+ assert.equal(await evaluate('document.getElementById("baseline-source-win").textContent.includes("Published reference")'),true);
+ await evaluate('document.querySelector("[data-workbench-nav=present]").click()');
+ assert.match(await evaluate('document.getElementById("reveal-description").textContent'),/published references/i);
+ assert.match(await evaluate('document.getElementById("present-evidence").textContent'),/published references/);
+ assert.match(await evaluate('document.getElementById("present-reference-sources").textContent'),/https:\/\/example\.org\/research/);
+ assert.match(await evaluate('document.getElementById("present-reference-sources").textContent'),/not measured customer outcomes/);
+ // Saved-file fallback is independent of session handoff.
  await command('Page.navigate',{url:'http://127.0.0.1:4174/'});
  const workbenchReady=await until(async()=>evaluate('!!document.getElementById("import-intake-file")&&!!document.getElementById("field-prospect")'),
    'workbench ready for survey handoff');
