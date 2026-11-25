@@ -7,6 +7,7 @@ export const EVIDENCE_STATUSES = Object.freeze({
   unconfirmed: "Unconfirmed prospect figure",
   "prospect-reported": "Prospect-reported",
   "document-cited": "Document cited (user-declared)",
+  "external-reference": "Published reference (not customer data)",
   "finance-reviewed": "Finance-reviewed (user-declared)"
 });
 
@@ -76,9 +77,9 @@ export function assessEvidence(input,evidence,enabled) {
     const record=normalized[key];
     if(record.status==="illustrative")illustrative.push(key);
     if(record.status==="unconfirmed")unconfirmed.push(key);
-    if((record.status==="document-cited"||record.status==="finance-reviewed")&&!record.source)
+    if((record.status==="document-cited"||record.status==="external-reference"||record.status==="finance-reviewed")&&!record.source)
       missingSources.push(key);
-    if(record.status==="prospect-reported"||record.status==="document-cited"||record.status==="finance-reviewed")
+    if(record.status==="prospect-reported"||record.status==="document-cited"||record.status==="external-reference"||record.status==="finance-reviewed")
       claimed.push(key);
   }
   return {
