@@ -1,4 +1,5 @@
 import {INTAKE_SECTIONS,FIELD_BY_KEY,emptyIntake,validateIntake,normalizeAnswer} from "../src/intake-contract.mjs";
+import {stageIntakeHandoff} from "../src/intake-handoff.mjs";
 
 const $=id=>document.getElementById(id);
 let intake=emptyIntake(),step=0,dirty=false;
@@ -146,6 +147,18 @@ $("next").addEventListener("click",()=>{
  catch(err){status(err.message);}
 });
 $("survey-notes").addEventListener("input",e=>{intake.notes=e.target.value;dirty=true;});
+$("open-in-workbench").addEventListener("click",()=>{
+ try{
+  const checked=validateIntake(intake);
+  stageIntakeHandoff(window.sessionStorage,checked);
+  // Same-tab navigation preserves this origin's sessionStorage. The workbench
+  // consumes it once and shows the normal import review before any replacement.
+  dirty=false;
+  window.location.assign("../?intakeHandoff=1");
+ }catch(err){
+  status("Unable to open Workbench directly: "+err.message+" You can download the intake JSON instead.");
+ }
+});
 $("download-intake").addEventListener("click",()=>{
  try{
   const checked=validateIntake(intake);
