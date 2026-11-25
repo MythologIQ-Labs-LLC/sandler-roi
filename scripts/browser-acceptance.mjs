@@ -484,6 +484,15 @@ try{
  const surveyLoaded=await until(async()=>evaluate('document.getElementById("step-title")?.textContent==="Business basics"'),
   'standalone survey entry point loaded');
  assert.equal(surveyLoaded,true);
+ assert.equal(await evaluate('getComputedStyle(document.querySelector(".reference-detail")).display'),"none",
+  'published-source inputs must not appear for unknown answers');
+ await evaluate('(()=>{const row=document.querySelector(".field");const sel=row.querySelector("select");'+
+   'sel.value="reference";sel.dispatchEvent(new Event("change",{bubbles:true}));})()');
+ assert.equal(await evaluate('getComputedStyle(document.querySelector(".reference-detail")).display'),"grid",
+  'source details should appear only when published-reference mode is selected');
+ await evaluate('(()=>{const row=document.querySelector(".field");const sel=row.querySelector("select");'+
+   'sel.value="unknown";sel.dispatchEvent(new Event("change",{bubbles:true}));})()');
+ assert.equal(await evaluate('getComputedStyle(document.querySelector(".reference-detail")).display'),"none");
  await evaluate('(()=>{const set=(id,value)=>{const el=document.getElementById("intake-"+id);'+
   'const select=el.closest(".field").querySelector("select");select.value="provided";'+
   'select.dispatchEvent(new Event("change",{bubbles:true}));el.value=String(value);'+
@@ -498,7 +507,21 @@ try{
   'select.dispatchEvent(new Event("change",{bubbles:true}));el.value=String(value);'+
   'el.dispatchEvent(new Event("input",{bubbles:true}));};'+
   'set("annualProposals",120);set("proposalWinRatePct",25);set("meetingCloseRatePct",20);})()');
- for(let n=0;n<4;n++)await evaluate('document.getElementById("next").click()');
+ for(let n=0;n<3;n++)await evaluate('document.getElementById("next").click()');
+ assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Sales turnover");
+ await evaluate('(()=>{const input=document.getElementById("intake-rampMonths");'+
+   'const select=input.closest(".field").querySelector("select");select.value="provided";'+
+   'select.dispatchEvent(new Event("change",{bubbles:true}));})()');
+ // Intentionally leave an invalid answer on a later step and walk backwards.
+ await evaluate('document.getElementById("back").click()');
+ assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Deal size");
+ await evaluate('document.getElementById("next").click()');
+ assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Sales turnover",
+   'a later invalid response must not trap navigation from an earlier step');
+ await evaluate('(()=>{const input=document.getElementById("intake-rampMonths");'+
+   'const select=input.closest(".field").querySelector("select");select.value="unknown";'+
+   'select.dispatchEvent(new Event("change",{bubbles:true}));})()');
+ await evaluate('document.getElementById("next").click()');
  assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Review your discovery");
  const surveyShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'standalone-survey-review.png'),Buffer.from(surveyShot.data,'base64'));
