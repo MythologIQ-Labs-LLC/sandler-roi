@@ -6,6 +6,10 @@ import { dirname, join } from "node:path";
 const root=dirname(fileURLToPath(import.meta.url));
 const files={
   "/":"index.html", "/index.html":"index.html",
+  "/survey/":"survey/index.html", "/survey/index.html":"survey/index.html",
+  "/survey/survey.css":"survey/survey.css", "/survey/survey.mjs":"survey/survey.mjs",
+  "/src/intake-contract.mjs":"src/intake-contract.mjs",
+  "/src/intake-bridge.mjs":"src/intake-bridge.mjs",
   "/src/app.mjs":"src/app.mjs", "/src/roi.mjs":"src/roi.mjs",
   "/src/evidence.mjs":"src/evidence.mjs",
   "/src/csv-import.mjs":"src/csv-import.mjs",
