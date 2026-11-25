@@ -1,4 +1,4 @@
-import {INTAKE_SECTIONS,FIELD_BY_KEY,emptyIntake,validateIntake} from "../src/intake-contract.mjs";
+import {INTAKE_SECTIONS,FIELD_BY_KEY,emptyIntake,validateIntake,normalizeAnswer} from "../src/intake-contract.mjs";
 
 const $=id=>document.getElementById(id);
 let intake=emptyIntake(),step=0,dirty=false;
@@ -137,8 +137,8 @@ function validateSection(){
      throw Error(field.label+": enter a value or choose I don't know");
   }
  }
- // Validate all entered values with the canonical contract.
- validateIntake(intake);
+ // Validate only the visible step. Later incomplete answers must not trap Back/Continue navigation.
+ for(const [key] of section.questions)normalizeAnswer(FIELD_BY_KEY[key],intake.responses[key]);
 }
 $("back").addEventListener("click",()=>{step=Math.max(0,step-1);render();});
 $("next").addEventListener("click",()=>{
