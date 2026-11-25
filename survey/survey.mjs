@@ -85,7 +85,7 @@ function reviewNode(){
    const p=document.createElement("p"),b=document.createElement("b");b.textContent=label+": ";
    const value=document.createElement("span");
    value.textContent=answer.status==="unknown"?"Unknown":
-    String(answer.value)+" "+FIELD_BY_KEY[key].unit+
+    (FIELD_BY_KEY[key].kind==="text"?String(answer.value):String(answer.value)+" "+FIELD_BY_KEY[key].unit)+
       (answer.status==="reference"?" (published reference, not a customer fact)":" (customer-reported)");
    p.append(b,value);card.append(p);
    if(answer.status==="reference"){
