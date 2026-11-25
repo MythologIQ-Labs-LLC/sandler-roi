@@ -492,6 +492,7 @@ try{
  await evaluate('document.getElementById("next").click()');
  assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Prospecting");
  await evaluate('document.getElementById("next").click()');
+ await evaluate('document.querySelector("details.optional-questions").open=true');
  await evaluate('(()=>{const set=(id,value)=>{const el=document.getElementById("intake-"+id);'+
   'const select=el.closest(".field").querySelector("select");select.value="provided";'+
   'select.dispatchEvent(new Event("change",{bubbles:true}));el.value=String(value);'+
