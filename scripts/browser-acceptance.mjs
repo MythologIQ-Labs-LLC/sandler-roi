@@ -499,6 +499,8 @@ try{
   'set("annualProposals",120);set("proposalWinRatePct",25);set("meetingCloseRatePct",20);})()');
  for(let n=0;n<4;n++)await evaluate('document.getElementById("next").click()');
  assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Review your discovery");
+ const surveyShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'standalone-survey-review.png'),Buffer.from(surveyShot.data,'base64'));
  await evaluate('document.getElementById("download-intake").click()');
  const surveyFileName="sales-growth-intake-example-customer.json";
  const surveyExported=await until(async()=> (await readdir(downloadDir)).includes(surveyFileName),
@@ -525,6 +527,10 @@ try{
    'canonical import review dialog');
  assert.equal(intakeDialogReady,true);
  assert.match(await evaluate('document.getElementById("intake-preview").textContent'),/meetingCloseRatePct/);
+ assert.equal(await evaluate('document.getElementById("cost").textContent'),"$79,200",
+  'preview must not replace the prior model before explicit confirmation');
+ const importShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'standalone-survey-import-review.png'),Buffer.from(importShot.data,'base64'));
  await evaluate('(()=>{window.confirm=()=>true;document.getElementById("intake-apply").click()})()');
  const importedReady=await until(async()=>evaluate('document.getElementById("field-prospect")?.value==="Example customer"'),
   'imported survey customer');
@@ -539,6 +545,8 @@ try{
  await evaluate('document.querySelector("[data-edit-baseline=avgDealValue]").click()');
  assert.equal(await evaluate('document.getElementById("tab-performance").getAttribute("aria-selected")'),"true");
  assert.equal(await evaluate('document.activeElement.id'),"field-avgDealValue");
+ await evaluate('(()=>{const f=document.getElementById("field-avgDealValue");f.value="16000";f.dispatchEvent(new Event("input",{bubbles:true}))})()');
+ assert.equal(await evaluate('document.getElementById("baseline-deal").textContent'),"$16,000");
  await evaluate('document.getElementById("export-json").click()');
  const modelFile="sandler-roi-example-customer.json";
  assert.equal(await until(async()=>(await readdir(downloadDir)).includes(modelFile),
@@ -547,6 +555,12 @@ try{
  assert.equal(savedModel.schema,"sandler-roi/3");
  assert.equal(savedModel.intake.responses.meetingCloseRatePct.value,20);
  assert.equal(savedModel.intake.responses.proposalWinRatePct.value,25);
+ assert.equal(savedModel.intake.responses.averageDealValue.value,14000,
+  'source survey remains preserved after the workbench override');
+ assert.equal(savedModel.inputs.avgDealValue,"16000",
+  'John can modify the working baseline after importing the survey');
+ assert.equal(savedModel.evidence.avgDealValue.status,"unconfirmed",
+  'revised baseline must not retain old customer confirmation');
  assert.equal(savedModel.inputs.monthlyFee,"");
  assert.deepEqual(exceptions,[],'Unexpected browser JavaScript exceptions');
  console.log('REAL BROWSER ACCEPTANCE PASS: Chromium rendered geometry, 4 tabs, desktop scroll budget, mobile overflow, Present nav.');
