@@ -27,6 +27,7 @@ h2{font-size:17px;margin:0 0 12px}p{margin:0 0 14px}#step-description{color:#536
 .controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(156px,195px);gap:10px}
 .controls>*{width:100%}.field .hint{margin-top:8px}
 .reference-detail{display:grid;gap:8px;border-radius:9px;background:#f4f8fb;padding:12px;margin-top:10px}
+.reference-detail[hidden]{display:none!important}
 .reference-detail label{font-size:12px;font-weight:650;margin:0}
 .reference-detail input{width:100%}
 .hint{font-size:12px;color:#63748b}
