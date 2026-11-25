@@ -50,3 +50,7 @@ footer{text-align:center;font-size:11px;color:#718098;padding:18px}
 .optional-questions summary{cursor:pointer;color:#26476c;font-weight:720;padding:13px 2px}
 .optional-questions[open] summary{border-bottom:1px solid #e4eaf4;margin-bottom:16px}
 .optional-questions .field{margin:0 0 18px}
+
+.back-link{color:#ddf5ff;font-size:13px;font-weight:720;text-decoration:underline;text-underline-offset:3px}
+.back-link:focus-visible{outline:3px solid #00aded;outline-offset:3px}
+@media(max-width:680px){.masthead{gap:8px}.back-link{order:3}}
