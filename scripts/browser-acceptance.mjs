@@ -484,8 +484,8 @@ try{
  const toolsReady=await until(async()=>evaluate('document.querySelectorAll(".tool").length===2'),
    'tool selector loaded');
  assert.equal(toolsReady,true);
- assert.equal(await evaluate('document.querySelector("a[href=\"../survey/\"]")!==null'),true);
- assert.equal(await evaluate('document.querySelector("a[href=\"../\"]")!==null'),true);
+ assert.equal(await evaluate('Array.from(document.querySelectorAll(".tool a")).some(a=>a.getAttribute("href")==="../survey/")'),true);
+ assert.equal(await evaluate('Array.from(document.querySelectorAll(".tool a")).some(a=>a.getAttribute("href")==="../")'),true);
  // Standalone product: launch a separate survey document and export canonical intake.
  await command('Page.navigate',{url:'http://127.0.0.1:4174/survey/'});
  const surveyLoaded=await until(async()=>evaluate('document.getElementById("step-title")?.textContent==="Business basics"'),
@@ -521,7 +521,7 @@ try{
   '["url","https://example.org/research"],["population","Comparable proposal-stage sales"]]){'+
   'const x=document.getElementById("intake-proposalWinRatePct-"+name);x.value=value;'+
   'x.dispatchEvent(new Event("input",{bubbles:true}));}})()');
- for(let n=0;n<3;n++await evaluate('document.getElementById("next").click()');
+ for(let n=0;n<3;n++)await evaluate('document.getElementById("next").click()');
  assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Sales turnover");
  await evaluate('(()=>{const input=document.getElementById("intake-rampMonths");'+
    'const select=input.closest(".field").querySelector("select");select.value="provided";'+
