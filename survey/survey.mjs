@@ -2,6 +2,14 @@ import {INTAKE_SECTIONS,FIELD_BY_KEY,emptyIntake,validateIntake} from "../src/in
 
 const $=id=>document.getElementById(id);
 let intake=emptyIntake(),step=0,dirty=false;
+const CORE_FIELDS=Object.freeze({
+ basics:["customerName","salespeople","averageDealValue","grossMarginPct"],
+ prospecting:["meetingsPerRepWeek","targetMeetingsPerRepWeek"],
+ closing:["meetingCloseRatePct","targetMeetingCloseRatePct"],
+ discounting:["averageDiscountPct","totalDealsAnnual"],
+ "deal-size":["targetAverageDealValue"],
+ turnover:["salesRepsLostAnnual","replacementCostPerRep","rampMonths"]
+});
 const filename=str=>"sales-growth-intake-"+String(str||"customer").trim().toLowerCase()
   .replace(/[^a-z0-9-]+/g,"-").replace(/^-|-$/g,"").slice(0,55)+".json";
 function status(message=""){$("survey-status").textContent=message;}
@@ -100,7 +108,19 @@ function render(){
  $("survey-review").hidden=!review;
  const list=$("question-list");list.replaceChildren();
  if(review)reviewNode();
- else for(const key of section.questions.map(q=>q[0]))list.append(questionNode(FIELD_BY_KEY[key]));
+ else{
+  const core=new Set(CORE_FIELDS[section.id]||[]);
+  for(const [key] of section.questions)if(core.has(key))list.append(questionNode(FIELD_BY_KEY[key]));
+  const more=section.questions.map(q=>q[0]).filter(key=>!core.has(key));
+  if(more.length){
+   const details=document.createElement("details");details.className="optional-questions";
+   const heading=document.createElement("summary");heading.textContent="Additional details (optional)";
+   details.append(heading);
+   for(const key of more)details.append(questionNode(FIELD_BY_KEY[key]));
+   details.open=more.some(key=>intake.responses[key].status!=="unknown");
+   list.append(details);
+  }
+ }
  $("back").disabled=step===0;
  $("next").hidden=review;
  status();
