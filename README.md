@@ -48,6 +48,19 @@ npm start
 
 The preview server binds to \`127.0.0.1\`. Opening \`index.html\` directly using \`file://\` is not supported because the browser restricts JavaScript modules loaded from local files. The first-use path is **source-inspected** and its user interactions were simulated offline. An actual Chromium/Edge browser acceptance run is still pending.
 
+## Sales Growth Discovery: standalone customer survey
+
+**Two separate experiences, one explicit file handoff:**
+
+- **[Sales Growth Discovery Survey](https://mythologiq-labs-llc.github.io/sandler-roi/survey/)**: a standalone six-step customer intake for business basics, prospecting, closing, discounting, deal size and sales turnover. The client can skip unknown numbers, cite a published reference, and download a portable `sandler-discovery-intake/1` JSON file. It does **not** perform ROI math.
+- **[ROI Workbench](https://mythologiq-labs-llc.github.io/sandler-roi/)**: John chooses **Work & reports → Open discovery intake JSON**, reviews exactly which inputs map, confirms replacing the current work, and can then edit every mapped baseline or modeled assumption. Original discovery answers, including unmapped answers, are retained in the newer `sandler-roi/3` customer backup.
+
+This initially ships as **two independent website entrypoints in the same repository**, not two databases or services. The only shared element needed for the handoff is the pure versioned `src/intake-contract.mjs`. See [standalone survey architecture](docs/design/standalone-discovery-intake.md).
+
+**Benchmark integrity:** Unknowns never block survey completion. No generic industry benchmark is automatically applied yet because the potential figures reviewed do not uniformly match the survey's specific sales-stage denominators or a franchisee's business. A manually supplied published reference requires title, source URL, and population, and remains labeled **published reference, not customer fact** in the workbench. Qualifying and automating industry-specific fallbacks is a separately gated research step.
+
+**Privacy:** The public survey runs in the browser and does not transmit or auto-save answers. The user explicitly downloads a plain JSON file, then separately imports it. The standalone survey is not a secure CRM or customer-submission portal.
+
 ## Saved customer work and development feedback
 
 The **Work & reports** menu separates three tasks:
