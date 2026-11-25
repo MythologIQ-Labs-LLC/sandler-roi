@@ -581,3 +581,6 @@ body[data-stage="present"] .journey{display:block}
 #intake-import-dialog #intake-preview p{margin:6px 0;overflow-wrap:anywhere}
 
 .baseline-point .baseline-source{display:block;color:#64788f;font-size:10px;line-height:1.25;margin-top:5px;overflow-wrap:anywhere}
+
+#present-reference-sources{overflow-wrap:anywhere;white-space:normal;border-top:1px solid var(--hairline);padding-top:8px}
+@media print{#present-reference-sources{display:block!important;font-size:9pt;line-height:1.4}}
