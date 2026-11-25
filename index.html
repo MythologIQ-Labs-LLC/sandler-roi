@@ -139,10 +139,13 @@
   <header class="top">
     <div class="brand"><div class="brand-identity"><img class="brand-wordmark" src="https://go.nextlevel.sandler.com/hs-fs/hubfs/SANDLER-LOGO-R-1C.webp?height=38&amp;name=SANDLER-LOGO-R-1C.webp&amp;width=300" width="230" height="30" alt="Sandler" referrerpolicy="no-referrer"><span class="brand-print-name" aria-hidden="true">SANDLER®</span><span class="brand-divider"></span><span class="brand-product">ROI Workbench</span></div><div class="brand-sub">A guided business-case conversation</div></div>
     <div class="top-actions no-print">
+      <a class="btn btn-dark" href="./survey/" target="_blank" rel="noopener">Customer intake survey</a>
       <button type="button" id="reset" class="btn btn-dark">Reset example</button>
       <button type="button" id="present" class="btn btn-primary" aria-pressed="false">Present case</button>
       <button type="button" id="feedback-toggle" class="btn btn-dark" aria-pressed="false" aria-controls="feedback-panel" hidden>Feedback mode</button>
       <details class="toolbar-menu" id="file-menu"><summary class="btn btn-dark">Work &amp; reports</summary><div class="toolbar-menu-content">
+        <div class="toolbar-group-label">Discovery survey</div>
+        <button type="button" id="import-intake" class="btn">Open discovery intake JSON</button><input id="import-intake-file" type="file" accept=".json,application/json" hidden>
         <div class="toolbar-group-label">Saved customer work</div>
         <button type="button" id="customer-files-open" class="btn">Customer files</button>
         <button type="button" id="import" class="btn">Open JSON backup</button><input type="file" id="import-file" accept=".json,application/json" hidden>
@@ -231,10 +234,10 @@
         <p class="small" id="prospect-title">Illustrative customer figures · verify before relying on them</p>
         <p class="layout-description" id="baseline-description">Review the customer's current numbers and their sources before discussing possible improvements.</p>
         <div class="baseline-grid">
-          <div class="baseline-point"><span>Current proposal win rate</span><strong id="baseline-win">—</strong></div>
-          <div class="baseline-point"><span>Annual proposals</span><strong id="baseline-proposals">—</strong></div>
-          <div class="baseline-point"><span>Average deal value</span><strong id="baseline-deal">—</strong></div>
-          <div class="baseline-point"><span>Current seller ramp</span><strong id="baseline-ramp">—</strong></div>
+          <div class="baseline-point"><span>Current proposal win rate</span><strong id="baseline-win">—</strong><button class="edit-baseline" type="button" data-edit-baseline="baselineWinRatePct">Edit value</button></div>
+          <div class="baseline-point"><span>Annual proposals</span><strong id="baseline-proposals">—</strong><button class="edit-baseline" type="button" data-edit-baseline="annualProposals">Edit value</button></div>
+          <div class="baseline-point"><span>Average deal value</span><strong id="baseline-deal">—</strong><button class="edit-baseline" type="button" data-edit-baseline="avgDealValue">Edit value</button></div>
+          <div class="baseline-point"><span>Current seller ramp</span><strong id="baseline-ramp">—</strong><button class="edit-baseline" type="button" data-edit-baseline="rampMonths">Edit value</button></div>
         </div>
         <div class="baseline-investment">
           <div><div class="eyebrow">Budget discussion</div><h3 id="budget-title">Customer's modeled program investment</h3><p id="cost-basis" class="small">Fee-only estimate</p></div>
@@ -410,6 +413,20 @@
     <p class="section-note">Export your captured notes before leaving or refreshing. Voice clips have a 2-minute and 15 MB limit; the package has a 50 MB limit. Neither feedback nor audio is stored or sent automatically. Review the ZIP before sharing; voice and typed comments may contain information you choose to disclose.</p>
     <p id="feedback-status" role="status" aria-live="polite"></p>
   </aside>
+  <dialog id="intake-import-dialog" class="customer-files-dialog no-print" aria-labelledby="intake-import-heading">
+    <div class="customer-files-heading">
+      <div><div class="eyebrow">Discovery handoff</div><h2 id="intake-import-heading">Review customer intake</h2></div>
+      <button type="button" id="intake-close" class="btn">Close</button>
+    </div>
+    <p class="section-note">You are opening a separate survey file. Confirm the customer's answers and cited references before replacing the current model. Fields without equivalent ROI formulas will remain in the saved customer file.</p>
+    <div id="intake-preview" aria-live="polite"></div>
+    <div class="customer-file-actions">
+      <button type="button" class="btn btn-primary" id="intake-apply">Create workbench model</button>
+      <button type="button" class="btn" id="intake-cancel">Cancel</button>
+    </div>
+    <p class="section-note">This action starts a new customer model. The sample workbench numbers are not copied into it. Existing unsaved work would be replaced.</p>
+    <p id="intake-status" role="status" aria-live="polite"></p>
+  </dialog>
   <dialog id="csv-map-dialog" class="csv-map-dialog" aria-labelledby="csv-map-title" aria-describedby="csv-map-description">
     <div class="csv-modal-head">
       <div>
