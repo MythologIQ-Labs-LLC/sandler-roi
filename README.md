@@ -48,18 +48,22 @@ npm start
 
 The preview server binds to \`127.0.0.1\`. Opening \`index.html\` directly using \`file://\` is not supported because the browser restricts JavaScript modules loaded from local files. The first-use path is **source-inspected** and its user interactions were simulated offline. An actual Chromium/Edge browser acceptance run is still pending.
 
-## Sales Growth Discovery: standalone customer survey
+## Sales Growth Toolkit: select a tool and review customer data
 
-**Two separate experiences, one explicit file handoff:**
+**[Open tool selection](https://mythologiq-labs-llc.github.io/sandler-roi/tools/)** to choose between standalone Sales Growth Discovery and the ROI Workbench. The original Workbench URL remains supported for existing bookmarks. These are separate screens within one static-site deployment, not independent cloud services.
 
-- **[Sales Growth Discovery Survey](https://mythologiq-labs-llc.github.io/sandler-roi/survey/)**: a standalone six-step customer intake for business basics, prospecting, closing, discounting, deal size and sales turnover. The client can skip unknown numbers, cite a published reference, and download a portable `sandler-discovery-intake/1` JSON file. It does **not** perform ROI math.
-- **[ROI Workbench](https://mythologiq-labs-llc.github.io/sandler-roi/)**: John chooses **Work & reports → Open discovery intake JSON**, reviews exactly which inputs map, confirms replacing the current work, and can then edit every mapped baseline or modeled assumption. Original discovery answers, including unmapped answers, are retained in the newer `sandler-roi/3` customer backup.
+**Two separate experiences, with direct or file-based handoff:**
 
-This initially ships as **two independent website entrypoints in the same repository**, not two databases or services. The only shared element needed for the handoff is the pure versioned `src/intake-contract.mjs`. See [standalone survey architecture](docs/design/standalone-discovery-intake.md).
+- **[Sales Growth Discovery Survey](https://mythologiq-labs-llc.github.io/sandler-roi/survey/)**: a standalone six-step customer intake for business basics, prospecting, closing, discounting, deal size and sales turnover. The client can skip unknown numbers and cite a published reference. On the review screen, choose **Open in ROI Workbench** for a one-time, same-browser transfer that opens the Workbench’s import review, or **Download intake JSON for later** to save a portable `sandler-discovery-intake/1` file. It does **not** perform ROI math.
+- **[ROI Workbench](https://mythologiq-labs-llc.github.io/sandler-roi/)**: John can accept the survey’s one-time handoff into the **review dialog**, or choose **Work & reports → Open discovery intake JSON** for a file saved previously. In both cases he reviews exactly which inputs map and must explicitly confirm replacing the current work before anything changes. He can then edit every mapped baseline or modeled assumption. Original discovery answers, including unmapped answers, are retained in the newer `sandler-roi/3` customer backup.
+
+This initially ships as **two independent website entrypoints in the same repository**, not two databases or services. The data shape lives in the pure `src/intake-contract.mjs`; the ephemeral one-time same-origin transfer uses `src/intake-handoff.mjs`, expires after 15 minutes, is consumed once, and never places customer answers in URL parameters. Session storage is a convenience, **not a secure client vault**; save the JSON template for a durable backup. See [standalone survey architecture](docs/design/standalone-discovery-intake.md).
+
+**Present and print:** Published reference inputs are identified in the financial presentation and print summary, including their user-supplied citations. They are never described as actual customer measurements or independently verified evidence.
 
 **Benchmark integrity:** Unknowns never block survey completion. No generic industry benchmark is automatically applied yet because the potential figures reviewed do not uniformly match the survey's specific sales-stage denominators or a franchisee's business. A manually supplied published reference requires title, source URL, and population, and remains labeled **published reference, not customer fact** in the workbench. Qualifying and automating industry-specific fallbacks is a separately gated research step.
 
-**Privacy:** The public survey runs in the browser and does not transmit or auto-save answers. The user explicitly downloads a plain JSON file, then separately imports it. The standalone survey is not a secure CRM or customer-submission portal.
+**Privacy:** The public survey runs in the browser and does not transmit or auto-save answers. The user can explicitly download a plain JSON file or transfer the validated intake within the current browser session. Nothing is silently applied: the Workbench always requires import review and confirmation. The standalone survey is not a secure CRM or customer-submission portal.
 
 ## Saved customer work and development feedback
 
