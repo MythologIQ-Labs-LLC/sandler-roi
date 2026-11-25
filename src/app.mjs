@@ -5,6 +5,8 @@ import {behaviorJourney} from "./story.mjs";
 import {customerCopy} from "./customer-copy.mjs";
 import {initCustomerFiles} from "./customer-files.mjs";
 import {initDevelopmentFeedback} from "./feedback.mjs";
+import {validateIntake} from "./intake-contract.mjs";
+import {buildWorkbenchFromIntake} from "./intake-bridge.mjs";
 
 const clone = object => JSON.parse(JSON.stringify(object));
 let inputs=clone(DEFAULT_INPUTS);
@@ -12,6 +14,7 @@ let evidence=defaultEvidence(inputs);
 let scenarios=clone(SCENARIOS);
 let active=clone(DEFAULT_ACTIVE);
 let selected="expected";
+let intakeRecord=null, pendingIntake=null;
 let currentStep="discover", priorStep="compare", presentationSeen=false;
 let discoveryPanel="engagement";
 let pendingCSV=null, csvMapping={};
@@ -533,7 +536,7 @@ function drawCSVMapping(){
 
 function snapshot(){
   const result=calculate(inputs,scenarios[selected],active);
-  return {schema:"sandler-roi/2",savedAt:new Date().toISOString(),selected,inputs,scenarios,active,evidence,calculated:result};
+  return {schema:"sandler-roi/3",savedAt:new Date().toISOString(),selected,inputs,scenarios,active,evidence,intake:intakeRecord,calculated:result};
 }
 function download(filename,content,type){
   const blob=new Blob([content],{type}),url=URL.createObjectURL(blob);
@@ -605,7 +608,7 @@ $("present").addEventListener("click",()=>setStep(currentStep==="present"?priorS
 $("print").addEventListener("click",()=>{setStep("present");window.print();});
 $("reset").addEventListener("click",()=>{
   if(!window.confirm("Replace all current inputs and assumptions with the illustrative example?"))return;
-  inputs=clone(DEFAULT_INPUTS);evidence=defaultEvidence(inputs);scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
+  inputs=clone(DEFAULT_INPUTS);evidence=defaultEvidence(inputs);intakeRecord=null;scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
   presentationSeen=false;
   priorStep="compare";
   renderFields();
@@ -626,6 +629,7 @@ $("csv-apply").addEventListener("click",()=>{
   if(!preview)return;
   const imported=buildCSVImport(preview);
   inputs=imported.inputs;
+  intakeRecord=null;
   evidence=normalizeEvidence(imported.evidence,inputs);
   scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
   closeCSVDialog();
@@ -645,7 +649,7 @@ $("import-csv-file").addEventListener("change",async event=>{
 });
 
 function loadSavedCustomer(data){
-  if(!data||!["sandler-roi/1","sandler-roi/2"].includes(data.schema)||
+  if(!data||!["sandler-roi/1","sandler-roi/2","sandler-roi/3"].includes(data.schema)||
       !data.inputs||typeof data.inputs!=="object"||Array.isArray(data.inputs)||
       !data.scenarios||typeof data.scenarios!=="object"||Array.isArray(data.scenarios)||
       !data.active||typeof data.active!=="object"||Array.isArray(data.active))
@@ -662,12 +666,13 @@ function loadSavedCustomer(data){
         cleanScenarios[key][field]=data.scenarios[key][field];
   }
   if(data.schema==="sandler-roi/1")cleanInputs.costMode="fees";
-  const cleanEvidence=data.schema==="sandler-roi/2"?
+  const cleanEvidence=data.schema!=="sandler-roi/1"?
     normalizeEvidence(data.evidence,cleanInputs):defaultEvidence(cleanInputs);
   const cleanActive=Object.fromEntries(
     Object.keys(DEFAULT_ACTIVE).map(key=>[key,data.active[key]===false?false:true]));
   const cleanSelected=Object.prototype.hasOwnProperty.call(SCENARIOS,data.selected)?data.selected:"expected";
-  inputs=cleanInputs;scenarios=cleanScenarios;evidence=cleanEvidence;
+  const restoredIntake=data.schema==="sandler-roi/3"&&data.intake?validateIntake(data.intake):null;
+  inputs=cleanInputs;scenarios=cleanScenarios;evidence=cleanEvidence;intakeRecord=restoredIntake;
   active=cleanActive;selected=cleanSelected;
   // Start at the customer's baseline, not a previous customer's financial reveal.
   presentationSeen=false;priorStep="compare";
@@ -680,6 +685,68 @@ $("import-file").addEventListener("change",async event=>{
   try{loadSavedCustomer(JSON.parse(await file.text()));}
   catch(err){window.alert("Could not open customer file: "+err.message);}
 });
+/* Canonical intake is a separate product and only imports by explicit local file handoff. */
+function closeIntakeDialog(){
+ const dialog=$("intake-import-dialog");
+ if(typeof dialog.close==="function")dialog.close();
+ else dialog.removeAttribute("open");
+}
+$("import-intake").addEventListener("click",()=>{$("import-intake-file").click();});
+$("intake-close").addEventListener("click",closeIntakeDialog);
+$("intake-cancel").addEventListener("click",closeIntakeDialog);
+$("import-intake-file").addEventListener("change",async event=>{
+ const file=event.target.files?.[0];event.target.value="";if(!file)return;
+ if(file.size>500_000){window.alert("Discovery intake exceeds 500 KB.");return;}
+ try{
+  pendingIntake=validateIntake(JSON.parse(await file.text()));
+  const plan=buildWorkbenchFromIntake(pendingIntake);
+  const area=$("intake-preview");area.replaceChildren();
+  const summary=document.createElement("p");summary.className="small";
+  summary.textContent=plan.mapped.length+" fields ready to map, "+plan.unmapped.length+
+    " discovery-only answers, "+plan.unknown.length+" unanswered. New model investment and other missing inputs remain blank.";
+  area.append(summary);
+  for(const entry of plan.mapped){
+   const line=document.createElement("p");line.className="section-note";
+   const meta=entry.status==="reference"?"Published reference, not customer data":"Customer-reported";
+   line.textContent=entry.key+" → "+entry.target+": "+entry.value+" ("+meta+")"+
+     (entry.status==="reference"?" · "+entry.source.title+" · "+entry.source.url:"");
+   area.append(line);
+  }
+  const list=document.createElement("p");list.className="section-note";
+  list.textContent="Unmapped answers (preserved, not added to ROI): "+
+    (plan.unmapped.map(x=>x.key).join(", ")||"none");
+  area.append(list);
+  $("intake-status").textContent="Review the proposed mapping and confirm before applying.";
+  const dialog=$("intake-import-dialog");
+  if(typeof dialog.showModal==="function")dialog.showModal();
+  else dialog.setAttribute("open","");
+ }catch(err){pendingIntake=null;window.alert("Invalid discovery intake: "+err.message);}
+});
+$("intake-apply").addEventListener("click",()=>{
+ if(!pendingIntake)return;
+ if(!window.confirm("Create a new customer model from this intake? Current unsaved work will be replaced."))return;
+ try{
+  const plan=buildWorkbenchFromIntake(pendingIntake);
+  inputs=plan.inputs;evidence=normalizeEvidence(plan.evidence,inputs);
+  intakeRecord=plan.intake;
+  scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
+  presentationSeen=false;priorStep="compare";pendingIntake=null;
+  renderFields();renderAssumptions();setDiscoverPanel("engagement");setStep("discover");
+  closeIntakeDialog();
+  const note=$("intake-status");
+  note.textContent="Intake applied. Review published references and complete missing values before presenting ROI.";
+ }catch(err){$("intake-status").textContent="Could not apply intake: "+err.message;}
+});
+document.querySelectorAll("[data-edit-baseline]").forEach(button=>button.addEventListener("click",()=>{
+ const key=button.dataset.editBaseline;
+ setStep("discover");setDiscoverPanel("performance");
+ const field=$("field-"+key);
+ if(!field)return;
+ const details=field.closest("details");
+ if(details)details.open=true;
+ field.focus();
+ field.scrollIntoView?.({block:"center",behavior:"smooth"});
+}));
 initCustomerFiles({
   makeSnapshot:snapshot,
   loadSnapshot:loadSavedCustomer,
