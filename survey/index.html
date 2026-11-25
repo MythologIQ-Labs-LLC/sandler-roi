@@ -12,7 +12,7 @@
 <a class="skip-link" href="#survey-content">Skip to survey</a>
 <header class="masthead">
  <div><div class="eyebrow">SALES GROWTH DISCOVERY</div><strong class="wordmark">Customer intake</strong></div>
- <span class="local-note">Private to this browser session · No automatic upload</span>
+ <a class="back-link" href="../tools/">All tools</a><span class="local-note">Private to this browser session · No automatic upload</span>
 </header>
 <main class="layout" id="survey-content">
  <section class="intro">
@@ -26,12 +26,13 @@
   <div id="survey-review" hidden>
    <p class="eyebrow">REVIEW &amp; EXPORT</p>
    <h2>Your discovery summary</h2>
-   <p>Check the responses before handing the file to your representative. The financial calculations happen separately in the ROI Workbench.</p>
+   <p>Review your answers. Choose <strong>Open in ROI Workbench</strong> to transfer them securely within this browser for an import review, or download the reusable JSON template to open later.</p>
    <div id="review-contents"></div>
    <label for="survey-notes">Additional observations (optional)</label>
    <textarea id="survey-notes" rows="3" maxlength="2000" placeholder="Context, questions, priorities, or information to confirm later"></textarea>
    <div class="export-bar">
-    <button id="download-intake" type="button" class="primary">Download discovery file (.json)</button>
+    <button id="open-in-workbench" type="button" class="primary">Open in ROI Workbench</button>
+    <button id="download-intake" type="button">Download intake JSON for later</button>
     <span class="hint">Keep this file secure. It may contain confidential business information.</span>
    </div>
   </div>
@@ -50,7 +51,7 @@
   <div class="aside-divider"></div>
   <button type="button" id="open-existing">Open an existing discovery file</button>
   <input type="file" id="intake-file" accept=".json,application/json" hidden>
-  <p class="hint">To model outcomes, download your intake file, then import it into the ROI Workbench. Data is transferred by file, not automatically.</p>
+  <p class="hint">Open directly from the review screen or download a versioned JSON intake file and import it later. The Workbench always asks you to confirm before replacing customer work.</p>
  </aside>
 </main>
 <footer>Sales Growth Discovery · Standalone customer intake · No automatic saving or submission</footer>
