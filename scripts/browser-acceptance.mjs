@@ -486,6 +486,13 @@ try{
  assert.equal(toolsReady,true);
  assert.equal(await evaluate('Array.from(document.querySelectorAll(".tool a")).some(a=>a.getAttribute("href")==="../survey/")'),true);
  assert.equal(await evaluate('Array.from(document.querySelectorAll(".tool a")).some(a=>a.getAttribute("href")==="../")'),true);
+ const toolsScreenshot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+ await writeFile(join(output,'tool-selector-desktop.png'),Buffer.from(toolsScreenshot.data,'base64'));
+ await command('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+ const toolMetrics=await evaluate('(()=>({width:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,columns:getComputedStyle(document.querySelector(".choices")).gridTemplateColumns}))()');
+ assert.ok(toolMetrics.scrollWidth<=toolMetrics.width+2,
+   'tool selector must not scroll horizontally on mobile: '+JSON.stringify(toolMetrics));
+ await command('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
  // Standalone product: launch a separate survey document and export canonical intake.
  await command('Page.navigate',{url:'http://127.0.0.1:4174/survey/'});
  const surveyLoaded=await until(async()=>evaluate('document.getElementById("step-title")?.textContent==="Business basics"'),
@@ -537,6 +544,7 @@ try{
    'select.dispatchEvent(new Event("change",{bubbles:true}));})()');
  await evaluate('document.getElementById("next").click()');
  assert.equal(await evaluate('document.getElementById("step-title").textContent'),"Review your discovery");
+ await sleep(260); // Let progress-bar animation settle before visual inspection.
  const surveyShot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
  await writeFile(join(output,'standalone-survey-review.png'),Buffer.from(surveyShot.data,'base64'));
  await evaluate('document.getElementById("download-intake").click()');
