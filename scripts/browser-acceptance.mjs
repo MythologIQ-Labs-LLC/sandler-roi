@@ -525,8 +525,8 @@ try{
   'const row=input.closest(".field");const sel=row.querySelector("select");'+
   'sel.value="reference";sel.dispatchEvent(new Event("change",{bubbles:true}));'+
   'for(const [name,value] of [["title","Example published research"],'+
-  '["url","https://example.org/research"],"+
-   '["population","Comparable proposal-stage sales "+"P".repeat(170)],"+
+   '["url","https://example.org/research"],'+
+   '["population","Comparable proposal-stage sales "+"P".repeat(170)],'+
    '["notes","Applicable only to comparable proposals "+"N".repeat(350)+" END-OF-APPLICABILITY"]]){'+
   'const x=document.getElementById("intake-proposalWinRatePct-"+name);x.value=value;'+
   'x.dispatchEvent(new Event("input",{bubbles:true}));}})()');
