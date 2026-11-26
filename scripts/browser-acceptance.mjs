@@ -525,7 +525,9 @@ try{
   'const row=input.closest(".field");const sel=row.querySelector("select");'+
   'sel.value="reference";sel.dispatchEvent(new Event("change",{bubbles:true}));'+
   'for(const [name,value] of [["title","Example published research"],'+
-  '["url","https://example.org/research"],["population","Comparable proposal-stage sales"]]){'+
+  '["url","https://example.org/research"],"+
+   '["population","Comparable proposal-stage sales "+"P".repeat(170)],"+
+   '["notes","Applicable only to comparable proposals "+"N".repeat(350)+" END-OF-APPLICABILITY"]]){'+
   'const x=document.getElementById("intake-proposalWinRatePct-"+name);x.value=value;'+
   'x.dispatchEvent(new Event("input",{bubbles:true}));}})()');
  for(let n=0;n<3;n++)await evaluate('document.getElementById("next").click()');
@@ -583,6 +585,10 @@ try{
  assert.match(await evaluate('document.getElementById("present-evidence").textContent'),/published references/);
  assert.match(await evaluate('document.getElementById("present-reference-sources").textContent'),/https:\/\/example\.org\/research/);
  assert.match(await evaluate('document.getElementById("present-reference-sources").textContent'),/not measured customer outcomes/);
+ assert.match(await evaluate('document.getElementById("present-reference-sources").textContent'),/END-OF-APPLICABILITY/,
+   'full published reference applicability must remain visible in Present and printed output');
+ assert.ok(await evaluate('Array.from(document.querySelectorAll("#evidence-register input")).some(el=>el.maxLength===2048)'),
+   'Workbench source editor must retain complete published citation length');
  // Saved-file fallback is independent of session handoff.
  await command('Page.navigate',{url:'http://127.0.0.1:4174/'});
  const workbenchReady=await until(async()=>evaluate('!!document.getElementById("import-intake-file")&&!!document.getElementById("field-prospect")'),
