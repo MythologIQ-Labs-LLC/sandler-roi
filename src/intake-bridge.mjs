@@ -2,7 +2,7 @@
  * Maps only semantically identical metrics. No inferred formulas or demo values.
  */
 import {DEFAULT_INPUTS} from "./roi.mjs";
-import {BASELINE_FIELDS} from "./evidence.mjs";
+import {BASELINE_FIELDS,MAX_EVIDENCE_SOURCE_LENGTH} from "./evidence.mjs";
 import {previewWorkbenchImport} from "./intake-contract.mjs";
 
 export function buildWorkbenchFromIntake(candidate){
@@ -17,7 +17,7 @@ export function buildWorkbenchFromIntake(candidate){
    const source=item.source;
    evidence[item.target]=item.status==="reference"?
      {status:"external-reference",source:[source.title,source.date,source.url,
-       "Population: "+source.population].filter(Boolean).join(" · ").slice(0,500)}:
+       "Population: "+source.population,source.notes?"Applicability: "+source.notes:""].filter(Boolean).join(" · ").slice(0,MAX_EVIDENCE_SOURCE_LENGTH)}:
      {status:"prospect-reported",source:"Customer-reported through standalone intake; not independently verified"};
   }
  }
