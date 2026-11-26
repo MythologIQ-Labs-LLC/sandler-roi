@@ -1,10 +1,13 @@
 import { DEFAULT_INPUTS, SCENARIOS, DEFAULT_ACTIVE, calculate, calculatePipelineBridge, parseValue, MONEY, PERCENT } from "./roi.mjs";
-import { BASELINE_FIELDS, EVIDENCE_STATUSES, defaultEvidence, normalizeEvidence, requiredEvidenceKeys, assessEvidence } from "./evidence.mjs";
+import { BASELINE_FIELDS, EVIDENCE_STATUSES, MAX_EVIDENCE_SOURCE_LENGTH, defaultEvidence, normalizeEvidence, requiredEvidenceKeys, assessEvidence } from "./evidence.mjs";
 import { CSV_FIELDS, CSV_LABELS, CSV_TEMPLATE_HEADERS, prepareCSV, suggestMapping, mappedCSVPreview, buildCSVImport } from "./csv-import.mjs";
 import {behaviorJourney} from "./story.mjs";
 import {customerCopy} from "./customer-copy.mjs";
 import {initCustomerFiles} from "./customer-files.mjs";
 import {initDevelopmentFeedback} from "./feedback.mjs";
+import {validateIntake} from "./intake-contract.mjs";
+import {buildWorkbenchFromIntake} from "./intake-bridge.mjs";
+import {consumeIntakeHandoff} from "./intake-handoff.mjs";
 
 const clone = object => JSON.parse(JSON.stringify(object));
 let inputs=clone(DEFAULT_INPUTS);
@@ -12,6 +15,7 @@ let evidence=defaultEvidence(inputs);
 let scenarios=clone(SCENARIOS);
 let active=clone(DEFAULT_ACTIVE);
 let selected="expected";
+let intakeRecord=null, pendingIntake=null;
 let currentStep="discover", priorStep="compare", presentationSeen=false;
 let discoveryPanel="engagement";
 let pendingCSV=null, csvMapping={};
@@ -178,7 +182,7 @@ function renderEvidenceEditor(){
     }
     select.value=record.status;
     const source=document.createElement("input");
-    source.type="text";source.maxLength=500;source.value=record.source||"";
+    source.type="text";source.maxLength=MAX_EVIDENCE_SOURCE_LENGTH;source.value=record.source||"";
     source.placeholder="Source reference, date or owner (if any)";
     source.setAttribute("aria-label","Source reference: "+label.textContent);
     select.addEventListener("change",()=>{evidence[key]={...evidence[key],status:select.value};render();});
@@ -331,7 +335,11 @@ function render(){
   put("review-title","Review "+customer.possessive+" figures and assumptions");
   put("review-description","Confirm the current figures, proposed improvements and investment with the customer before reviewing modeled financial results.");
   put("reveal-heading","Where "+customer.subject+" stands. What could change.");
-  put("reveal-description","Current values are customer-entered; possible future results are modeled hypotheses, not achieved outcomes.");
+  const requiredReferenceKeys=requiredEvidenceKeys(inputs,active).filter(key=>evidence[key]?.status==="external-reference");
+  const referenceCount=requiredReferenceKeys.length;
+  put("reveal-description",referenceCount
+    ? "Some baselines use published references, not this customer's measured results. Modeled future outcomes are hypotheses, not achieved results."
+    : "Current values are customer-entered or explicitly illustrative; possible future results are modeled hypotheses, not achieved outcomes.");
   put("scenario-owner-heading",customer.leadPossessive+" modeled financial outcomes");
   put("present-driver-heading","What could create value for "+customer.subject+"?");
   put("pitch-title",customer.leadPossessive+" potential business case");
@@ -341,6 +349,21 @@ function render(){
   put("baseline-proposals",baselineText("annualProposals",v=>new Intl.NumberFormat("en-US").format(v)));
   put("baseline-deal",baselineText("avgDealValue",MONEY));
   put("baseline-ramp",baselineText("rampMonths",v=>v.toFixed(1)+" months"));
+  const provenanceLabel=key=>{
+    const record=evidence[key]||{};
+    switch(record.status){
+      case "external-reference":return "Published reference · inspect source in Evidence";
+      case "prospect-reported":return "Customer-reported · not independently verified";
+      case "finance-reviewed":return "Finance-reviewed (user-declared)";
+      case "document-cited":return "Document cited (user-declared)";
+      case "illustrative":return "Illustrative example";
+      default:return "Unconfirmed";
+    }
+  };
+  put("baseline-source-win",provenanceLabel("baselineWinRatePct"));
+  put("baseline-source-proposals",provenanceLabel("annualProposals"));
+  put("baseline-source-deal",provenanceLabel("avgDealValue"));
+  put("baseline-source-ramp",provenanceLabel("rampMonths"));
   put("print-scenario",scenario.label);
   put("roi",result.complete?(result.roi===null?"N/A":PERCENT(result.roi)):"Incomplete");
   put("net",result.complete?MONEY(result.net):"Incomplete");
@@ -354,13 +377,19 @@ function render(){
   put("cost-extras",result.costMode==="fees"?"Other training costs are excluded.":
     "Fees: "+MONEY(result.costBreakdown.feeCost)+" + other modeled costs: "+MONEY(result.costBreakdown.additionalCost)+".");
   const proof=assessEvidence(inputs,evidence,active);
+  const publishedReferenceCount=Object.values(evidence).filter(record=>record.status==="external-reference").length;
   put("evidence-summary",proof.requiredCount+" required inputs: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
     " unconfirmed, "+proof.missingSources.length+" citations missing a reference. Not independently verified.");
-  put("baseline-confidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+" unconfirmed. Review with the customer.");
+  put("baseline-confidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+" unconfirmed, "+publishedReferenceCount+" published references (not customer facts). Review with the customer.");
   put("compare-evidence","Source status: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
-    " unconfirmed, "+proof.missingSources.length+" missing references. Status is user-declared.");
+    " unconfirmed, "+proof.missingSources.length+" missing references, "+publishedReferenceCount+" published references (not customer facts). Status is user-declared.");
   put("present-evidence","Input confidence: "+proof.illustrative.length+" illustrative, "+proof.unconfirmed.length+
-    " unconfirmed, "+proof.missingSources.length+" citations without a source reference. None independently verified.");
+    " unconfirmed, "+proof.missingSources.length+" citations without a source reference, "+referenceCount+
+    " published references (not customer facts). None independently verified.");
+  put("present-reference-sources",referenceCount
+    ? "Published references used in this scenario (not measured customer outcomes): "+requiredReferenceKeys.map(key=>
+        (BASELINE_FIELDS[key]||key)+" — "+(evidence[key].source||"Source not supplied")).join(" | ")
+    : "");
   const warning=$("warnings");
   if(result.problems.length){
     warning.classList.add("visible");
@@ -533,7 +562,7 @@ function drawCSVMapping(){
 
 function snapshot(){
   const result=calculate(inputs,scenarios[selected],active);
-  return {schema:"sandler-roi/2",savedAt:new Date().toISOString(),selected,inputs,scenarios,active,evidence,calculated:result};
+  return {schema:"sandler-roi/3",savedAt:new Date().toISOString(),selected,inputs,scenarios,active,evidence,intake:intakeRecord,calculated:result};
 }
 function download(filename,content,type){
   const blob=new Blob([content],{type}),url=URL.createObjectURL(blob);
@@ -605,7 +634,7 @@ $("present").addEventListener("click",()=>setStep(currentStep==="present"?priorS
 $("print").addEventListener("click",()=>{setStep("present");window.print();});
 $("reset").addEventListener("click",()=>{
   if(!window.confirm("Replace all current inputs and assumptions with the illustrative example?"))return;
-  inputs=clone(DEFAULT_INPUTS);evidence=defaultEvidence(inputs);scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
+  inputs=clone(DEFAULT_INPUTS);evidence=defaultEvidence(inputs);intakeRecord=null;scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
   presentationSeen=false;
   priorStep="compare";
   renderFields();
@@ -626,6 +655,7 @@ $("csv-apply").addEventListener("click",()=>{
   if(!preview)return;
   const imported=buildCSVImport(preview);
   inputs=imported.inputs;
+  intakeRecord=null;
   evidence=normalizeEvidence(imported.evidence,inputs);
   scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
   closeCSVDialog();
@@ -645,7 +675,7 @@ $("import-csv-file").addEventListener("change",async event=>{
 });
 
 function loadSavedCustomer(data){
-  if(!data||!["sandler-roi/1","sandler-roi/2"].includes(data.schema)||
+  if(!data||!["sandler-roi/1","sandler-roi/2","sandler-roi/3"].includes(data.schema)||
       !data.inputs||typeof data.inputs!=="object"||Array.isArray(data.inputs)||
       !data.scenarios||typeof data.scenarios!=="object"||Array.isArray(data.scenarios)||
       !data.active||typeof data.active!=="object"||Array.isArray(data.active))
@@ -662,12 +692,13 @@ function loadSavedCustomer(data){
         cleanScenarios[key][field]=data.scenarios[key][field];
   }
   if(data.schema==="sandler-roi/1")cleanInputs.costMode="fees";
-  const cleanEvidence=data.schema==="sandler-roi/2"?
+  const cleanEvidence=data.schema!=="sandler-roi/1"?
     normalizeEvidence(data.evidence,cleanInputs):defaultEvidence(cleanInputs);
   const cleanActive=Object.fromEntries(
     Object.keys(DEFAULT_ACTIVE).map(key=>[key,data.active[key]===false?false:true]));
   const cleanSelected=Object.prototype.hasOwnProperty.call(SCENARIOS,data.selected)?data.selected:"expected";
-  inputs=cleanInputs;scenarios=cleanScenarios;evidence=cleanEvidence;
+  const restoredIntake=data.schema==="sandler-roi/3"&&data.intake?validateIntake(data.intake):null;
+  inputs=cleanInputs;scenarios=cleanScenarios;evidence=cleanEvidence;intakeRecord=restoredIntake;
   active=cleanActive;selected=cleanSelected;
   // Start at the customer's baseline, not a previous customer's financial reveal.
   presentationSeen=false;priorStep="compare";
@@ -680,6 +711,87 @@ $("import-file").addEventListener("change",async event=>{
   try{loadSavedCustomer(JSON.parse(await file.text()));}
   catch(err){window.alert("Could not open customer file: "+err.message);}
 });
+/* Canonical intake is a separate product and only imports by explicit local file handoff. */
+function closeIntakeDialog(){
+ const dialog=$("intake-import-dialog");
+ if(typeof dialog.close==="function")dialog.close();
+ else dialog.removeAttribute("open");
+}
+$("import-intake").addEventListener("click",()=>{$("import-intake-file").click();});
+$("intake-close").addEventListener("click",closeIntakeDialog);
+$("intake-cancel").addEventListener("click",closeIntakeDialog);
+function openIntakePreview(candidate){
+ try{
+  pendingIntake=validateIntake(candidate);
+  const plan=buildWorkbenchFromIntake(pendingIntake);
+  const area=$("intake-preview");area.replaceChildren();
+  const summary=document.createElement("p");summary.className="small";
+  summary.textContent=plan.mapped.length+" fields ready to map, "+plan.unmapped.length+
+    " discovery-only answers, "+plan.unknown.length+" unanswered. New model investment and other missing inputs remain blank.";
+  area.append(summary);
+  for(const entry of plan.mapped){
+   const line=document.createElement("p");line.className="section-note";
+   const meta=entry.status==="reference"?"Published reference, not customer data":"Customer-reported";
+   line.textContent=entry.key+" → "+entry.target+": "+entry.value+" ("+meta+")"+
+     (entry.status==="reference"?" · "+entry.source.title+" · "+entry.source.url:"");
+   area.append(line);
+  }
+  const list=document.createElement("p");list.className="section-note";
+  list.textContent="Unmapped answers (preserved, not added to ROI): "+
+    (plan.unmapped.map(x=>x.key).join(", ")||"none");
+  area.append(list);
+  $("intake-status").textContent="Review the proposed mapping and confirm before applying.";
+  const dialog=$("intake-import-dialog");
+  if(typeof dialog.showModal==="function")dialog.showModal();
+  else dialog.setAttribute("open","");
+ }catch(err){pendingIntake=null;window.alert("Invalid discovery intake: "+err.message);}
+}
+$("import-intake-file").addEventListener("change",async event=>{
+ const file=event.target.files?.[0];event.target.value="";if(!file)return;
+ if(file.size>500_000){window.alert("Discovery intake exceeds 500 KB.");return;}
+ try{openIntakePreview(JSON.parse(await file.text()));}
+ catch(err){pendingIntake=null;window.alert("Could not open discovery intake: "+err.message);}
+});
+// Explicit one-time handoff is only read from the same-origin browser session.
+// Unlike JSON file selection, this opens the review dialog automatically, never applies values.
+if(new URLSearchParams(window.location?.search||"").get("intakeHandoff")==="1"){
+ try{openIntakePreview(consumeIntakeHandoff(window.sessionStorage));}
+ catch(err){window.alert("Survey transfer unavailable: "+err.message);}
+ finally{
+  // Remove the launch marker so refresh never replays an expired transfer.
+  if(window.history?.replaceState&&window.location?.href){
+   const url=new URL(window.location.href);
+   url.searchParams.delete("intakeHandoff");
+   window.history.replaceState(null,"",url.pathname+url.search+url.hash);
+  }
+ }
+}
+
+$("intake-apply").addEventListener("click",()=>{
+ if(!pendingIntake)return;
+ if(!window.confirm("Create a new customer model from this intake? Current unsaved work will be replaced."))return;
+ try{
+  const plan=buildWorkbenchFromIntake(pendingIntake);
+  inputs=plan.inputs;evidence=normalizeEvidence(plan.evidence,inputs);
+  intakeRecord=plan.intake;
+  scenarios=clone(SCENARIOS);active=clone(DEFAULT_ACTIVE);selected="expected";
+  presentationSeen=false;priorStep="compare";pendingIntake=null;
+  renderFields();renderAssumptions();setDiscoverPanel("engagement");setStep("discover");
+  closeIntakeDialog();
+  const note=$("intake-status");
+  note.textContent="Intake applied. Review published references and complete missing values before presenting ROI.";
+ }catch(err){$("intake-status").textContent="Could not apply intake: "+err.message;}
+});
+document.querySelectorAll("[data-edit-baseline]").forEach(button=>button.addEventListener("click",()=>{
+ const key=button.dataset.editBaseline;
+ setStep("discover");setDiscoverPanel("performance");
+ const field=$("field-"+key);
+ if(!field)return;
+ const details=field.closest("details");
+ if(details)details.open=true;
+ field.focus();
+ field.scrollIntoView?.({block:"center",behavior:"smooth"});
+}));
 initCustomerFiles({
   makeSnapshot:snapshot,
   loadSnapshot:loadSavedCustomer,

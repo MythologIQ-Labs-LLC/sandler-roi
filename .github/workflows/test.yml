@@ -4,6 +4,7 @@ on:
     paths:
       - 'index.html'
       - 'src/**'
+      - 'survey/**'
       - 'tests/**'
       - 'package.json'
       - 'server.mjs'
@@ -60,4 +61,14 @@ jobs:
           curl -fsS http://127.0.0.1:4173/src/feedback.mjs -o /dev/null
           curl -fsS http://127.0.0.1:4173/src/feedback-archive.mjs -o /dev/null
           curl -fsS http://127.0.0.1:4173/src/workbench.css -o /dev/null
+          curl -fsS http://127.0.0.1:4173/tools/ -o /tmp/sandler-tools.html
+          grep -q 'Choose your tool' /tmp/sandler-tools.html
+          curl -fsS http://127.0.0.1:4173/tools/tools.css -o /dev/null
+          curl -fsS http://127.0.0.1:4173/src/intake-handoff.mjs -o /dev/null
+          curl -fsS http://127.0.0.1:4173/survey/ -o /tmp/sandler-discovery.html
+          grep -q 'Customer intake' /tmp/sandler-discovery.html
+          curl -fsS http://127.0.0.1:4173/survey/survey.mjs -o /dev/null
+          curl -fsS http://127.0.0.1:4173/survey/survey.css -o /dev/null
+          curl -fsS http://127.0.0.1:4173/src/intake-contract.mjs -o /dev/null
+          curl -fsS http://127.0.0.1:4173/src/intake-bridge.mjs -o /dev/null
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4173/secrets)" = 404

@@ -27,7 +27,7 @@ export function initCustomerFiles({makeSnapshot,loadSnapshot,downloadBackup}){
     const file=await fileHandle.getFile();
     if(file.size>2_000_000)throw Error("Customer file is larger than the 2 MB limit");
     const value=JSON.parse(await file.text());
-    if(!["sandler-roi/1","sandler-roi/2"].includes(value?.schema))
+    if(!["sandler-roi/1","sandler-roi/2","sandler-roi/3"].includes(value?.schema))
       throw Error("Unsupported customer file format");
     return value;
   }

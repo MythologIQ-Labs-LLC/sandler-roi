@@ -137,7 +137,7 @@ test("representative UI integration: cost scope, sourcing, export and legacy imp
     await t.test("JSON v2 exports cost mode and user-declared evidence",async()=>{
       await elements.get("export-json").trigger("click");
       const model=JSON.parse(await downloads.at(-1).blob.text());
-      assert.equal(model.schema,"sandler-roi/2");
+      assert.equal(model.schema,"sandler-roi/3");
       assert.equal(model.inputs.costMode,"expanded");
       assert.equal(model.evidence.monthlyFee.status,"finance-reviewed");
     });
