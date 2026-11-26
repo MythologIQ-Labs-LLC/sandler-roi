@@ -1,5 +1,5 @@
 import { DEFAULT_INPUTS, SCENARIOS, DEFAULT_ACTIVE, calculate, calculatePipelineBridge, parseValue, MONEY, PERCENT } from "./roi.mjs";
-import { BASELINE_FIELDS, EVIDENCE_STATUSES, defaultEvidence, normalizeEvidence, requiredEvidenceKeys, assessEvidence } from "./evidence.mjs";
+import { BASELINE_FIELDS, EVIDENCE_STATUSES, MAX_EVIDENCE_SOURCE_LENGTH, defaultEvidence, normalizeEvidence, requiredEvidenceKeys, assessEvidence } from "./evidence.mjs";
 import { CSV_FIELDS, CSV_LABELS, CSV_TEMPLATE_HEADERS, prepareCSV, suggestMapping, mappedCSVPreview, buildCSVImport } from "./csv-import.mjs";
 import {behaviorJourney} from "./story.mjs";
 import {customerCopy} from "./customer-copy.mjs";
@@ -182,7 +182,7 @@ function renderEvidenceEditor(){
     }
     select.value=record.status;
     const source=document.createElement("input");
-    source.type="text";source.maxLength=500;source.value=record.source||"";
+    source.type="text";source.maxLength=MAX_EVIDENCE_SOURCE_LENGTH;source.value=record.source||"";
     source.placeholder="Source reference, date or owner (if any)";
     source.setAttribute("aria-label","Source reference: "+label.textContent);
     select.addEventListener("change",()=>{evidence[key]={...evidence[key],status:select.value};render();});
