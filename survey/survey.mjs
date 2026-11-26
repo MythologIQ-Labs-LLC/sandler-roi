@@ -47,7 +47,7 @@ function questionNode(field){
   const sub=document.createElement("label");sub.textContent=title;
   const fieldInput=fieldElement("text",field.key+"-"+key,answer.source[key]||"");
   fieldInput.placeholder=title;
-  fieldInput.maxLength=key==="notes"?500:250;
+  fieldInput.maxLength=key==="notes"||key==="url"?500:250;
   fieldInput.addEventListener("input",()=>{
    editAnswer(field.key,{source:{...intake.responses[field.key].source,[key]:fieldInput.value}});
   });
