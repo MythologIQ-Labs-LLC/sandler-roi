@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {emptyIntake,validateIntake,previewWorkbenchImport,INTAKE_SCHEMA,INTAKE_SECTIONS} from "../src/intake-contract.mjs";
 import {buildWorkbenchFromIntake} from "../src/intake-bridge.mjs";
 import {calculate,SCENARIOS} from "../src/roi.mjs";
+import {normalizeEvidence,MAX_EVIDENCE_SOURCE_LENGTH} from "../src/evidence.mjs";
 
 function provided(intake,key,value){
  intake.responses[key]={...intake.responses[key],status:"provided",value};
@@ -86,4 +87,25 @@ test("unmapped survey inputs remain in the canonical record for future independe
  assert.ok(result.unmapped.some(x=>x.key==="salesRepsLostAnnual"));
  assert.ok(result.unmapped.some(x=>x.key==="targetAverageDealValue"));
  assert.equal(result.inputs.rampMonths,"","missing ramp remains unknown");
+});
+
+test("long published citation preserves full URL, population and limitations through evidence normalization",()=>{
+ const input=emptyIntake();
+ const endpoint="https://example.org/research/"+("u".repeat(360));
+ const population="North America B2B qualified proposals, not meetings. "+("p".repeat(185));
+ const limitation="Only firms with mature CRM data; not a franchisee hiring benchmark. "+("n".repeat(410));
+ input.responses.proposalWinRatePct={
+   status:"reference",value:24,unit:"percent",
+   source:{title:"Annual outcome benchmark "+("t".repeat(175)),url:endpoint,
+     date:"2026-06-01",population,notes:limitation}
+ };
+ const model=buildWorkbenchFromIntake(input);
+ const citation=model.evidence.baselineWinRatePct.source;
+ assert.ok(citation.length>500,"test fixture must exceed the old truncation boundary");
+ assert.ok(citation.length<=MAX_EVIDENCE_SOURCE_LENGTH);
+ assert.ok(citation.includes(endpoint),"complete citation URL must remain");
+ assert.ok(citation.includes(population),"population/denominator caveat must remain");
+ assert.ok(citation.includes(limitation),"last applicability note must remain");
+ assert.equal(normalizeEvidence(model.evidence,model.inputs).baselineWinRatePct.source,citation);
+ assert.equal(model.intake.responses.proposalWinRatePct.source.notes,limitation);
 });
