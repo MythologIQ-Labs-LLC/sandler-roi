@@ -2,6 +2,7 @@
  * Prospect input provenance declarations, kept separate from numerical validity.
  * Every classification is rep-entered (or imported), never independently proven.
  */
+export const MAX_EVIDENCE_SOURCE_LENGTH = 2048;
 export const EVIDENCE_STATUSES = Object.freeze({
   illustrative: "Illustrative example",
   unconfirmed: "Unconfirmed prospect figure",
@@ -64,7 +65,7 @@ export function normalizeEvidence(candidate,input) {
     if(!record||typeof record!=="object"||Array.isArray(record))continue;
     const status=typeof record.status==="string"&&Object.hasOwn(EVIDENCE_STATUSES,record.status)
       ?record.status:"unconfirmed";
-    const source=typeof record.source==="string"?record.source.trim().slice(0,500):"";
+    const source=typeof record.source==="string"?record.source.trim().slice(0,MAX_EVIDENCE_SOURCE_LENGTH):"";
     out[key]={status,source};
   }
   return out;
